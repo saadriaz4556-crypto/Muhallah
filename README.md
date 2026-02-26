@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # muhallah
 
 A new Flutter project.
@@ -14,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Muhallah
+This project is the solution of problems that occur in town or cities 
+>>>>>>> b1e556da4f0348c97a6043b40c197f12f6068048
