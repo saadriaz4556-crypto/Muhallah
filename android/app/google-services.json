@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496013462528",
+    "project_id": "digitalmohallah-f91c6",
+    "storage_bucket": "digitalmohallah-f91c6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496013462528:android:0930460018fb705448dce5",
+        "android_client_info": {
+          "package_name": "com.example.muhallah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1rNxUVASiWgvT5KamJx8AxTJK4g7ZxzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
