@@ -16,6 +16,7 @@ import 'feed_screen.dart';
 import 'complaints_screen.dart';
 import 'market_screen.dart';
 import 'profile_screen.dart';
+import 'inbox_screen.dart';
 
 const Map<String, Color> COLORS = {
   'background': Color(0xFF252A34),
@@ -73,6 +74,9 @@ class _HomeScreenState extends State<HomeScreeen>
 
   // Screens list (initialized in didChangeDependencies)
   late List<Widget> _screens;
+
+  // Unread messages count
+  int _unreadCount = 0;
 
   @override
   void initState() {
@@ -154,12 +158,43 @@ class _HomeScreenState extends State<HomeScreeen>
     }
     // YAHAN ACTUAL SCREEN FILES USE KAREIN
     _screens = [
-      _buildHomeTab(), // Home tab with existing content
-      const FeedScreen(), // Actual FeedScreen from feed_screen.dart
-      const ComplaintsScreen(), // Actual ComplaintsScreen from complaints_screen.dart
-      const MarketplaceModule(), // Actual MarketScreen from market_screen.dart
-      const ProfileApp(), // Actual ProfileScreen from profile_screen.dart
+      Builder(builder: (context) => _buildHomeTab()),
+      const FeedScreen(),
+      const ComplaintsScreen(),
+      const MarketplaceModule(),
+      InboxScreen(),
+      const ProfileApp(),
     ];
+
+    // Listen for unread messages
+    _listenForUnreadMessages();
+  }
+
+  void _listenForUnreadMessages() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    FirebaseFirestore.instance
+        .collection('chats')
+        .where('participants', arrayContains: user.uid)
+        .snapshots()
+        .listen((snapshot) {
+      int totalUnread = 0;
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final unreadCount = data['unreadCount'] as int? ?? 0;
+        final lastMessageSenderId =
+            data['lastMessageSenderId'] as String? ?? '';
+        if (unreadCount > 0 && lastMessageSenderId != user.uid) {
+          totalUnread += unreadCount;
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _unreadCount = totalUnread;
+        });
+      }
+    });
   }
 
   @override
@@ -279,7 +314,7 @@ class _HomeScreenState extends State<HomeScreeen>
     }
   }
 
-  // MAIN: Home tab made non-scrollable
+  // MAIN: Home tab made scrollable
   Widget _buildHomeTab() {
     final bg = COLORS['background']!;
     final accent = COLORS['accent']!;
@@ -290,7 +325,7 @@ class _HomeScreenState extends State<HomeScreeen>
 
     final screenWidth = MediaQuery.of(context).size.width;
     const int perRow = 3;
-    const gap = 12.0;
+    const gap = 6.0;
 
     // total horizontal padding used by the scroll view (left + right)
     const totalHorizontalPadding = SPACING * 2;
@@ -299,115 +334,181 @@ class _HomeScreenState extends State<HomeScreeen>
         screenWidth - totalHorizontalPadding - (gap * (perRow - 1));
     final cardWidth = availableWidth / perRow;
 
-    return Container(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: SPACING),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 6),
 
-          // Quick Actions
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _handleEmergency,
-                  borderRadius: BorderRadius.circular(RADIUS),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: COLORS['danger'],
-                      borderRadius: BorderRadius.circular(RADIUS),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
-                          blurRadius: 6,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+          // Welcome Header
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Assalamu Alaikum 👋',
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        const Text('🚨', style: TextStyle(fontSize: 20)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    'Emergency',
-                                    style: TextStyle(
-                                      color: light,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  Text(
-                                    'SOS Alert',
-                                    style: TextStyle(
-                                      color: light,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                    const SizedBox(height: 2),
+                    Text(
+                      userName.isNotEmpty ? userName : 'Resident',
+                      style: TextStyle(
+                        color: COLORS['light']!,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (muhalla.isNotEmpty)
+                      Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 13, color: COLORS['accent']),
+                          const SizedBox(width: 2),
+                          Text(
+                            muhalla,
+                            style: TextStyle(
+                              color: COLORS['accent'],
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                  ],
+                ),
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: COLORS['accent']!.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: COLORS['accent']!.withOpacity(0.4),
+                      width: 1.5,
                     ),
+                  ),
+                  child: Icon(
+                    Icons.notifications_outlined,
+                    color: COLORS['accent'],
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // SOS Button Full Width, Quick Report Below
+          Column(
+            children: [
+              // SOS — Full Width
+              InkWell(
+                onTap: _handleEmergency,
+                borderRadius: BorderRadius.circular(RADIUS),
+                child: Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFFF2E63),
+                        Color(0xFFB71C1C),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(RADIUS),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF2E63).withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('🚨', style: TextStyle(fontSize: 22)),
+                      SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'EMERGENCY SOS',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          Text(
+                            'Tap to send instant alert',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      Icon(Icons.arrow_forward_ios,
+                          color: Colors.white54, size: 16),
+                    ],
                   ),
                 ),
               ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const QuickReportApp(),
+
+              const SizedBox(height: 10),
+
+              // Quick Report — Below SOS
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QuickReportApp(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(RADIUS),
+                child: Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+                  decoration: BoxDecoration(
+                    color: COLORS['accent']!.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(RADIUS),
+                    border: Border.all(
+                      color: COLORS['accent']!.withOpacity(0.5),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('📝', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Quick Report',
+                        style: TextStyle(
+                          color: COLORS['accent'],
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(RADIUS),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(RADIUS),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
-                          blurRadius: 6,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Text('📝', style: TextStyle(fontSize: 20)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Quick Report',
-                                style: TextStyle(
-                                  color: light,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      const Spacer(),
+                      Icon(Icons.arrow_forward_ios,
+                          color: COLORS['accent']!.withOpacity(0.5), size: 14),
+                    ],
                   ),
                 ),
               ),
@@ -416,166 +517,193 @@ class _HomeScreenState extends State<HomeScreeen>
 
           const SizedBox(height: 15),
 
-          // Stats Section
-          Text(
-            'Community Overview',
-            style: TextStyle(
-              color: light,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 10),
+          // Stats Section - One Dark Card, Three Stats Inside
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: _hexToColor('#2196F3'),
-                    borderRadius: BorderRadius.circular(RADIUS),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '1,234',
-                        style: TextStyle(
-                          color: light,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Active Residents',
-                        style: TextStyle(color: light, fontSize: 12),
-                      ),
-                    ],
-                  ),
+              Container(
+                width: 4,
+                height: 20,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: COLORS['accent'],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: _hexToColor('#4CAF50'),
-                    borderRadius: BorderRadius.circular(RADIUS),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '42',
-                        style: TextStyle(
-                          color: light,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Issues Resolved',
-                        style: TextStyle(color: light, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  margin: const EdgeInsets.only(left: 8),
-                  decoration: BoxDecoration(
-                    color: _hexToColor('#FF9800'),
-                    borderRadius: BorderRadius.circular(RADIUS),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '98%',
-                        style: TextStyle(
-                          color: light,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Satisfaction Rate',
-                        style: TextStyle(color: light, fontSize: 12),
-                      ),
-                    ],
-                  ),
+              Text(
+                'Community Overview',
+                style: TextStyle(
+                  color: light,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1F2E),
+              borderRadius: BorderRadius.circular(RADIUS),
+              border: Border.all(
+                color: COLORS['accent']!.withOpacity(0.15),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Stat 1
+                Column(
+                  children: [
+                    Text(
+                      '1,234',
+                      style: TextStyle(
+                        color: COLORS['accent'],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Residents',
+                      style: TextStyle(color: Colors.white54, fontSize: 11),
+                    ),
+                  ],
+                ),
+                // Divider
+                Container(height: 36, width: 1, color: Colors.white12),
+                // Stat 2
+                Column(
+                  children: [
+                    Text(
+                      '42',
+                      style: TextStyle(
+                        color: COLORS['success'],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Resolved',
+                      style: TextStyle(color: Colors.white54, fontSize: 11),
+                    ),
+                  ],
+                ),
+                // Divider
+                Container(height: 36, width: 1, color: Colors.white12),
+                // Stat 3
+                Column(
+                  children: [
+                    Text(
+                      '98%',
+                      style: TextStyle(
+                        color: COLORS['warning'],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Satisfaction',
+                      style: TextStyle(color: Colors.white54, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 18),
 
           // Features grid
-          Text(
-            'Community Services',
-            style: TextStyle(
-              color: light,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: COLORS['accent'],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                'Community Services',
+                style: TextStyle(
+                  color: light,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
             children: FEATURES.map((f) {
-              final colorHex = f['color']!;
-              final color = _hexToColor(colorHex);
               return SizedBox(
                 width: cardWidth,
-                child: InkWell(
+                child: GestureDetector(
                   onTap: () => _handleFeaturePress(f['title']!),
-                  borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    height: 80,
-                    padding: const EdgeInsets.all(6),
+                    height: 110,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                     decoration: BoxDecoration(
-                      color: light,
-                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xFFF2F2F2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border(
+                        left: BorderSide(
+                          color: _hexToColor(f['color']!),
+                          width: 4,
+                        ),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
                       ],
-                      border: Border(left: BorderSide(color: color, width: 3)),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          width: 30,
-                          height: 30,
+                          width: 52,
+                          height: 52,
                           decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(15),
+                            color: _hexToColor(f['color']!),
+                            shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: Text(
                               f['emoji']!,
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(fontSize: 22),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 6),
                         Text(
                           f['title']!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: darkText,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            height: 1.0,
+                          style: const TextStyle(
+                            color: Color(0xFF252A34),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            height: 1.2,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -615,86 +743,10 @@ class _HomeScreenState extends State<HomeScreeen>
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        toolbarHeight: 78,
-        centerTitle: false,
-        title: FadeTransition(
-          opacity: _fadeAnim,
-          child: SlideTransition(
-            position: _slideAnim,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello, $userName 👋',
-                  style: TextStyle(
-                    color: light,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '📍 $muhalla',
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: COLORS['success'],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '✓ Verified Resident',
-                    style: TextStyle(
-                      color: light,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: danger,
-              shape: BoxShape.circle,
-              border: Border.all(color: accent, width: 2),
-            ),
-            child: Center(
-              child: Text(
-                userName.isNotEmpty ? userName[0].toUpperCase() : '',
-                style: TextStyle(
-                  color: light,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: _goToLogin,
-            icon: const Icon(Icons.logout_rounded),
-            color: light,
-            tooltip: 'Logout / Go to login',
-          ),
-        ],
+        toolbarHeight: 0,
       ),
       // YAHAN ACTUAL SCREENS SHOW HONGI
-      body: _screens[_currentIndex],
+      body: _currentIndex == 0 ? _buildHomeTab() : _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
@@ -704,18 +756,52 @@ class _HomeScreenState extends State<HomeScreeen>
         unselectedItemColor: Colors.grey,
         selectedLabelStyle: const TextStyle(fontSize: 12),
         unselectedLabelStyle: const TextStyle(fontSize: 12),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.feed), label: "Feed"),
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          const BottomNavigationBarItem(icon: Icon(Icons.feed), label: "Feed"),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.warning),
             label: "Complaints",
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: "Market",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: [
+                const Icon(Icons.chat_bubble),
+                if (_unreadCount > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
+                      child: Text(
+                        _unreadCount > 99 ? '99+' : _unreadCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: "Inbox",
+          ),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

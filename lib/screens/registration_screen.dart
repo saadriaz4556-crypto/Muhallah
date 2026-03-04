@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Firebase Imports (Registration logic ke liye zaroori)
 import 'package:firebase_auth/firebase_auth.dart';
@@ -218,6 +219,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
     final request = http.MultipartRequest('POST', url);
     request.fields['upload_preset'] = uploadPreset;
+    request.headers['X-Requested-With'] = 'XMLHttpRequest';
 
     // Universally use bytes for upload (Works on Web & Mobile)
     final bytes = await file.readAsBytes();
@@ -428,45 +430,120 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   Future<void> _getCurrentLocation() async {
     setState(() => _gettingLocation = true);
     try {
-      bool serviceEnabled;
-      LocationPermission permission;
+      if (kIsWeb) {
+        // On web, directly call getCurrentPosition without permission checks
+        final position = await Geolocator.getCurrentPosition();
+        setState(() {
+          _selectedLocation = LatLng(position.latitude, position.longitude);
+          _mapController.move(_selectedLocation!, 15);
+          _gettingLocation = false;
+        });
+      } else {
+        // Mobile permission check code
+        bool serviceEnabled;
+        LocationPermission permission;
 
-      // Test if location services are enabled.
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _showAlert('Location Error', 'Location services are disabled.');
-        setState(() => _gettingLocation = false);
-        return;
-      }
-
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _showAlert('Location Error', 'Location permissions are denied');
+        // Test if location services are enabled.
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          _showAlert('Location Error', 'Location services are disabled.');
           setState(() => _gettingLocation = false);
           return;
         }
-      }
 
-      if (permission == LocationPermission.deniedForever) {
-        _showAlert('Location Error',
-            'Location permissions are permanently denied, we cannot request permissions.');
-        setState(() => _gettingLocation = false);
-        return;
-      }
+        permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            _showAlert('Location Error', 'Location permissions are denied');
+            setState(() => _gettingLocation = false);
+            return;
+          }
+        }
 
-      final position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _selectedLocation = LatLng(position.latitude, position.longitude);
-        _mapController.move(_selectedLocation!, 15);
-        _gettingLocation = false;
-      });
+        if (permission == LocationPermission.deniedForever) {
+          _showAlert('Location Error',
+              'Location permissions are permanently denied, we cannot request permissions.');
+          setState(() => _gettingLocation = false);
+          return;
+        }
+
+        final position = await Geolocator.getCurrentPosition();
+        setState(() {
+          _selectedLocation = LatLng(position.latitude, position.longitude);
+          _mapController.move(_selectedLocation!, 15);
+          _gettingLocation = false;
+        });
+      }
     } catch (e) {
       debugPrint('Error getting location: $e');
       _showAlert('Location Error', 'Could not get current location: $e');
       setState(() => _gettingLocation = false);
     }
+  }
+
+  void _validateAndNext() {
+    if (_currentStep == 0) {
+      // Step 1 - Personal Info validation
+      if (fullNameController.text.trim().isEmpty) {
+        _showAlert('Required', 'Please enter your Full Name.'); return;
+      }
+      if (fatherNameController.text.trim().isEmpty) {
+        _showAlert('Required', 'Please enter your Father Name.'); return;
+      }
+      if (emailController.text.trim().isEmpty ||
+          !RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(emailController.text.trim())) {
+        _showAlert('Required', 'Please enter a valid Email Address.'); return;
+      }
+      if (phoneController.text.trim().isEmpty || phoneController.text.replaceAll(RegExp(r'\D'), '').length < 11) {
+        _showAlert('Required', 'Please enter a valid 11-digit Phone Number.'); return;
+      }
+      final cnicDigits = cnicController.text.replaceAll(RegExp(r'\D'), '');
+      if (!RegExp(r'^\d{13}$').hasMatch(cnicDigits)) {
+        _showAlert('Required', 'Please enter a valid 13-digit CNIC Number.'); return;
+      }
+      if (cnicIssueDate == null) {
+        _showAlert('Required', 'Please select CNIC Date of Issue.'); return;
+      }
+      if (selectedRole == 'renter') {
+        final fatherCnicDigits = fatherCnicController.text.replaceAll(RegExp(r'\D'), '');
+        if (!RegExp(r'^\d{13}$').hasMatch(fatherCnicDigits)) {
+          _showAlert('Required', "Please enter a valid 13-digit Father's CNIC."); return;
+        }
+      }
+    } else if (_currentStep == 1) {
+      // Step 2 - Location validation
+      if (selectedCountry == null) {
+        _showAlert('Required', 'Please select a Country.'); return;
+      }
+      if (selectedCountry == 'Pakistan') {
+        if (selectedProvince == null) {
+          _showAlert('Required', 'Please select a Province / Region.'); return;
+        }
+        if (selectedDistrict == null) {
+          _showAlert('Required', 'Please select a District.'); return;
+        }
+        if (selectedTehsil == null) {
+          _showAlert('Required', 'Please select a Tehsil / Town.'); return;
+        }
+      }
+      if (fullAddressController.text.trim().isEmpty) {
+        _showAlert('Required', 'Please enter your Full Address.'); return;
+      }
+      if (_selectedLocation == null) {
+        _showAlert('Required', 'Please select your location on the map.'); return;
+      }
+    }
+
+    // All good — move to next step
+    setState(() {
+      _currentStep++;
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    });
   }
 
   // Firebase Registration and Firestore Logic
@@ -801,6 +878,31 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   // --- UI build ---
   @override
   Widget build(BuildContext context) {
+    // Role selection screen - clean professional design
+    if (selectedRole == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF0F1923),
+        appBar: AppBar(
+          title: const Text('Select Role'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _buildRoleSelection(),
+          ),
+        ),
+      );
+    }
+
+    // Registration form screen - existing design
     return Scaffold(
       backgroundColor: deepNavy,
       body: SafeArea(
@@ -822,36 +924,27 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 title: Text(
-                  selectedRole == null
-                      ? 'Select Role'
-                      : 'Complete Your ${selectedRole == 'owner' ? 'Owner' : 'Renter'} Profile',
+                  'Complete Your ${selectedRole == 'owner' ? 'Owner' : 'Renter'} Profile',
                   style: const TextStyle(
                     color: deepNavy,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
                 ),
-                leading: selectedRole != null
-                    ? IconButton(
-                        icon: const Icon(Icons.arrow_back, color: deepNavy),
-                        onPressed: _handleBackToRole,
-                      )
-                    : null,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: deepNavy),
+                  onPressed: _handleBackToRole,
+                ),
                 centerTitle: true,
               ),
             ),
             // Main content with proper constraints
             // Main content
             Expanded(
-              child: selectedRole == null
-                  ? SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: _buildRoleSelection(),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: _buildFormForRole(),
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildFormForRole(),
+              ),
             ),
           ],
         ),
@@ -860,95 +953,357 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   }
 
   Widget _buildRoleSelection() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: 20),
-        // Enhanced title with gradient text
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [teal, coral],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Register as',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Choose your role to continue',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-        const SizedBox(height: 40),
-        _roleCard('Owner', Icons.house_siding_rounded, secondaryGradient),
-        const SizedBox(height: 20),
-        _roleCard('Renter', Icons.person_outline_rounded, primaryGradient),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
 
-  Widget _roleCard(String title, IconData icon, LinearGradient gradient) {
-    return Material(
-      elevation: 8,
-      borderRadius: BorderRadius.circular(20),
-      shadowColor: gradient.colors.first.withOpacity(0.3),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: cardGradient,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: gradient.colors.first.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: InkWell(
-          onTap: () => _selectRole(title.toLowerCase()),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: gradient,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: gradient.colors.first.withOpacity(0.4),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, color: deepNavy, size: 32),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: whiteish,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Register as $title in your community',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  textAlign: TextAlign.center,
+          // ── Top Icon + Title ──
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF08D9D6), Color(0xFF00B4B2)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF08D9D6).withOpacity(0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
+            child: const Icon(
+              Icons.shield_rounded,
+              color: Colors.white,
+              size: 40,
+            ),
           ),
+
+          const SizedBox(height: 24),
+
+          // ── Heading ──
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFF08D9D6), Color(0xFFFF2E63)],
+            ).createShader(bounds),
+            child: const Text(
+              'Register as',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'Choose your role to join your\nneighborhood community',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+
+          const SizedBox(height: 48),
+
+          // ── OWNER CARD ──
+          GestureDetector(
+            onTap: () => _selectRole('owner'),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1E1B4B), Color(0xFF2D1B69)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFFF2E63).withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF2E63).withOpacity(0.2),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Icon Box
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFFF2E63), Color(0xFFE01E5A)],
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF2E63).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.home_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  // Text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Owner',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Register as Owner in your community',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Tag badges
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            _roleBadge('Property Owner',
+                                const Color(0xFFFF2E63)),
+                            _roleBadge('Verified',
+                                const Color(0xFFFF2E63)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Arrow
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF2E63).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFFFF2E63),
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── OR DIVIDER ──
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withOpacity(0.2),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'OR',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── RENTER CARD ──
+          GestureDetector(
+            onTap: () => _selectRole('renter'),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0F2A2A), Color(0xFF0D3333)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFF08D9D6).withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF08D9D6).withOpacity(0.2),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Icon Box
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF08D9D6), Color(0xFF00B4B2)],
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF08D9D6).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  // Text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Renter',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Register as Renter in your community',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            _roleBadge('Tenant',
+                                const Color(0xFF08D9D6)),
+                            _roleBadge('Verified',
+                                const Color(0xFF08D9D6)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Arrow
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF08D9D6).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFF08D9D6),
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  Widget _roleBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -1031,13 +1386,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               ElevatedButton(
                 onPressed: () {
                   if (_currentStep < 2) {
-                    // basic validation for step fields can be added here
-                    setState(() {
-                      _currentStep++;
-                      _pageController.animateToPage(_currentStep,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.ease);
-                    });
+                    _validateAndNext();
                   } else {
                     _handleSubmit();
                   }
@@ -1107,8 +1456,13 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   controller: phoneController,
                   style: const TextStyle(color: whiteish),
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(11),
+                    _PakistaniPhoneFormatter(),
+                  ],
                   decoration: const InputDecoration(
-                    hintText: "03XXXXXXXXX",
+                    hintText: "0XXX-XXXXXXX",
                     hintStyle: TextStyle(color: Colors.white24),
                     border: InputBorder.none,
                     contentPadding:
@@ -1727,56 +2081,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
             const SizedBox(height: 24),
 
-            // Submit button
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: coral.withOpacity(0.4),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: _saving ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  shadowColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: _saving
-                          ? [Colors.grey, Colors.grey.shade700]
-                          : [teal, coral],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: Text(
-                      _saving ? 'Submitting...' : 'Submit for Verification',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
+
           ],
         ),
       ),
@@ -2066,6 +2371,27 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PakistaniPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final limited = digits.length > 11 ? digits.substring(0, 11) : digits;
+    String formatted;
+    if (limited.length <= 4) {
+      formatted = limited;
+    } else {
+      formatted = '${limited.substring(0, 4)}-${limited.substring(4)}';
+    }
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

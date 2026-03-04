@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'chat_screen.dart';
 
 class MarketplaceModule extends StatefulWidget {
   const MarketplaceModule({super.key});
@@ -64,6 +66,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
       'title': 'Vintage Leather Sofa',
       'price': 500,
       'seller': 'John Doe',
+      'sellerUid': 'seller1_uid',
       'location': 'Islamabad',
       'timestamp': '2 hours ago',
       'category': 'furniture',
@@ -78,6 +81,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
       'title': 'Mountain Bike',
       'price': 250,
       'seller': 'Jane Smith',
+      'sellerUid': 'seller2_uid',
       'location': 'Jubilee Hills',
       'timestamp': '1 day ago',
       'category': 'vehicles',
@@ -638,7 +642,30 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   constraints: const BoxConstraints(minWidth: 24), // Smaller
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    final currentUser = FirebaseAuth.instance.currentUser;
+                    if (currentUser == null) return;
+
+                    final currentUid = currentUser.uid;
+                    final sellerUid = item['sellerUid'] as String? ?? '';
+                    final sellerName = item['seller'] as String? ?? 'Unknown';
+
+                    if (sellerUid.isEmpty) return;
+
+                    // Generate chatId by sorting UIDs alphabetically and joining with underscore
+                    final uids = [currentUid, sellerUid]..sort();
+                    final chatId = uids.join('_');
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                          chatId: chatId,
+                          otherUserName: sellerName,
+                        ),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Contact',
                     style: TextStyle(

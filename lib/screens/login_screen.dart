@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,10 +22,25 @@ class _LoginScreenState extends State<LoginScreen> {
   static const Color gradientStart = Color(0xFF0066CC);
   static const Color gradientEnd = Color(0xFF00CCFF);
 
+  // --- slider images
+  static const List<String> _sliderImages = [
+    'assets/images/slider1.jpg',
+    'assets/images/slider2.jpg',
+    'assets/images/slider3.jpg',
+    'assets/images/slider4.jpg',
+    'assets/images/slider5.jpg',
+    'assets/images/slider6.jpg',
+  ];
+
   // --- preserved state variables and controllers
   final TextEditingController _cnicController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+
+  // --- slider state variables
+  int _currentSlide = 0;
+  Timer? _slideTimer;
+  final PageController _slideController = PageController();
 
   // Format CNIC like: 12345-1234567-1 (preserved behavior)
   String _formatCnicDigits(String input) {
@@ -193,7 +210,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _slideTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!mounted) return;
+      final next = (_currentSlide + 1) % _sliderImages.length;
+      _slideController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOut,
+      );
+      setState(() => _currentSlide = next);
+    });
+  }
+
+  @override
   void dispose() {
+    _slideTimer?.cancel();
+    _slideController.dispose();
     _cnicController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -230,117 +264,145 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      Container(
+                      SizedBox(
                         height: headerHeight,
                         width: double.infinity,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/loginpicture.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.only(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(30),
                             bottomRight: Radius.circular(30),
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 8),
-                              blurRadius: 25,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.3),
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(30),
-                                  bottomRight: Radius.circular(30),
-                                  topLeft: Radius.circular(20),
-                                  topRight: Radius.circular(20),
-                                ),
+                          child: Stack(
+                            children: [
+                              // ── Sliding Images (Local Assets) ──
+                              PageView.builder(
+                                controller: _slideController,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: _sliderImages.length,
+                                onPageChanged: (i) => setState(() => _currentSlide = i),
+                                itemBuilder: (context, index) {
+                                  return Image.asset(
+                                    _sliderImages[index],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  );
+                                },
                               ),
-                            ),
-                            Positioned(
-                              top: -20,
-                              right: -20,
-                              child: Container(
-                                width: 120,
-                                height: 120,
+
+                              // ── Dark Overlay ──
+                              Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  shape: BoxShape.circle,
+                                  color: Colors.black.withOpacity(0.38),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              bottom: -30,
-                              left: -30,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  shape: BoxShape.circle,
+
+                              // ── Decorative Circles (preserved) ──
+                              Positioned(
+                                top: -20,
+                                right: -20,
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [primaryTeal, gradientEnd],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 4),
-                                          blurRadius: 8,
+                              Positioned(
+                                bottom: -30,
+                                left: -30,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.05),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+
+                              // ── Welcome Back Text (preserved) ──
+                              Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [primaryTeal, gradientEnd],
                                         ),
-                                      ],
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            offset: Offset(0, 4),
+                                            blurRadius: 8,
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.security_rounded,
+                                        color: Colors.white,
+                                        size: 28,
+                                      ),
                                     ),
-                                    child: const Icon(
-                                      Icons.security_rounded,
-                                      color: Colors.white,
-                                      size: 28,
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Welcome Back',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  const Text(
-                                    'Welcome Back',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      'Sign in to access your account and continue your journey with us',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
+                                        height: 1.4,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    'Sign in to access your account and continue your journey with us',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                      height: 1.4,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+
+                              // ── Dot Indicators ──
+                              Positioned(
+                                bottom: 14,
+                                left: 0,
+                                right: 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(_sliderImages.length, (index) {
+                                    final isActive = index == _currentSlide;
+                                    return AnimatedContainer(
+                                      duration: const Duration(milliseconds: 300),
+                                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                                      width: isActive ? 20 : 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: isActive
+                                            ? const Color(0xFF08D9D6)
+                                            : Colors.white.withOpacity(0.4),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

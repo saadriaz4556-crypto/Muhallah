@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'utils/profile_constants.dart';
 import 'utils/location_data.dart';
 import 'delete_account_screen.dart'; // Keeping for navigation
+
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -171,8 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _isSaving = false;
       });
       _showSnackbar('Profile updated successfully!', isError: false);
-      Navigator.pop(context); // Go back to dashboard
-      _showSnackbar('Profile updated successfully!', isError: false);
+      if (mounted) Navigator.pop(context); // Go back to dashboard
     } catch (e) {
       debugPrint('Error updating profile: $e');
       _showSnackbar('Failed to update profile: $e', isError: true);
@@ -278,16 +278,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildSectionHeader(String title, {IconData? icon}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 0.0),
       child: Row(
         children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              gradient: primaryGradient,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
           if (icon != null) ...[
             Icon(icon, color: teal, size: 20),
             const SizedBox(width: 8)
           ],
           Text(title, style: headingStyle.copyWith(fontSize: 18)),
-          const Spacer(),
-          Container(height: 1, width: 60, color: Colors.white10),
         ],
       ),
     );
@@ -303,29 +310,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     VoidCallback? onTap,
     String? hint,
   }) {
-    // In View mode, everything is readOnly effectively, but we handle that via enabled state or just readOnly prop.
-    // If _isEditing is false, all fields are readOnly.
-    // If _isEditing is true, 'readOnly' param dictates if specific field is still locked (like CNIC).
-
     final isLocked = !_isEditing || readOnly;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: labelStyle),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           TextFormField(
             controller: controller,
-            readOnly: isLocked ||
-                onTap !=
-                    null, // If onTap is provided (e.g. date), it is readOnly text input
-            onTap: (!_isEditing && !readOnly)
-                ? null
-                : onTap, // Only allow onTap if editing
-            enabled:
-                true, // We keep enabled to allow copy paste or clear text reading
+            readOnly: isLocked || onTap != null,
+            onTap: (!_isEditing && !readOnly) ? null : onTap,
+            enabled: true, // Allow copy-paste
             style: inputTextStyle.copyWith(
                 color: isLocked ? Colors.white60 : Colors.white),
             keyboardType: inputType,
@@ -336,17 +334,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               fillColor: isLocked ? sectionBg.withOpacity(0.5) : inputBg,
               hintText: hint,
               hintStyle: const TextStyle(color: Colors.white30),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: teal),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: teal, width: 2),
               ),
-              suffixIcon: isLocked &&
-                      _isEditing &&
-                      readOnly // Show lock icon only in edit mode for locked fields
+              suffixIcon: isLocked && _isEditing && readOnly
                   ? const Icon(Icons.lock, color: Colors.white24, size: 16)
                   : null,
             ),
@@ -460,432 +458,485 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final isOwner = role == 'owner';
     final status = _userData?['status'] ?? 'pending';
 
-    return Scaffold(
-      backgroundColor: deepNavy,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent, // Gradient background handles this
-        elevation: 0,
-        title: const Text('Edit Profile',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(gradient: primaryGradient),
-        ),
-        actions: [
-          IconButton(
-            icon: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
-                : const Icon(Icons.check),
-            onPressed: _saveProfile, // Save
+    return PopScope(
+        canPop: true,
+        child: Scaffold(
+          backgroundColor: deepNavy,
+          appBar: AppBar(
+            backgroundColor:
+                Colors.transparent, // Gradient background handles this
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: whiteish),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text('Edit Profile',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(gradient: primaryGradient),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel",
+                    style: TextStyle(
+                        color: Colors.white54, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Header Section
-              Center(
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomRight,
+          body: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Header Section
+                  Center(
+                    child: Column(
                       children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: teal, width: 2),
-                              color: sectionBg,
-                              image: const DecorationImage(
-                                image: AssetImage(
-                                    'assets/images/placeholder_avatar_2.png'),
-                                fit: BoxFit.cover,
-                              )),
-                          // Showing initials if no image logic is complex with Assets
-                          // We can use a Child with Text if image fails, but keeping it simple
-                          child: const Center(
-                              child: Text("U",
-                                  style: TextStyle(
-                                      fontSize: 40, color: Colors.white30))),
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: teal, width: 2),
+                                  color: sectionBg,
+                                  image: const DecorationImage(
+                                    image: AssetImage(
+                                        'assets/images/placeholder_avatar_2.png'),
+                                    fit: BoxFit.cover,
+                                  )),
+                              // Showing initials if no image logic is complex with Assets
+                              // We can use a Child with Text if image fails, but keeping it simple
+                              child: const Center(
+                                  child: Text("U",
+                                      style: TextStyle(
+                                          fontSize: 40,
+                                          color: Colors.white30))),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                  color: deepNavy, shape: BoxShape.circle),
+                              child: Icon(
+                                status == 'verified'
+                                    ? Icons.verified
+                                    : Icons.access_time_filled,
+                                color: status == 'verified'
+                                    ? successGreen
+                                    : warningAmber,
+                                size: 20,
+                              ),
+                            )
+                          ],
                         ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _fullNameController.text.isNotEmpty
+                              ? _fullNameController.text
+                              : "User Name",
+                          style: headingStyle,
+                        ),
+                        const SizedBox(height: 6),
                         Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                              color: deepNavy, shape: BoxShape.circle),
-                          child: Icon(
-                            status == 'verified'
-                                ? Icons.verified
-                                : Icons.access_time_filled,
-                            color: status == 'verified'
-                                ? successGreen
-                                : warningAmber,
-                            size: 20,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isOwner
+                                ? teal.withOpacity(0.2)
+                                : coral.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: isOwner ? teal : coral),
                           ),
-                        )
+                          child: Text(
+                            role.toString().toUpperCase(),
+                            style: TextStyle(
+                              color: isOwner ? teal : coral,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _fullNameController.text.isNotEmpty
-                          ? _fullNameController.text
-                          : "User Name",
-                      style: headingStyle,
+                  ),
+
+                  // 2. Personal Information
+                  _buildSectionHeader('Personal Information',
+                      icon: Icons.person),
+                  _buildTextField(
+                    label: 'Full Name',
+                    controller: _fullNameController,
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  _buildTextField(
+                    label: 'Father Name',
+                    controller: _fatherNameController,
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  _buildTextField(
+                    label: 'CNIC (Identifier)',
+                    controller: _cnicController,
+                    readOnly: true, // ALWAYS READ ONLY
+                    hint: 'Cannot be changed',
+                  ),
+                  _buildTextField(
+                    label: 'CNIC Issue Date',
+                    controller: TextEditingController(
+                      text: _cnicIssueDate != null
+                          ? DateFormat('yyyy-MM-dd').format(_cnicIssueDate!)
+                          : '',
                     ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isOwner
-                            ? teal.withOpacity(0.2)
-                            : coral.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isOwner ? teal : coral),
-                      ),
-                      child: Text(
-                        role.toString().toUpperCase(),
-                        style: TextStyle(
-                          color: isOwner ? teal : coral,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                    hint: 'YYYY-MM-DD',
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _cnicIssueDate ?? DateTime(now.year - 5),
+                        firstDate: DateTime(1950),
+                        lastDate: now,
+                        builder: (context, child) => Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: const ColorScheme.dark(
+                              primary: teal,
+                              onPrimary: deepNavy,
+                              surface: sectionBg,
+                            ),
+                            dialogTheme: const DialogThemeData(
+                                backgroundColor: deepNavy),
+                          ),
+                          child: child!,
                         ),
-                      ),
+                      );
+                      if (picked != null) {
+                        setState(() => _cnicIssueDate = picked);
+                      }
+                    },
+                  ),
+                  if (!isOwner)
+                    _buildTextField(
+                      label: "Father's CNIC",
+                      controller: _fatherCnicController,
+                      readOnly: true, // Read Only
+                    ),
+
+                  // 3. Contact Info
+                  _buildSectionHeader('Contact Information',
+                      icon: Icons.contact_phone),
+                  _buildTextField(
+                    label: 'Email Address',
+                    controller: _emailController,
+                    inputType: TextInputType.emailAddress,
+                    validator: (v) =>
+                        v != null && v.contains('@') ? null : 'Invalid Email',
+                  ),
+                  _buildTextField(
+                    label: 'Phone Number',
+                    controller: _phoneController,
+                    inputType: TextInputType.phone,
+                    validator: (v) => v!.length >= 11 ? null : 'Invalid Phone',
+                  ),
+
+                  // 4. Location
+                  _buildSectionHeader('Location Details',
+                      icon: Icons.location_city),
+                  _buildDropdown(
+                    label: 'Country',
+                    value: _selectedCountry,
+                    items: allCountries,
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedCountry = val;
+                        // Reset Cascading dropdowns
+                        _selectedProvince = null;
+                        _selectedDistrict = null;
+                        _selectedTehsil = null;
+                      });
+                    },
+                  ),
+                  if (_selectedCountry == 'Pakistan') ...[
+                    _buildDropdown(
+                      label: 'Province',
+                      value: _selectedProvince,
+                      items: _provinceList,
+                      onChanged: (val) => setState(() {
+                        _selectedProvince = val;
+                        _selectedDistrict = null;
+                        _selectedTehsil = null;
+                      }),
+                    ),
+                    _buildDropdown(
+                      label: 'District',
+                      value: _selectedDistrict,
+                      items: _districtList,
+                      onChanged: (val) => setState(() {
+                        _selectedDistrict = val;
+                        _selectedTehsil = null;
+                      }),
+                    ),
+                    _buildDropdown(
+                      label: 'Tehsil/Area',
+                      value: _selectedTehsil,
+                      items: _tehsilList,
+                      onChanged: (val) => setState(() => _selectedTehsil = val),
                     ),
                   ],
-                ),
-              ),
-
-              // 2. Personal Information
-              _buildSectionHeader('Personal Information', icon: Icons.person),
-              _buildTextField(
-                label: 'Full Name',
-                controller: _fullNameController,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-              ),
-              _buildTextField(
-                label: 'Father Name',
-                controller: _fatherNameController,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-              ),
-              _buildTextField(
-                label: 'CNIC (Identifier)',
-                controller: _cnicController,
-                readOnly: true, // ALWAYS READ ONLY
-                hint: 'Cannot be changed',
-              ),
-              _buildTextField(
-                label: 'CNIC Issue Date',
-                controller: TextEditingController(
-                  text: _cnicIssueDate != null
-                      ? DateFormat('yyyy-MM-dd').format(_cnicIssueDate!)
-                      : '',
-                ),
-                hint: 'YYYY-MM-DD',
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-                onTap: () async {
-                  final now = DateTime.now();
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _cnicIssueDate ?? DateTime(now.year - 5),
-                    firstDate: DateTime(1950),
-                    lastDate: now,
-                    builder: (context, child) => Theme(
-                      data: ThemeData.dark().copyWith(
-                        colorScheme: const ColorScheme.dark(
-                          primary: teal,
-                          onPrimary: deepNavy,
-                          surface: sectionBg,
-                        ),
-                        dialogTheme:
-                            const DialogThemeData(backgroundColor: deepNavy),
-                      ),
-                      child: child!,
+                  _buildTextField(
+                    label: 'Availability Address',
+                    controller: _fullAddressController,
+                    maxLines: 2,
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white24),
                     ),
-                  );
-                  if (picked != null) {
-                    setState(() => _cnicIssueDate = picked);
-                  }
-                },
-              ),
-              if (!isOwner)
-                _buildTextField(
-                  label: "Father's CNIC",
-                  controller: _fatherCnicController,
-                  readOnly: true, // Read Only
-                ),
-
-              // 3. Contact Info
-              _buildSectionHeader('Contact Information',
-                  icon: Icons.contact_phone),
-              _buildTextField(
-                label: 'Email Address',
-                controller: _emailController,
-                inputType: TextInputType.emailAddress,
-                validator: (v) =>
-                    v != null && v.contains('@') ? null : 'Invalid Email',
-              ),
-              _buildTextField(
-                label: 'Phone Number',
-                controller: _phoneController,
-                inputType: TextInputType.phone,
-                validator: (v) => v!.length >= 11 ? null : 'Invalid Phone',
-              ),
-
-              // 4. Location
-              _buildSectionHeader('Location Details',
-                  icon: Icons.location_city),
-              _buildDropdown(
-                label: 'Country',
-                value: _selectedCountry,
-                items: allCountries,
-                onChanged: (val) {
-                  setState(() {
-                    _selectedCountry = val;
-                    // Reset Cascading dropdowns
-                    _selectedProvince = null;
-                    _selectedDistrict = null;
-                    _selectedTehsil = null;
-                  });
-                },
-              ),
-              if (_selectedCountry == 'Pakistan') ...[
-                _buildDropdown(
-                  label: 'Province',
-                  value: _selectedProvince,
-                  items: _provinceList,
-                  onChanged: (val) => setState(() {
-                    _selectedProvince = val;
-                    _selectedDistrict = null;
-                    _selectedTehsil = null;
-                  }),
-                ),
-                _buildDropdown(
-                  label: 'District',
-                  value: _selectedDistrict,
-                  items: _districtList,
-                  onChanged: (val) => setState(() {
-                    _selectedDistrict = val;
-                    _selectedTehsil = null;
-                  }),
-                ),
-                _buildDropdown(
-                  label: 'Tehsil/Area',
-                  value: _selectedTehsil,
-                  items: _tehsilList,
-                  onChanged: (val) => setState(() => _selectedTehsil = val),
-                ),
-              ],
-              _buildTextField(
-                label: 'Availability Address',
-                controller: _fullAddressController,
-                maxLines: 2,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Stack(
-                    children: [
-                      FlutterMap(
-                        mapController: _mapController,
-                        options: MapOptions(
-                          initialCenter: _selectedLocation ??
-                              const LatLng(30.3753, 69.3451),
-                          initialZoom: 13,
-                          interactionOptions: const InteractionOptions(
-                              flags: InteractiveFlag
-                                  .none), // Disable interaction in mini map
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Stack(
                         children: [
-                          TileLayer(
-                            urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            userAgentPackageName: 'com.muhallah.app',
-                          ),
-                          if (_selectedLocation != null)
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: _selectedLocation!,
-                                  width: 40,
-                                  height: 40,
-                                  child: const Icon(Icons.location_on,
-                                      color: coral, size: 40),
+                          FlutterMap(
+                            mapController: _mapController,
+                            options: MapOptions(
+                              initialCenter: _selectedLocation ??
+                                  const LatLng(30.3753, 69.3451),
+                              initialZoom: 13,
+                              interactionOptions: const InteractionOptions(
+                                  flags: InteractiveFlag
+                                      .none), // Disable interaction in mini map
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'com.muhallah.app',
+                              ),
+                              if (_selectedLocation != null)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: _selectedLocation!,
+                                      width: 40,
+                                      height: 40,
+                                      child: const Icon(Icons.location_on,
+                                          color: coral, size: 40),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                            ],
+                          ),
+                          if (_isEditing)
+                            Positioned(
+                              bottom: 10,
+                              right: 10,
+                              child: FloatingActionButton.small(
+                                backgroundColor: teal,
+                                onPressed: _openLocationPicker,
+                                child: const Icon(Icons.edit_location_alt,
+                                    color: deepNavy),
+                              ),
                             ),
                         ],
                       ),
-                      if (_isEditing)
-                        Positioned(
-                          bottom: 10,
-                          right: 10,
-                          child: FloatingActionButton.small(
-                            backgroundColor: teal,
-                            onPressed: _openLocationPicker,
-                            child: const Icon(Icons.edit_location_alt,
-                                color: deepNavy),
+                    ),
+                  ),
+
+                  // 5. Documents
+                  _buildSectionHeader('Documents', icon: Icons.folder_shared),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: warningAmber.withOpacity(0.1),
+                      border: Border.all(color: warningAmber.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: warningAmber, size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "Documents are fixed after registration. Contact support to change.",
+                            style: TextStyle(color: warningAmber, fontSize: 12),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 1.2,
+                    children: [
+                      _buildDocumentCard(
+                          'CNIC Front', _cnicFrontUrl, Icons.subtitles),
+                      _buildDocumentCard(
+                          'CNIC Back', _cnicBackUrl, Icons.subtitles),
+                      _buildDocumentCard(
+                          'Utility Bill', _utilityBillUrl, Icons.receipt),
+                      _buildDocumentCard('Passport Photo', _passportPhotoUrl,
+                          Icons.person_pin),
+                      if (isOwner)
+                        _buildDocumentCard('Police Verification',
+                            _policeVerificationUrl, Icons.gavel),
+                      if (!isOwner)
+                        _buildDocumentCard(
+                            'Affidavit', _affidavitUrl, Icons.description),
                     ],
                   ),
-                ),
-              ),
 
-              // 5. Documents
-              _buildSectionHeader('Documents', icon: Icons.folder_shared),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: warningAmber.withOpacity(0.1),
-                  border: Border.all(color: warningAmber.withOpacity(0.3)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline, color: warningAmber, size: 20),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Documents are fixed after registration. Contact support to change.",
-                        style: TextStyle(color: warningAmber, fontSize: 12),
+                  // 6. Account Info
+                  _buildSectionHeader('Account Information', icon: Icons.info),
+                  _buildTextField(
+                      label: 'Account Status',
+                      controller:
+                          TextEditingController(text: status.toUpperCase()),
+                      readOnly: true),
+                  _buildTextField(
+                      label: 'Registration Date',
+                      controller: TextEditingController(
+                          text: _userData?['registrationDate'] != null
+                              ? DateFormat.yMMMd().format(
+                                  (_userData!['registrationDate'] as Timestamp)
+                                      .toDate())
+                              : '-'),
+                      readOnly: true),
+                  _buildTextField(
+                      label: 'User ID',
+                      controller:
+                          TextEditingController(text: _currentUser?.uid),
+                      readOnly: true),
+
+                  // 7. Security
+                  _buildSectionHeader('Security', icon: Icons.security),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.lock_reset, color: teal),
+                    title: const Text('Change Password',
+                        style: TextStyle(color: whiteish)),
+                    trailing: const Icon(Icons.arrow_forward_ios,
+                        color: Colors.white24, size: 16),
+                    onTap: () {
+                      // Open Password Change Dialog
+                      showDialog(
+                          context: context,
+                          builder: (context) => const ChangePasswordDialog());
+                    },
+                  ),
+                  const Divider(color: Colors.white10),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.logout, color: coral),
+                    title:
+                        const Text('Logout', style: TextStyle(color: whiteish)),
+                    onTap: () async {
+                      // Confirm Logout
+                      bool confirm = await showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                    backgroundColor: sectionBg,
+                                    title: const Text("Logout",
+                                        style: TextStyle(color: whiteish)),
+                                    content: const Text(
+                                        "Are you sure you want to logout?",
+                                        style:
+                                            TextStyle(color: Colors.white70)),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, false),
+                                          child: const Text("Cancel")),
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, true),
+                                          child: const Text("Logout",
+                                              style: TextStyle(color: coral))),
+                                    ],
+                                  )) ??
+                          false;
+
+                      if (confirm) {
+                        await FirebaseAuth.instance.signOut();
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/login', (route) => false);
+                        }
+                      }
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.delete_forever, color: errorRed),
+                    title: const Text('Delete Account',
+                        style: TextStyle(color: errorRed)),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const DeleteAccountScreen()));
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 8. Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: primaryGradient,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: teal.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    color: whiteish, strokeWidth: 2))
+                            : const Text(
+                                "Save Changes",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: whiteish),
+                              ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.2,
-                children: [
-                  _buildDocumentCard(
-                      'CNIC Front', _cnicFrontUrl, Icons.subtitles),
-                  _buildDocumentCard(
-                      'CNIC Back', _cnicBackUrl, Icons.subtitles),
-                  _buildDocumentCard(
-                      'Utility Bill', _utilityBillUrl, Icons.receipt),
-                  _buildDocumentCard(
-                      'Passport Photo', _passportPhotoUrl, Icons.person_pin),
-                  if (isOwner)
-                    _buildDocumentCard('Police Verification',
-                        _policeVerificationUrl, Icons.gavel),
-                  if (!isOwner)
-                    _buildDocumentCard(
-                        'Affidavit', _affidavitUrl, Icons.description),
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
-
-              // 6. Account Info
-              _buildSectionHeader('Account Information', icon: Icons.info),
-              _buildTextField(
-                  label: 'Account Status',
-                  controller: TextEditingController(text: status.toUpperCase()),
-                  readOnly: true),
-              _buildTextField(
-                  label: 'Registration Date',
-                  controller: TextEditingController(
-                      text: _userData?['registrationDate'] != null
-                          ? DateFormat.yMMMd().format(
-                              (_userData!['registrationDate'] as Timestamp)
-                                  .toDate())
-                          : '-'),
-                  readOnly: true),
-              _buildTextField(
-                  label: 'User ID',
-                  controller: TextEditingController(text: _currentUser?.uid),
-                  readOnly: true),
-
-              // 7. Security
-              _buildSectionHeader('Security', icon: Icons.security),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.lock_reset, color: teal),
-                title: const Text('Change Password',
-                    style: TextStyle(color: whiteish)),
-                trailing: const Icon(Icons.arrow_forward_ios,
-                    color: Colors.white24, size: 16),
-                onTap: () {
-                  // Open Password Change Dialog
-                  showDialog(
-                      context: context,
-                      builder: (context) => const ChangePasswordDialog());
-                },
-              ),
-              const Divider(color: Colors.white10),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.logout, color: coral),
-                title: const Text('Logout', style: TextStyle(color: whiteish)),
-                onTap: () async {
-                  // Confirm Logout
-                  bool confirm = await showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                                backgroundColor: sectionBg,
-                                title: const Text("Logout",
-                                    style: TextStyle(color: whiteish)),
-                                content: const Text(
-                                    "Are you sure you want to logout?",
-                                    style: TextStyle(color: Colors.white70)),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(ctx, false),
-                                      child: const Text("Cancel")),
-                                  TextButton(
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                      child: const Text("Logout",
-                                          style: TextStyle(color: coral))),
-                                ],
-                              )) ??
-                      false;
-
-                  if (confirm) {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil('/login', (route) => false);
-                    }
-                  }
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.delete_forever, color: errorRed),
-                title: const Text('Delete Account',
-                    style: TextStyle(color: errorRed)),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DeleteAccountScreen()));
-                },
-              ),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 
