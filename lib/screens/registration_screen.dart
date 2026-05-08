@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 // import 'package:countries_list/countries_list.dart'; // Removed
+import 'family_member_flow.dart';
 
 // End Firebase Imports
 const Color deepNavy = Color(0xFF252A34);
@@ -264,7 +265,6 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   String _confirmPassword = '';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _saving = false;
 
   bool sameAsPermanent = false;
 
@@ -333,7 +333,6 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     _confirmPassword = '';
     _obscurePassword = true;
     _obscureConfirmPassword = true;
-    _saving = false;
     sameAsPermanent = false;
   }
 
@@ -486,52 +485,69 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     if (_currentStep == 0) {
       // Step 1 - Personal Info validation
       if (fullNameController.text.trim().isEmpty) {
-        _showAlert('Required', 'Please enter your Full Name.'); return;
+        _showAlert('Required', 'Please enter your Full Name.');
+        return;
       }
       if (fatherNameController.text.trim().isEmpty) {
-        _showAlert('Required', 'Please enter your Father Name.'); return;
+        _showAlert('Required', 'Please enter your Father Name.');
+        return;
       }
       if (emailController.text.trim().isEmpty ||
-          !RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(emailController.text.trim())) {
-        _showAlert('Required', 'Please enter a valid Email Address.'); return;
+          !RegExp(r'^[\w.-]+@[\w.-]+\.\w+$')
+              .hasMatch(emailController.text.trim())) {
+        _showAlert('Required', 'Please enter a valid Email Address.');
+        return;
       }
-      if (phoneController.text.trim().isEmpty || phoneController.text.replaceAll(RegExp(r'\D'), '').length < 11) {
-        _showAlert('Required', 'Please enter a valid 11-digit Phone Number.'); return;
+      if (phoneController.text.trim().isEmpty ||
+          phoneController.text.replaceAll(RegExp(r'\D'), '').length < 11) {
+        _showAlert('Required', 'Please enter a valid 11-digit Phone Number.');
+        return;
       }
       final cnicDigits = cnicController.text.replaceAll(RegExp(r'\D'), '');
       if (!RegExp(r'^\d{13}$').hasMatch(cnicDigits)) {
-        _showAlert('Required', 'Please enter a valid 13-digit CNIC Number.'); return;
+        _showAlert('Required', 'Please enter a valid 13-digit CNIC Number.');
+        return;
       }
       if (cnicIssueDate == null) {
-        _showAlert('Required', 'Please select CNIC Date of Issue.'); return;
+        _showAlert('Required', 'Please select CNIC Date of Issue.');
+        return;
       }
       if (selectedRole == 'renter') {
-        final fatherCnicDigits = fatherCnicController.text.replaceAll(RegExp(r'\D'), '');
+        final fatherCnicDigits =
+            fatherCnicController.text.replaceAll(RegExp(r'\D'), '');
         if (!RegExp(r'^\d{13}$').hasMatch(fatherCnicDigits)) {
-          _showAlert('Required', "Please enter a valid 13-digit Father's CNIC."); return;
+          _showAlert(
+              'Required', "Please enter a valid 13-digit Father's CNIC.");
+          return;
         }
       }
     } else if (_currentStep == 1) {
       // Step 2 - Location validation
       if (selectedCountry == null) {
-        _showAlert('Required', 'Please select a Country.'); return;
+        _showAlert('Required', 'Please select a Country.');
+        return;
       }
       if (selectedCountry == 'Pakistan') {
         if (selectedProvince == null) {
-          _showAlert('Required', 'Please select a Province / Region.'); return;
+          _showAlert('Required', 'Please select a Province / Region.');
+          return;
         }
         if (selectedDistrict == null) {
-          _showAlert('Required', 'Please select a District.'); return;
+          _showAlert('Required', 'Please select a District.');
+          return;
         }
         if (selectedTehsil == null) {
-          _showAlert('Required', 'Please select a Tehsil / Town.'); return;
+          _showAlert('Required', 'Please select a Tehsil / Town.');
+          return;
         }
       }
       if (fullAddressController.text.trim().isEmpty) {
-        _showAlert('Required', 'Please enter your Full Address.'); return;
+        _showAlert('Required', 'Please enter your Full Address.');
+        return;
       }
       if (_selectedLocation == null) {
-        _showAlert('Required', 'Please select your location on the map.'); return;
+        _showAlert('Required', 'Please select your location on the map.');
+        return;
       }
     }
 
@@ -650,7 +666,9 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     }
     // --- End Validation Checks ---
 
-    setState(() => _saving = true);
+    setState(() {
+      // Logic for saving state could be added here if needed for UI
+    });
 
     final email = '$cnicText@muhallah.com'; // Consistent pseudo-email
     final firestore = FirebaseFirestore.instance;
@@ -733,7 +751,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       await firestore.collection('users').doc(userId).set(userData);
 
       // On successful Auth and Firestore write: show success and navigate
-      if (mounted) setState(() => _saving = false);
+      if (mounted) setState(() {});
 
       // Check if any uploads failed to warn the user, or just success
       bool anyUploadFailed = cnicFrontFileUrl == null ||
@@ -811,7 +829,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
       }
       if (mounted) {
         _showAlert('Registration Error', message);
-        setState(() => _saving = false);
+        setState(() {});
       }
     } catch (e) {
       // Critical error (Firestore write failed?)
@@ -840,7 +858,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
             ],
           ),
         );
-        setState(() => _saving = false);
+        setState(() {});
       }
     }
   }
@@ -1095,10 +1113,9 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         Wrap(
                           spacing: 8,
                           children: [
-                            _roleBadge('Property Owner',
-                                const Color(0xFFFF2E63)),
-                            _roleBadge('Verified',
-                                const Color(0xFFFF2E63)),
+                            _roleBadge(
+                                'Property Owner', const Color(0xFFFF2E63)),
+                            _roleBadge('Verified', const Color(0xFFFF2E63)),
                           ],
                         ),
                       ],
@@ -1253,10 +1270,8 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         Wrap(
                           spacing: 8,
                           children: [
-                            _roleBadge('Tenant',
-                                const Color(0xFF08D9D6)),
-                            _roleBadge('Verified',
-                                const Color(0xFF08D9D6)),
+                            _roleBadge('Tenant', const Color(0xFF08D9D6)),
+                            _roleBadge('Verified', const Color(0xFF08D9D6)),
                           ],
                         ),
                       ],
@@ -1273,6 +1288,169 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                     child: const Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Color(0xFF08D9D6),
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── OR DIVIDER ──
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withOpacity(0.2),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'OR',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── FAMILY MEMBER CARD ──
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FamilyMemberTypeScreen(),
+                ),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1A0F3E), Color(0xFF2D1B69)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFF7C3AED).withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7C3AED).withOpacity(0.25),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Icon Box
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF7C3AED).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.family_restroom_rounded,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  // Text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Family Member',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Register as a family member in your community',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            _roleBadge('Family', const Color(0xFF7C3AED)),
+                            _roleBadge('Linked', const Color(0xFF7C3AED)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Arrow
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7C3AED).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFF7C3AED),
                       size: 18,
                     ),
                   ),
@@ -2080,8 +2258,6 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
             ),
 
             const SizedBox(height: 24),
-
-
           ],
         ),
       ),

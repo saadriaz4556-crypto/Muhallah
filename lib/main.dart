@@ -17,12 +17,16 @@ import 'screens/features_screen/lostfound.dart';
 import 'screens/features_screen/localservices.dart';
 import 'screens/features_screen/marriage_event.dart';
 import 'screens/features_screen/invitation_card.dart';
-import 'screens/features_screen/bill_remminder.dart';
 import 'screens/features_screen/jobs.dart';
 import 'screens/features_screen/poll_voting.dart';
 import 'screens/features_screen/event_donation.dart';
 
 import 'firebase_options.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:get/get.dart';
+import 'package:muhallah/features/bill_reminder/models/bill_model.dart';
+import 'package:muhallah/features/bill_reminder/services/notification_service.dart';
+import 'package:muhallah/features/bill_reminder/screens/bill_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +34,17 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('✅ Firebase initialized successfully');
+    
+    // Initialize Hive
+    await Hive.initFlutter();
+    Hive.registerAdapter(BillModelAdapter());
+    
+    // Initialize Notifications
+    await NotificationService.initializeNotifications();
+    
+    print('✅ Firebase & Services initialized successfully');
   } catch (e, st) {
-    print('❌ Firebase initialization failed: $e\n$st');
+    print('❌ Initialization failed: $e\n$st');
   }
   runApp(const MyApp());
 }
@@ -65,7 +77,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Digital Muhallah',
       theme: ThemeData(
@@ -102,7 +114,7 @@ class MyApp extends StatelessWidget {
         '/merriage_event': (context) => const MarriageEventsScreen(),
         '/invitation_card': (context) => const InvitationCardScreen(),
         '/localservices': (context) => const LocalServicesScreen(),
-        '/bill_remminder': (context) => const BillRemindersApp(),
+        '/bill_remminder': (context) => BillListScreen(),
         '/jobs': (context) => const JobsApp(),
         '/poll_voting': (context) => const PollsVotingApp(),
         '/event_donation': (context) => const EventsDonationsApp(),

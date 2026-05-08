@@ -37,6 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  // --- NEW: Role selector for login type
+  String _loginRole = 'owner'; // 'owner' or 'family_member'
+
   // --- slider state variables
   int _currentSlide = 0;
   Timer? _slideTimer;
@@ -87,6 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // <--- MAJOR CHANGE: Firebase Login Logic
   Future<void> _handleLogin() async {
+    if (_loginRole == 'family_member') {
+      await _handleFamilyMemberLogin();
+      return;
+    }
+
+    // Owner/Renter login (existing code)
     final cnicText = _cnicController.text.replaceAll(RegExp(r'\D'), '');
     final password = _passwordController.text.trim();
 
@@ -202,12 +211,107 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  // NEW: Family Member Login Method
+  Future<void> _handleFamilyMemberLogin() async {
+    final cnicDigits = _cnicController.text.replaceAll(RegExp(r'\D'), '');
+    final password = _passwordController.text.trim();
+
+    // Validate CNIC
+    if (!RegExp(r'^\d{13}$').hasMatch(cnicDigits)) {
+      _showAlert('Error', 'Please enter a valid 13-digit CNIC number.');
+      return;
+    }
+
+    // Validate password
+    if (password.isEmpty) {
+      _showAlert('Error', 'Please enter your password.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Step 1: Format CNIC for Firestore lookup
+      final formattedCnic = '${cnicDigits.substring(0, 5)}-'
+          '${cnicDigits.substring(5, 12)}-'
+          '${cnicDigits.substring(12)}';
+
+      // Step 2: Look up family member in Firestore by CNIC
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'family_member')
+          .where('cnic', isEqualTo: formattedCnic)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        setState(() => _isLoading = false);
+        _showAlert('Error',
+            'No family member account found with this CNIC. Please register first.');
+        return;
+      }
+
+      // Step 3: Get the auth email from Firestore
+      final userDoc = snapshot.docs.first.data();
+      final authEmail =
+          userDoc['authEmail'] as String? ?? userDoc['email'] as String?;
+
+      if (authEmail == null || authEmail.isEmpty) {
+        setState(() => _isLoading = false);
+        _showAlert('Error', 'Account error. Please contact support.');
+        return;
+      }
+
+      // Step 4: Sign in with Firebase Auth using the real email
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: authEmail,
+          password: password,
+        );
+
+        // Step 5: Navigate to home/dashboard
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        Navigator.of(context).pushReplacementNamed('/home');
+      } on FirebaseAuthException catch (e) {
+        // If new email format fails, try old format as fallback
+        if (e.code == 'user-not-found' ||
+            e.code == 'invalid-credential' ||
+            e.code == 'wrong-password') {
+          try {
+            // Try old format as fallback (for accounts registered before this fix)
+            final fallbackEmail = '$cnicDigits@community.app';
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: fallbackEmail,
+              password: password,
+            );
+
+            if (!mounted) return;
+            setState(() => _isLoading = false);
+            Navigator.of(context).pushReplacementNamed('/home');
+            return;
+          } catch (_) {
+            // Fallback also failed
+            setState(() => _isLoading = false);
+            _showAlert('Error', 'Invalid password. Please try again.');
+            return;
+          }
+        }
+
+        setState(() => _isLoading = false);
+        _showAlert('Error', 'Login failed. Please try again.');
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showAlert(
+        'Error',
+        'Login failed. Please check your connection and try again.',
+      );
+    }
+  }
   // END MAJOR CHANGE
 
-  void _navigateToRoleSelection() {
-    // This function seems unused in your routes, keeping for completeness
-    Navigator.pushNamed(context, '/role_selection');
-  }
 
   @override
   void initState() {
@@ -244,7 +348,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Responsive sizing
     final mq = MediaQuery.of(context);
-    final width = mq.size.width;
     final height = mq.size.height;
     final headerHeight = (height * 0.28).clamp(280.0, 360.0);
 
@@ -281,7 +384,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _slideController,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: _sliderImages.length,
-                                onPageChanged: (i) => setState(() => _currentSlide = i),
+                                onPageChanged: (i) =>
+                                    setState(() => _currentSlide = i),
                                 itemBuilder: (context, index) {
                                   return Image.asset(
                                     _sliderImages[index],
@@ -384,11 +488,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 right: 0,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(_sliderImages.length, (index) {
+                                  children: List.generate(_sliderImages.length,
+                                      (index) {
                                     final isActive = index == _currentSlide;
                                     return AnimatedContainer(
-                                      duration: const Duration(milliseconds: 300),
-                                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 3),
                                       width: isActive ? 20 : 8,
                                       height: 8,
                                       decoration: BoxDecoration(
@@ -443,6 +550,93 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              // NEW: Role selector (Owner vs Family Member)
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: primaryTeal.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: _isLoading
+                                            ? null
+                                            : () {
+                                                setState(
+                                                    () => _loginRole = 'owner');
+                                              },
+                                        child: AnimatedContainer(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: _loginRole == 'owner'
+                                                ? primaryTeal.withOpacity(0.3)
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Owner/Renter',
+                                              style: TextStyle(
+                                                color: _loginRole == 'owner'
+                                                    ? primaryTeal
+                                                    : Colors.white60,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: _isLoading
+                                            ? null
+                                            : () {
+                                                setState(() => _loginRole =
+                                                    'family_member');
+                                              },
+                                        child: AnimatedContainer(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: _loginRole == 'family_member'
+                                                ? primaryTeal.withOpacity(0.3)
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Family Member',
+                                              style: TextStyle(
+                                                color: _loginRole ==
+                                                        'family_member'
+                                                    ? primaryTeal
+                                                    : Colors.white60,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 20),

@@ -112,7 +112,14 @@ class _SecurityScreenState extends State<SecurityScreen> {
               ),
               trailing: Switch(
                 value: _isProfilePrivate,
-                activeThumbColor: teal,
+                thumbColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return teal;
+                    }
+                    return Colors.grey;
+                  },
+                ),
                 onChanged: (val) {
                   setState(() => _isProfilePrivate = val);
                   // Feature for future implementation
@@ -159,8 +166,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
           subtitle,
           style: const TextStyle(color: Colors.white54, fontSize: 12),
         ),
-        trailing:
-            trailing ??
+        trailing: trailing ??
             (onTap != null
                 ? const Icon(
                     Icons.arrow_forward_ios,

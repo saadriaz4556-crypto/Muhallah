@@ -895,7 +895,16 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                                     onChanged: (value) => setState(
                                       () => deliveryRequested = value,
                                     ),
-                                    activeThumbColor: colors['primary'],
+                                    thumbColor: WidgetStateProperty
+                                        .resolveWith<Color>(
+                                      (Set<WidgetState> states) {
+                                        if (states
+                                            .contains(WidgetState.selected)) {
+                                          return colors['primary']!;
+                                        }
+                                        return Colors.grey;
+                                      },
+                                    ),
                                   ),
                                 ],
                               ),

@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.muhallah"
-    compileSdk = 36  // ✅ Recommended: Changed to 34 (Stable) to avoid SDK errors
+    compileSdk = 36  // ✅ Recommended: High version required by modern plugins
 
     defaultConfig {
         applicationId = "com.example.muhallah"
@@ -20,6 +20,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -58,4 +59,5 @@ dependencies {
 
     // Core Kotlin extensions
     implementation("androidx.core:core-ktx:1.12.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 }

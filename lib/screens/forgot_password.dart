@@ -58,6 +58,9 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
   bool _verifyingCnic = false;
   final TextEditingController _cnicController = TextEditingController();
 
+  // NEW: Role selector (owner or family_member)
+  String _userRole = 'owner'; // 'owner' or 'family_member'
+
   // Date picker inputs
   String _dpDay = '';
   String _dpMonth = '';
@@ -150,6 +153,13 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
       );
       return;
     }
+
+    if (_userRole == 'family_member') {
+      await _verifyFamilyMemberCnic();
+      return;
+    }
+
+    // Owner/Renter verification (existing code)
     if (_issueDate == null) {
       _showAlert(
         'Missing CNIC issue date',
@@ -198,6 +208,59 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
       // Trim and lowercase email to ensure consistency
       final trimmedEmail = email.trim().toLowerCase();
       debugPrint('Verified email for CNIC $_cnicDigits: $trimmedEmail');
+
+      setState(() {
+        _verifyingCnic = false;
+        _registeredEmail = trimmedEmail;
+        step = 2;
+      });
+    } catch (e) {
+      setState(() => _verifyingCnic = false);
+      _showAlert('Error', 'An error occurred during verification: $e');
+    }
+  }
+
+  // NEW: Family Member CNIC Verification
+  Future<void> _verifyFamilyMemberCnic() async {
+    setState(() => _verifyingCnic = true);
+
+    try {
+      // Format CNIC for Firestore lookup
+      final formattedCnic = '${_cnicDigits.substring(0, 5)}-'
+          '${_cnicDigits.substring(5, 12)}-'
+          '${_cnicDigits.substring(12)}';
+
+      // Look up family member by CNIC
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'family_member')
+          .where('cnic', isEqualTo: formattedCnic)
+          .limit(1)
+          .get();
+
+      if (!mounted) return;
+
+      if (snapshot.docs.isEmpty) {
+        setState(() => _verifyingCnic = false);
+        _showAlert('Record Not Found',
+            'No family member account found with this CNIC. Please check your CNIC or register first.');
+        return;
+      }
+
+      final userData = snapshot.docs.first.data();
+      final email =
+          userData['authEmail'] as String? ?? userData['email'] as String?;
+
+      if (email == null || email.isEmpty) {
+        setState(() => _verifyingCnic = false);
+        _showAlert('Error',
+            'Could not find your registered email. Please contact support.');
+        return;
+      }
+
+      final trimmedEmail = email.trim().toLowerCase();
+      debugPrint(
+          'Verified family member email for CNIC $_cnicDigits: $trimmedEmail');
 
       setState(() {
         _verifyingCnic = false;
@@ -795,6 +858,76 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          // NEW: Role selector (Owner vs Family Member)
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: COLORS['primaryTeal']!.withOpacity(0.4),
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _userRole = 'owner'),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _userRole == 'owner'
+                            ? COLORS['primaryTeal']!.withOpacity(0.3)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Owner/Renter',
+                          style: TextStyle(
+                            color: _userRole == 'owner'
+                                ? COLORS['primaryTeal']
+                                : Colors.white60,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _userRole = 'family_member'),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _userRole == 'family_member'
+                            ? COLORS['primaryTeal']!.withOpacity(0.3)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Family Member',
+                          style: TextStyle(
+                            color: _userRole == 'family_member'
+                                ? COLORS['primaryTeal']
+                                : Colors.white60,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
           const Text(
             'CNIC Number',
@@ -885,56 +1018,62 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             ),
           ],
           const SizedBox(height: 16),
-          const Text(
-            'CNIC Issue Date',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          InkWell(
-            onTap: _openDatePickerModal,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: COLORS['deepNavy'],
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: COLORS['primaryTeal']!.withOpacity(0.3),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          // Hide CNIC issue date for family members
+          if (_userRole == 'owner') ...[
+            const Text(
+              'CNIC Issue Date',
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w500,
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today, color: COLORS['primaryTeal']),
-                  const SizedBox(width: 12),
-                  Text(
-                    _issueDate != null
-                        ? _formatDate(_issueDate!)
-                        : 'DD/MM/YYYY',
-                    style: TextStyle(
-                      color: _issueDate != null
-                          ? Colors.white
-                          : COLORS['premiumWhite']!.withOpacity(0.5),
-                      fontSize: 16,
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: _openDatePickerModal,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: COLORS['deepNavy'],
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: COLORS['primaryTeal']!.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  const Spacer(),
-                  Icon(Icons.arrow_drop_down, color: COLORS['primaryTeal']),
-                ],
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today, color: COLORS['primaryTeal']),
+                    const SizedBox(width: 12),
+                    Text(
+                      _issueDate != null
+                          ? _formatDate(_issueDate!)
+                          : 'DD/MM/YYYY',
+                      style: TextStyle(
+                        color: _issueDate != null
+                            ? Colors.white
+                            : COLORS['premiumWhite']!.withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.arrow_drop_down, color: COLORS['primaryTeal']),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ] else ...[
+            const SizedBox(height: 12),
+          ],
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -1620,6 +1759,167 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
     );
   }
 
+  // --- NEW: Family Member Forgot Password (CNIC → email lookup → sendPasswordResetEmail) ---
+  Future<void> _familyMemberForgotPassword() async {
+    final cnicDigits = _cnicController.text.replaceAll(RegExp(r'\D'), '');
+    if (!RegExp(r'^\d{13}$').hasMatch(cnicDigits)) {
+      _showAlert('Invalid CNIC', 'Please enter a valid 13-digit CNIC.');
+      return;
+    }
+    setState(() => _verifyingCnic = true);
+    try {
+      // Format CNIC for Firestore lookup
+      final formattedCnic =
+          '${cnicDigits.substring(0, 5)}-${cnicDigits.substring(5, 12)}-${cnicDigits.substring(12)}';
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'family_member')
+          .where('cnic', isEqualTo: formattedCnic)
+          .limit(1)
+          .get();
+      if (!mounted) return;
+      if (snapshot.docs.isEmpty) {
+        setState(() => _verifyingCnic = false);
+        _showAlert('Not Found',
+            'No family member account found with this CNIC. Please check your CNIC or register first.');
+        return;
+      }
+      final userDoc = snapshot.docs.first.data();
+      final authEmail =
+          userDoc['authEmail'] as String? ?? userDoc['email'] as String?;
+      if (authEmail == null || authEmail.isEmpty) {
+        setState(() => _verifyingCnic = false);
+        _showAlert('Error',
+            'Could not find your registered email. Please contact support.');
+        return;
+      }
+      // If old account (fake email), show special message
+      if (authEmail.endsWith('@community.app')) {
+        setState(() => _verifyingCnic = false);
+        _showAlert(
+          'Old Account',
+          'Your account was registered with the old system and cannot be reset online. Please contact the administrator to reset your password, or register a new account with your real email.',
+        );
+        return;
+      }
+      // Otherwise, send password reset email
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: authEmail);
+      setState(() => _verifyingCnic = false);
+      _showAlert('Reset Email Sent',
+          'Password reset email sent to your registered email address. Please check your inbox and follow the link to reset your password.');
+    } on FirebaseAuthException catch (e) {
+      setState(() => _verifyingCnic = false);
+      if (e.code == 'user-not-found') {
+        _showAlert('Not Found',
+            'No account found. Please check your CNIC or register first.');
+      } else {
+        _showAlert(
+            'Error', e.message ?? 'Failed to send reset email. Try again.');
+      }
+    } catch (e) {
+      setState(() => _verifyingCnic = false);
+      _showAlert(
+          'Error', 'Something went wrong. Please check your connection.');
+    }
+  }
+
+  // --- UI: Add a button for family member forgot password ---
+  Widget _familyMemberForgotPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        const Text(
+          'Forgot Password (Family Member)',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: COLORS['inputBg'],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: TextField(
+            controller: _cnicController,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(
+                color: Colors.white, fontSize: 16, letterSpacing: 1),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(13),
+            ],
+            decoration: const InputDecoration(
+              hintText: 'Enter your CNIC (00000-0000000-0)',
+              hintStyle: TextStyle(color: Colors.white30, letterSpacing: 1),
+              prefixIcon: Icon(Icons.credit_card_rounded,
+                  color: Color(0xFF08D9D6), size: 20),
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            ),
+            onChanged: _handleCnicChange,
+          ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: GestureDetector(
+            onTap: _verifyingCnic ? null : _familyMemberForgotPassword,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: _verifyingCnic
+                    ? const LinearGradient(
+                        colors: [Color(0xFF4B3A7E), Color(0xFF4B3A7E)])
+                    : const LinearGradient(
+                        colors: [Color(0xFF08D9D6), Color(0xFF00B4B2)]),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF08D9D6)
+                        .withOpacity(_verifyingCnic ? 0.1 : 0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: _verifyingCnic
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.5, color: Colors.white),
+                      ),
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.email_rounded,
+                            color: Colors.white, size: 22),
+                        SizedBox(width: 10),
+                        Text(
+                          'Send Reset Link',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget content;
@@ -1671,6 +1971,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 ),
                 const SizedBox(height: 24),
                 content,
+                _familyMemberForgotPasswordSection(),
               ],
             ),
           ),

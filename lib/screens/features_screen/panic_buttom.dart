@@ -36,7 +36,6 @@ class _PanicScreenState extends State<PanicScreen> {
   static const Color teal = Color(0xFF08D9D6);
   static const Color darkGray = Color(0xFF252A34);
   static const Color panicRed = Color(0xFFFF2E63);
-  static const Color textGray = Color(0xFFEAEAEA);
   bool _isLoading = false;
   bool _alertSent = false;
 

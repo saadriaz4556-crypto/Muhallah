@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Added Firestore import
 import 'package:muhallah/screens/features_screen/Poll_voting.dart';
 import 'package:muhallah/screens/features_screen/announcements.dart';
-import 'package:muhallah/screens/features_screen/bill_remminder.dart';
+import 'package:muhallah/features/bill_reminder/screens/bill_list_screen.dart';
 import 'package:muhallah/screens/features_screen/event_donation.dart';
 import 'package:muhallah/screens/features_screen/invitation_card.dart';
 import 'package:muhallah/screens/features_screen/jobs.dart';
@@ -63,8 +63,6 @@ class HomeScreeen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreeen>
     with TickerProviderStateMixin {
   late final AnimationController _animController;
-  late final Animation<double> _fadeAnim;
-  late final Animation<Offset> _slideAnim;
 
   int _currentIndex = 0;
   String userName = ''; // Removed hardcoded 'Saad'
@@ -86,12 +84,6 @@ class _HomeScreenState extends State<HomeScreeen>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
     _animController.forward();
     // _fetchUserData(); // Moved to didChangeDependencies to access arguments
@@ -256,7 +248,7 @@ class _HomeScreenState extends State<HomeScreeen>
       case 'Bill Reminders':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const BillRemindersApp()),
+          MaterialPageRoute(builder: (context) => BillListScreen()),
         );
         break;
 
@@ -279,8 +271,6 @@ class _HomeScreenState extends State<HomeScreeen>
           context,
           MaterialPageRoute(builder: (context) => const EventsDonationsApp()),
         );
-        break;
-
         break;
 
       default:
@@ -307,22 +297,10 @@ class _HomeScreenState extends State<HomeScreeen>
     );
   }
 
-  Future<void> _goToLogin() async {
-    await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-    }
-  }
 
   // MAIN: Home tab made scrollable
   Widget _buildHomeTab() {
-    final bg = COLORS['background']!;
-    final accent = COLORS['accent']!;
-    final danger = COLORS['danger']!;
     final light = COLORS['light']!;
-    final darkText = COLORS['darkText']!;
-    final muted = COLORS['mutedText']!;
-
     final screenWidth = MediaQuery.of(context).size.width;
     const int perRow = 3;
     const gap = 6.0;
@@ -725,9 +703,7 @@ class _HomeScreenState extends State<HomeScreeen>
   @override
   Widget build(BuildContext context) {
     final bg = COLORS['background']!;
-    final light = COLORS['light']!;
     final accent = COLORS['accent']!;
-    final danger = COLORS['danger']!;
 
     if (_isLoading) {
       return Scaffold(

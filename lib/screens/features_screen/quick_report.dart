@@ -530,7 +530,6 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
   };
 
   String _urgency = 'Medium';
-  bool _usingLocation = false;
   String _locationLabel = 'Tap "Use My Location" to set location';
 
   @override
@@ -563,7 +562,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
 
   Future<void> _useMyLocation() async {
     setState(() {
-      _usingLocation = true;
+      // Location using logic could be added here
       _locationLabel = '📍 F-8/3, Islamabad (simulated)';
     });
     widget.report.useMyLocation = true;
