@@ -62,6 +62,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _fetchUserData();
   }
 
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _fatherNameController.dispose();
+    _cnicController.dispose();
+    _fatherCnicController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _fullAddressController.dispose();
+    super.dispose();
+  }
+
   // --- Fetch Data ---
   Future<void> _fetchUserData() async {
     setState(() => _isLoading = true);
@@ -953,6 +965,14 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   final _newPassController = TextEditingController();
   final _confirmPassController = TextEditingController();
   bool _loading = false;
+
+  @override
+  void dispose() {
+    _passController.dispose();
+    _newPassController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
 
   Future<void> _updatePassword() async {
     if (_newPassController.text != _confirmPassController.text) {

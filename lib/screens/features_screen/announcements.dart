@@ -1,4 +1,10 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const AnnouncementApp());
@@ -234,6 +240,65 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
     super.dispose();
   }
 
+  Future<String?> _uploadToCloudinary(XFile file) async {
+    const cloudName = 'drposqmf0';
+    const uploadPreset = 'flutter_uploads';
+
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+
+    final request = http.MultipartRequest('POST', url);
+    request.fields['upload_preset'] = uploadPreset;
+    request.headers['X-Requested-With'] = 'XMLHttpRequest';
+
+    final bytes = await file.readAsBytes();
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      bytes,
+      filename: file.name,
+    ));
+
+    try {
+      final response = await request.send();
+      final responseData = await response.stream.toBytes();
+      final responseString = String.fromCharCodes(responseData);
+      final jsonResponse = jsonDecode(responseString);
+
+      if (response.statusCode == 200) {
+        return jsonResponse['secure_url'];
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        widget.data.isImageUploading = true;
+      });
+
+      final url = await _uploadToCloudinary(image);
+      
+      if (mounted) {
+        setState(() {
+          if (url != null) {
+            widget.data.imageUrl = url;
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to upload image.')),
+            );
+          }
+          widget.data.isImageUploading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -375,6 +440,66 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
               ),
             ],
 
+            const SizedBox(height: 16),
+            const Text(
+              'Add Image (Optional)',
+              style: TextStyle(
+                color: Color(0xFF08D9D6),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: widget.data.isImageUploading ? null : _pickAndUploadImage,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF252A34),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[700]!),
+                ),
+                child: Center(
+                  child: widget.data.isImageUploading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF08D9D6),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.data.imageUrl != null
+                                  ? Icons.check_circle
+                                  : Icons.add_photo_alternate,
+                              color: widget.data.imageUrl != null
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEAEAEA),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              widget.data.imageUrl != null
+                                  ? 'Image Uploaded'
+                                  : 'Tap to pick an image',
+                              style: TextStyle(
+                                color: widget.data.imageUrl != null
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEAEAEA),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -416,9 +541,16 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
 
 /* ----------------- Preview & Publish Screen ----------------- */
 
-class PreviewPublishScreen extends StatelessWidget {
+class PreviewPublishScreen extends StatefulWidget {
   final AnnouncementData data;
   const PreviewPublishScreen({super.key, required this.data});
+
+  @override
+  State<PreviewPublishScreen> createState() => _PreviewPublishScreenState();
+}
+
+class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -438,8 +570,37 @@ class PreviewPublishScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.data.imageUrl != null &&
+                        widget.data.imageUrl!.isNotEmpty) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          widget.data.imageUrl!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              height: 200,
+                              color: const Color(0xFF3A4250),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                  color: const Color(0xFF08D9D6),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     Text(
-                      data.headline ?? '(No headline)',
+                      widget.data.headline ?? '(No headline)',
                       style: const TextStyle(
                         color: Color(0xFFEAEAEA),
                         fontSize: 18,
@@ -448,47 +609,12 @@ class PreviewPublishScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      data.description ?? '(No details)',
+                      widget.data.description ?? '(No details)',
                       style: const TextStyle(color: Color(0xFFB0B0B0)),
                     ),
                   ],
                 ),
               ),
-            ),
-            const Spacer(),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF08D9D6),
-                      side: const BorderSide(color: Color(0xFF08D9D6)),
-                    ),
-                    child: const Text('EDIT'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // publish action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Announcement published')),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF08D9D6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('PUBLISH'),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -516,19 +642,66 @@ class PreviewPublishScreen extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  // final publish action
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Published!')));
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() => _isLoading = true);
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('announcements')
+                              .add({
+                            'headline': widget.data.headline?.trim() ?? '',
+                            'description': widget.data.description?.trim() ?? '',
+                            'type': widget.data.type ?? 'General',
+                            'postType': 'announcement',
+                            'authorId':
+                                FirebaseAuth.instance.currentUser?.uid ?? '',
+                            'authorName': FirebaseAuth.instance.currentUser?.displayName?.isNotEmpty == true
+                                ? FirebaseAuth.instance.currentUser!.displayName!
+                                : (FirebaseAuth.instance.currentUser?.email?.split('@').first ?? 'Resident'),
+                            'createdAt': FieldValue.serverTimestamp(),
+                            'imageUrl': widget.data.imageUrl ?? '',
+                            'pinned': false,
+                            'likes': 0,
+                            'comments': 0,
+                            'shares': 0,
+                          });
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Announcement published successfully!'),
+                              ),
+                            );
+                            Navigator.of(context)
+                                .popUntil((route) => route.isFirst);
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF08D9D6),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('CONFIRM & SEND'),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('CONFIRM & SEND'),
               ),
             ),
           ],
@@ -544,8 +717,11 @@ class AnnouncementData {
   String? type;
   String? headline;
   String? description;
+  String? imageUrl;
+  bool isImageUploading = false;
 
   bool get isStep2Valid =>
       (headline != null && headline!.trim().isNotEmpty) &&
-      (description != null && description!.trim().isNotEmpty);
+      (description != null && description!.trim().isNotEmpty) &&
+      !isImageUploading;
 }

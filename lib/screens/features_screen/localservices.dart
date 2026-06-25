@@ -94,12 +94,12 @@ class _LocalServicesScreenState extends State<LocalServicesScreen> {
   ];
 
   // UI colors
-  final Color _darkBackground = const Color(0xFF121212);
-  final Color _primaryColor = const Color(0xFF4CAF50);
-  final Color _accentColor = const Color(0xFF00BCD4);
-  final Color _darkCardColor = const Color(0xFF1E1E1E);
-  final Color _darkTextColor = const Color(0xFFE0E0E0);
-  final Color _darkSecondaryText = const Color(0xFF9E9E9E);
+  final Color _darkBackground = const Color(0xFF252A34);
+  final Color _primaryColor = const Color(0xFF08D9D6);
+  final Color _accentColor = const Color(0xFF08D9D6);
+  final Color _darkCardColor = const Color(0xFF2A303C);
+  final Color _darkTextColor = const Color(0xFFEAEAEA);
+  final Color _darkSecondaryText = Colors.white70;
 
   // Function to launch phone dialer
   Future<void> _launchPhoneDialer(String phoneNumber) async {

@@ -42,7 +42,21 @@ dependencies:
   google_mlkit_commons: ^0.11.0
   image: ^4.0.0
   path_provider: ^2.0.0
+  share_plus: ^12.0.2
+  adhan: ^2.0.0+1
+  google_maps_flutter: ^2.11.0
+  geocoding: ^3.0.0
+  flutter_qiblah: ^3.1.0+1
+  just_audio: ^0.10.5
+  permission_handler: ^12.0.1
+  shared_preferences: ^2.3.2
+  video_player: ^2.9.0
+  timeago: ^3.7.1
   # --- END: Updated/Required Dependencies ---
+
+dependency_overrides:
+  # Pin to 2.14.8 to avoid Kotlin 2.x K2 compiler crash in newer google_maps_flutter_android versions (2.19.x)
+  google_maps_flutter_android: 2.14.8
 
 dev_dependencies:
   flutter_test:

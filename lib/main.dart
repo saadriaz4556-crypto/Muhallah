@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Local screens
-import 'package:muhallah/screens/smart_search.dart';
+import 'package:muhallah/screens/smart_search_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
@@ -100,7 +100,7 @@ class MyApp extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
         ),
       ),
-      home: const SplashScreen(),
+      home: const HomeScreeen(),
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
@@ -118,7 +118,8 @@ class MyApp extends StatelessWidget {
         '/jobs': (context) => const JobsApp(),
         '/poll_voting': (context) => const PollsVotingApp(),
         '/event_donation': (context) => const EventsDonationsApp(),
-        '/smart_search': (context) => const SmartSearchApp(),
+        '/smart_search': (context) => const SmartSearchScreen(),
+        '/smart-search': (context) => const SmartSearchScreen(),
         '/help': (context) => const HelpScreen(),
       },
     );

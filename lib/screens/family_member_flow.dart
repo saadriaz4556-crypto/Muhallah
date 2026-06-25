@@ -303,6 +303,12 @@ class _OwnerVerificationScreenState extends State<OwnerVerificationScreen> {
   bool _verifying = false;
   String? _errorMessage;
 
+  @override
+  void dispose() {
+    _cnicController.dispose();
+    super.dispose();
+  }
+
   // ── CNIC formatter: 00000-0000000-0 ──────────────────────────
 
   String _formatDate(DateTime d) => '${d.year.toString().padLeft(4, '0')}-'
@@ -1511,6 +1517,19 @@ class _FamilyMemberRegistrationScreenState
   final _confirmPasswordCtrl = TextEditingController();
   final _customRelationCtrl = TextEditingController();
 
+  @override
+  void dispose() {
+    _fullNameCtrl.dispose();
+    _parentNameCtrl.dispose();
+    _cnicCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
+    _customRelationCtrl.dispose();
+    super.dispose();
+  }
+
   // ── Document uploads ──────────────────────────────────────────
   XFile? _cnicFrontFile;
   XFile? _cnicBackFile;
@@ -1802,19 +1821,6 @@ class _FamilyMemberRegistrationScreenState
       setState(() => _saving = false);
       _showAlert('Error', 'Registration failed. Please try again.\n$e');
     }
-  }
-
-  @override
-  void dispose() {
-    _fullNameCtrl.dispose();
-    _parentNameCtrl.dispose();
-    _cnicCtrl.dispose();
-    _emailCtrl.dispose();
-    _phoneCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
-    _customRelationCtrl.dispose();
-    super.dispose();
   }
 
   @override

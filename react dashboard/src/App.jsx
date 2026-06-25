@@ -12,6 +12,7 @@ import Announcements from './pages/dashboard/Announcements';
 import Complaints from './pages/dashboard/Complaints';
 import Marketplace from './pages/dashboard/Marketplace';
 import Services from './pages/dashboard/Services';
+import LocalVibesModeration from './pages/dashboard/LocalVibesModeration';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
@@ -45,6 +46,7 @@ function App() {
                 <Route path="complaints" element={<Complaints />} />
                 <Route path="marketplace" element={<Marketplace />} />
                 <Route path="services" element={<Services />} />
+                <Route path="local-vibes" element={<LocalVibesModeration />} />
               </Route>
               <Route path="/" element={<Navigate to="/login" replace />} />
             </Routes>

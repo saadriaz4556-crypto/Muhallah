@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'post_creation_screen.dart';
+import 'my_posts_screen.dart';
+import 'post_detail_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -15,18 +20,18 @@ class _FeedScreenState extends State<FeedScreen> {
 
   // Colors matching the React Native version
   final colors = {
-    'background': const Color(0xFF121212),
-    'cardBackground': const Color(0xFF1E1E1E),
-    'surface': const Color(0xFF252525),
-    'primary': const Color(0xFF11988D),
-    'accent': const Color(0xFFFFC107),
-    'textPrimary': const Color(0xFFFFFFFF),
-    'textSecondary': const Color(0xFFB0B0B0),
-    'textTertiary': const Color(0xFF888888),
-    'border': const Color(0xFF333333),
-    'success': const Color(0xFF059669),
+    'background': const Color(0xFF252A34),
+    'cardBackground': const Color(0xFF2A303C),
+    'surface': const Color(0xFF3A4250),
+    'primary': const Color(0xFF08D9D6),
+    'accent': const Color(0xFFFF2E63),
+    'textPrimary': const Color(0xFFEAEAEA),
+    'textSecondary': Colors.white70,
+    'textTertiary': Colors.white38,
+    'border': Colors.white10,
+    'success': const Color(0xFF10B981),
     'warning': const Color(0xFFF59E0B),
-    'error': const Color(0xFFDC2626),
+    'error': const Color(0xFFFF2E63),
   };
 
   // Sample data
@@ -41,106 +46,20 @@ class _FeedScreenState extends State<FeedScreen> {
     {'id': 'polls', 'label': 'Polls', 'count': 3},
   ];
 
-  final pinnedItems = [
-    {
-      'id': '1',
-      'type': 'emergency',
-      'title': 'Water outage tomorrow',
-      'description': 'Main water line maintenance from 9 AM to 5 PM.',
-      'color': const Color(0xFFDC2626),
-    },
-    {
-      'id': '2',
-      'type': 'announcement',
-      'title': 'Community Clean-up Saturday',
-      'description': 'Meet at the park - bags provided.',
-      'color': const Color(0xFFF59E0B),
-    },
-    {
-      'id': '3',
-      'type': 'poll',
-      'title': 'Active Community Poll',
-      'description': 'Vote on the new playground equipment.',
-      'color': const Color(0xFF11988D),
-    },
-  ];
 
-  final posts = [
-    {
-      'id': '1',
-      'type': 'announcement',
-      'author': 'Muhallah Admin',
-      'time': '2 hours ago',
-      'verified': true,
-      'pinned': true,
-      'title': 'Annual Neighborhood Festival',
-      'content':
-          "The annual neighborhood festival is scheduled for next month! We're looking for volunteers to help with planning and on-the-day activities. Please sign up using the link below.",
-      'likes': 23,
-      'comments': 8,
-      'shares': 4,
-    },
-    {
-      'id': '2',
-      'type': 'marketplace',
-      'author': 'Alsha Khan',
-      'time': '5 hours ago',
-      'verified': false,
-      'title': 'For Sale',
-      'content': 'Selling my barely used bicycle. Perfect for city rides.',
-      'price': '₹8,500',
-      'image':
-          'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmljeWNsZXxlbnwwfHwwfHx8MA%3D%3D',
-      'likes': 5,
-      'comments': 3,
-      'shares': 1,
-    },
-    {
-      'id': '3',
-      'type': 'poll',
-      'author': 'Bilal Ahmed',
-      'time': '1 day ago',
-      'verified': false,
-      'title': 'Community Center Colors',
-      'content': 'What color should we paint the community center walls?',
-      'options': [
-        {
-          'id': '1',
-          'label': 'Light Blue',
-          'votes': 79,
-          'percentage': 62,
-          'color': const Color(0xFF93C5FD),
-        },
-        {
-          'id': '2',
-          'label': 'Warm Beige',
-          'votes': 32,
-          'percentage': 25,
-          'color': const Color(0xFFFDE68A),
-        },
-        {
-          'id': '3',
-          'label': 'Mint Green',
-          'votes': 17,
-          'percentage': 13,
-          'color': const Color(0xFFA7F3D0),
-        },
-      ],
-      'totalVotes': 128,
-      'likes': 15,
-      'comments': 24,
-      'shares': 7,
-    },
-  ];
 
-  void handleLike(String postId) {
-    setState(() {
-      if (likedPosts.contains(postId)) {
-        likedPosts.remove(postId);
-      } else {
-        likedPosts.add(postId);
-      }
-    });
+
+
+  Future<void> handleLike(String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('announcements').doc(postId);
+    if (likedPosts.contains(postId)) {
+      likedPosts.remove(postId);
+      await postRef.update({'likes': FieldValue.increment(-1)});
+    } else {
+      likedPosts.add(postId);
+      await postRef.update({'likes': FieldValue.increment(1)});
+    }
+    setState(() {});
   }
 
   void handleSave(String postId) {
@@ -151,6 +70,158 @@ class _FeedScreenState extends State<FeedScreen> {
         savedPosts.add(postId);
       }
     });
+  }
+
+  void _showCommentSheet(BuildContext context, Map<String, dynamic> post) {
+    final commentController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF2A303C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 16, right: 16, top: 16,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Comments',
+              style: TextStyle(color: Color(0xFFEAEAEA),
+              fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('announcements')
+                  .doc(post['id'])
+                  .collection('comments')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text('No comments yet',
+                      style: TextStyle(color: Colors.white54)),
+                  );
+                }
+                return SizedBox(
+                  height: 200,
+                  child: ListView(
+                    children: snapshot.data!.docs.map((doc) {
+                      final d = doc.data() as Map<String, dynamic>;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CircleAvatar(radius: 16,
+                              backgroundColor: Color(0xFF3A4250)),
+                            const SizedBox(width: 8),
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(d['authorName'] ?? 'Resident',
+                                  style: const TextStyle(
+                                    color: Color(0xFF08D9D6),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13)),
+                                Text(d['text'] ?? '',
+                                  style: const TextStyle(
+                                    color: Color(0xFFEAEAEA), fontSize: 14)),
+                              ],
+                            )),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: commentController,
+                  style: const TextStyle(color: Color(0xFFEAEAEA)),
+                  decoration: InputDecoration(
+                    hintText: 'Write a comment...',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    filled: true,
+                    fillColor: const Color(0xFF3A4250),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () async {
+                  final text = commentController.text.trim();
+                  if (text.isEmpty) return;
+                  final postRef = FirebaseFirestore.instance
+                      .collection('announcements').doc(post['id']);
+                  await postRef.collection('comments').add({
+                    'text': text,
+                    'authorId': FirebaseAuth.instance.currentUser?.uid ?? '',
+                    'authorName': FirebaseAuth.instance.currentUser
+                        ?.displayName?.isNotEmpty == true
+                        ? FirebaseAuth.instance.currentUser!.displayName!
+                        : (FirebaseAuth.instance.currentUser?.email
+                            ?.split('@').first ?? 'Resident'),
+                    'createdAt': Timestamp.now(),
+                  });
+                  await postRef.update({'comments': FieldValue.increment(1)});
+                  commentController.clear();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF08D9D6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.send, color: Colors.white, size: 20),
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _stripHtml(String html) {
+    return html
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&nbsp;', ' ')
+        .trim();
+  }
+
+  String _timeAgo(dynamic timestamp) {
+    if (timestamp == null) return 'Just now';
+    DateTime dt;
+    if (timestamp is Timestamp) {
+      dt = timestamp.toDate();
+    } else {
+      return timestamp.toString();
+    }
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return '${dt.day} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.month-1]} ${dt.year}';
   }
 
   Widget _buildFilterChip(Map<String, dynamic> item) {
@@ -239,7 +310,7 @@ class _FeedScreenState extends State<FeedScreen> {
         children: [
           _buildEngagementButton(
             icon: likedPosts.contains(post['id']) ? '❤️' : '🤍',
-            count: post['likes'],
+            count: post['likes'] ?? 0,
             color: likedPosts.contains(post['id'])
                 ? colors['accent']
                 : colors['textSecondary'],
@@ -247,23 +318,9 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           _buildEngagementButton(
             icon: '💬',
-            count: post['comments'],
+            count: post['comments'] ?? 0,
             color: colors['textSecondary'],
-            onTap: () {},
-          ),
-          _buildEngagementButton(
-            icon: '↗️',
-            count: post['shares'],
-            color: colors['textSecondary'],
-            onTap: () {},
-          ),
-          _buildEngagementButton(
-            icon: savedPosts.contains(post['id']) ? '📖' : '📚',
-            count: null,
-            color: savedPosts.contains(post['id'])
-                ? colors['accent']
-                : colors['textSecondary'],
-            onTap: () => handleSave(post['id']),
+            onTap: () => _showCommentSheet(context, post),
           ),
         ],
       ),
@@ -295,11 +352,52 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Widget _buildAnnouncementCard(Map<String, dynamic> post) {
     return _buildCard(
+      post: post,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCardHeader(post),
           const SizedBox(height: 12),
+          if (post['image'] != null && post['image'].toString().isNotEmpty) ...[
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  post['image'],
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: colors['surface'],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                          color: colors['primary'],
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: colors['surface'],
+                      child: const Icon(
+                        Icons.error,
+                        color: Colors.grey,
+                        size: 50,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
             post['title'],
             style: TextStyle(
@@ -310,7 +408,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            post['content'],
+            _stripHtml(post['content'] ?? ''),
             style: TextStyle(
               color: colors['textSecondary'],
               fontSize: 14,
@@ -338,6 +436,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Widget _buildMarketplaceCard(Map<String, dynamic> post) {
     return _buildCard(
+      post: post,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -434,6 +533,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Widget _buildPollCard(Map<String, dynamic> post) {
     return _buildCard(
+      post: post,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -449,7 +549,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            post['content'],
+            _stripHtml(post['content'] ?? ''),
             style: TextStyle(
               color: colors['textSecondary'],
               fontSize: 14,
@@ -638,17 +738,27 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: colors['cardBackground'],
-        border: Border.all(color: colors['border']!),
-        borderRadius: BorderRadius.circular(12),
+  Widget _buildCard({required Map<String, dynamic> post, required Widget child}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PostDetailScreen(post: post),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: colors['cardBackground'],
+          border: Border.all(color: colors['border']!),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 
@@ -667,12 +777,8 @@ class _FeedScreenState extends State<FeedScreen> {
                 border: Border(bottom: BorderSide(color: colors['border']!)),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(
-                    onPressed: null, // () => context.go('/TabScreens/menu'),
-                    icon: Icon(Icons.menu, color: colors['textPrimary']),
-                  ),
                   Text(
                     'Feed',
                     style: TextStyle(
@@ -680,27 +786,6 @@ class _FeedScreenState extends State<FeedScreen> {
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.search, color: colors['textPrimary']),
-                      ),
-                      IconButton(
-                        onPressed:
-                            null, // () => context.go('/TabScreens/menu'),
-                        icon: Icon(
-                          Icons.settings,
-                          color: colors['textPrimary'],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed:
-                            null, // () => Navigator.pushNamed('/TabScreens/NewPost'),
-                        icon: Icon(Icons.add, color: colors['primary']),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -770,13 +855,17 @@ class _FeedScreenState extends State<FeedScreen> {
                         children: [
                           Row(
                             children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: colors['surface'],
-                                  shape: BoxShape.circle,
+                              GestureDetector(
+                                onTap: () => Navigator.push(context,
+                                  MaterialPageRoute(builder: (_) => const MyPostsScreen())),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  decoration: BoxDecoration(
+                                    color: colors['surface'],
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
                               ),
                               Expanded(
@@ -802,30 +891,12 @@ class _FeedScreenState extends State<FeedScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const PostCreationScreen()),
+                                ),
                                 icon: Icon(
                                   Icons.photo_camera,
-                                  color: colors['textSecondary'],
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.poll,
-                                  color: colors['textSecondary'],
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.attach_money,
-                                  color: colors['textSecondary'],
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.warning,
                                   color: colors['textSecondary'],
                                 ),
                               ),
@@ -835,49 +906,138 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                     ),
                     // Pinned Section
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Important Updates',
-                            style: TextStyle(
-                              color: colors['textPrimary'],
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('announcements')
+                          .where('pinned', isEqualTo: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const SizedBox.shrink(); // hide section if no pinned items
+                        }
+                        final pinned = snapshot.data!.docs.map((doc) {
+                          final d = doc.data() as Map<String, dynamic>;
+                          return <String, dynamic>{
+                            'id': doc.id,
+                            'title': d['headline'] ?? '',
+                            'description': d['description'] ?? '',
+                            'color': const Color(0xFFFF2E63),
+                          };
+                        }).toList();
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Important Updates',
+                                style: TextStyle(
+                                  color: colors['textPrimary'],
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 140,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: pinned.map(_buildPinnedItem).toList(),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 140,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children:
-                                  pinnedItems.map(_buildPinnedItem).toList(),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                     // Feed Posts
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: posts.map<Widget>((post) {
-                          switch (post['type']) {
-                            case 'announcement':
-                              return _buildAnnouncementCard(post);
-                            case 'marketplace':
-                              return _buildMarketplaceCard(post);
-                            case 'poll':
-                              return _buildPollCard(post);
-                            default:
-                              return _buildAnnouncementCard(post);
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('announcements')
+                          .orderBy('createdAt', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: colors['primary'],
+                              ),
+                            ),
+                          );
+                        }
+                        if (!snapshot.hasData ||
+                            snapshot.data!.docs.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: Text(
+                                'No posts yet',
+                                style: TextStyle(
+                                  color: colors['textSecondary'],
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        final posts = snapshot.data!.docs.map((doc) {
+                          final data =
+                              doc.data() as Map<String, dynamic>;
+                          try {
+                            return <String, dynamic>{
+                              'id': doc.id,
+                              'type': data['postType'] ?? 'announcement',
+                              'author': data['authorName'] ?? '',
+                              'time': _timeAgo(data['createdAt']),
+                              'verified': data['verified'] ?? false,
+                              'pinned': data['pinned'] ?? false,
+                              'title': data['headline'] ?? '',
+                              'content': data['description'] ?? '',
+                              'image': data['imageUrl'],
+                              'likes': (data['likes'] ?? 0) as int,
+                              'comments': (data['comments'] ?? 0) as int,
+                              'shares': (data['shares'] ?? 0) as int,
+                            };
+                          } catch (e) {
+                            return <String, dynamic>{
+                              'id': doc.id,
+                              'type': 'announcement',
+                              'author': 'User',
+                              'time': 'Just now',
+                              'verified': false,
+                              'pinned': false,
+                              'title': 'Loading...',
+                              'content': '',
+                              'image': null,
+                              'likes': 0,
+                              'comments': 0,
+                              'shares': 0,
+                            };
                           }
-                        }).toList(),
-                      ),
+                        }).toList();
+                        return Container(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            children: posts.map<Widget>((post) {
+                              switch (post['type']) {
+                                case 'announcement':
+                                  return _buildAnnouncementCard(post);
+                                case 'marketplace':
+                                  return _buildMarketplaceCard(post);
+                                case 'poll':
+                                  return _buildPollCard(post);
+                                default:
+                                  return _buildAnnouncementCard(post);
+                              }
+                            }).toList(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -887,8 +1047,10 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed:
-            null, // () => Navigator.pushNamed(context, '/TabScreens/NewPost'),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PostCreationScreen()),
+        ),
         backgroundColor: colors['primary'],
         child: const Icon(Icons.add, color: Colors.white, size: 24),
       ),

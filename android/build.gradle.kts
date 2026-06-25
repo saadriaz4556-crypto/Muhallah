@@ -1,5 +1,5 @@
 plugins {
-    // Kotlin version (Keep this as 2.1.0 as it was working)
+    // Kotlin version (Using original 2.1.0 now that maps crash is avoided)
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
 
     // Remove the version numbers here. Let Flutter/Gradle manage it.

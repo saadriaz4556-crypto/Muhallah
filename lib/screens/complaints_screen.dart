@@ -322,14 +322,24 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image
-                Container(
+                SizedBox(
                   width: 80,
                   height: 60,
-                  decoration: BoxDecoration(
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: AssetImage(item['image']),
+                    child: Image.asset(
+                      item['image'],
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: colors['surface'],
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: colors['textTertiary'],
+                            size: 24,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -608,43 +618,49 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Row(
-                            children: sortOptions.map((option) {
-                              final isSelected = selectedSort == option['id'];
-                              return GestureDetector(
-                                onTap: () => setState(
-                                  () => selectedSort = option['id']!,
-                                ),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? colors['primary']
-                                        : Colors.transparent,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? colors['primary']!
-                                          : colors['border']!,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: sortOptions.map((option) {
+                                  final isSelected = selectedSort == option['id'];
+                                  return GestureDetector(
+                                    onTap: () => setState(
+                                      () => selectedSort = option['id']!,
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    option['label']!,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? colors['textPrimary']
-                                          : colors['textSecondary'],
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                    child: Container(
+                                      margin: const EdgeInsets.only(left: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? colors['primary']
+                                            : Colors.transparent,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? colors['primary']!
+                                              : colors['border']!,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        option['label']!,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? colors['textPrimary']
+                                              : colors['textSecondary'],
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
                           ),
                         ],
                       ),

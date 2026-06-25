@@ -57,6 +57,12 @@ class _HelpScreenState extends State<HelpScreen> {
     _filteredFaqs = List.from(_allFaqs);
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _filterFaqs(String query) {
     setState(() {
       if (query.isEmpty) {

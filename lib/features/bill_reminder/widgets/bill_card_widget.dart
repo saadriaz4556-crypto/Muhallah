@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import '../models/bill_model.dart';
 import '../screens/image_preview_screen.dart';
+import '../screens/add_bill_screen.dart';
+import '../controllers/bill_controller.dart';
 
 class BillCardWidget extends StatelessWidget {
   final BillModel bill;
@@ -54,7 +56,7 @@ class BillCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (bill.billImageUrl != null)
+                if (bill.billImageUrl != null) ...[
                   Hero(
                     tag: bill.billImageUrl!,
                     child: ClipRRect(
@@ -68,6 +70,43 @@ class BillCardWidget extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                ],
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Colors.grey),
+                  color: const Color(0xFF252C42),
+                  onSelected: (value) async {
+                    if (value == 'edit') {
+                      Get.to(() => AddBillScreen(billToEdit: bill));
+                    } else if (value == 'delete') {
+                      // Confirm delete
+                      final controller = Get.find<BillController>();
+                      await controller.deleteBill(bill.id);
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, color: Color(0xFF00BCD4), size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red, size: 20),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 12),

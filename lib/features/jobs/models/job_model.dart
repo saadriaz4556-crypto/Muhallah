@@ -2,59 +2,67 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JobModel {
   final String id;
-  final String posterId;
-  final String title;
+  final String jobTitle;
+  final String company;
   final String description;
-  final String companyName;
   final String location;
-  final String salaryRange;
-  final String jobType; // Full-time, Part-time, Freelance
+  final String salary;
+  final String jobType;
   final String category;
-  final DateTime deadline;
+  final DateTime lastDate;
+  final String postedBy;
+  final String postedByName;
   final DateTime createdAt;
+  final bool isActive;
 
   JobModel({
     required this.id,
-    required this.posterId,
-    required this.title,
+    required this.jobTitle,
+    required this.company,
     required this.description,
-    required this.companyName,
     required this.location,
-    required this.salaryRange,
+    required this.salary,
     required this.jobType,
     required this.category,
-    required this.deadline,
+    required this.lastDate,
+    required this.postedBy,
+    required this.postedByName,
     required this.createdAt,
+    required this.isActive,
   });
 
   factory JobModel.fromMap(Map<String, dynamic> map, String documentId) {
     return JobModel(
       id: documentId,
-      posterId: map['posterId'] ?? '',
-      title: map['title'] ?? '',
+      jobTitle: map['jobTitle'] ?? map['title'] ?? '',
+      company: map['company'] ?? '',
       description: map['description'] ?? '',
-      companyName: map['companyName'] ?? '',
       location: map['location'] ?? '',
-      salaryRange: map['salaryRange'] ?? '',
+      salary: map['salary'] ?? '',
       jobType: map['jobType'] ?? '',
       category: map['category'] ?? '',
-      deadline: (map['deadline'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      lastDate: (map['lastDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      postedBy: map['postedBy'] ?? '',
+      postedByName: map['postedByName'] ?? '',
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isActive: map['isActive'] ?? true,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'posterId': posterId,
-      'title': title,
+      'jobTitle': jobTitle,
+      'company': company,
       'description': description,
-      'companyName': companyName,
       'location': location,
-      'salaryRange': salaryRange,
+      'salary': salary,
       'jobType': jobType,
       'category': category,
-      'deadline': Timestamp.fromDate(deadline),
+      'lastDate': Timestamp.fromDate(lastDate),
+      'postedBy': postedBy,
+      'postedByName': postedByName,
       'createdAt': Timestamp.fromDate(createdAt),
+      'isActive': isActive,
     };
   }
 }

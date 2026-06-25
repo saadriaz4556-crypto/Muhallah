@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCog, Megaphone, FileText, ShoppingBag, Wrench, Settings, Map } from 'lucide-react';
+import { LayoutDashboard, Users, UserCog, Megaphone, FileText, ShoppingBag, Wrench, Settings, Map, Flame } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ isOpen }) {
@@ -16,6 +16,7 @@ export default function Sidebar({ isOpen }) {
         { path: '/dashboard/complaints', icon: FileText, label: 'Complaints', roles: ['super-admin', 'sub-admin', 'moderator'] },
         { path: '/dashboard/marketplace', icon: ShoppingBag, label: 'Marketplace' },
         { path: '/dashboard/services', icon: Wrench, label: 'Services' },
+        { path: '/dashboard/local-vibes', icon: Flame, label: 'Local Vibes', roles: ['super-admin', 'sub-admin', 'moderator'] },
     ];
 
     return (

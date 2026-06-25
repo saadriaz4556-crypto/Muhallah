@@ -268,6 +268,19 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
   bool sameAsPermanent = false;
 
+  @override
+  void dispose() {
+    fullNameController.dispose();
+    fatherNameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    cnicController.dispose();
+    fatherCnicController.dispose();
+    fullAddressController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
   // --- helpers ---
   void _selectRole(String role) {
     setState(() {
@@ -879,18 +892,6 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    fullNameController.dispose();
-    fatherNameController.dispose();
-    emailController.dispose();
-    cnicController.dispose();
-    fatherCnicController.dispose();
-    fullAddressController.dispose();
-    // propertyController.dispose(); // Removed
-    super.dispose();
   }
 
   // --- UI build ---
@@ -1779,7 +1780,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               children: [
                 // Country Dropdown
                 DropdownButtonFormField<String>(
-                  initialValue: selectedCountry,
+                  value: selectedCountry,
                   decoration: const InputDecoration(
                       labelText: "Country",
                       labelStyle: TextStyle(color: Colors.white70)),
@@ -1802,7 +1803,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 // Province Dropdown
                 if (selectedCountry == "Pakistan") ...[
                   DropdownButtonFormField<String>(
-                    initialValue: selectedProvince,
+                    value: selectedProvince,
                     decoration: const InputDecoration(
                         labelText: "Province / Region",
                         labelStyle: TextStyle(color: Colors.white70)),
@@ -1823,7 +1824,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
                   // District Dropdown
                   DropdownButtonFormField<String>(
-                    initialValue: selectedDistrict,
+                    value: selectedDistrict,
                     decoration: const InputDecoration(
                         labelText: "District",
                         labelStyle: TextStyle(color: Colors.white70)),
@@ -1843,7 +1844,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
                   // Tehsil Dropdown
                   DropdownButtonFormField<String>(
-                    initialValue: selectedTehsil,
+                    value: selectedTehsil,
                     decoration: const InputDecoration(
                         labelText: "Tehsil / Town",
                         labelStyle: TextStyle(color: Colors.white70)),

@@ -17,19 +17,21 @@ class JobService {
   // Get all jobs (for listing)
   Stream<List<JobModel>> getJobs() {
     return _firestore
-        .collection(_collectionName)
+        .collection('jobs') // must be lowercase
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => JobModel.fromMap(doc.data(), doc.id))
-            .toList());
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return JobModel.fromMap(doc.data(), doc.id);
+          }).toList();
+        });
   }
 
   // Get jobs posted by specific user
-  Stream<List<JobModel>> getJobsByPoster(String posterId) {
+  Stream<List<JobModel>> getJobsByPoster(String postedBy) {
     return _firestore
         .collection(_collectionName)
-        .where('posterId', isEqualTo: posterId)
+        .where('postedBy', isEqualTo: postedBy)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs

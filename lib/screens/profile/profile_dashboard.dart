@@ -7,6 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'edit_profile_screen.dart';
 import 'utils/profile_constants.dart';
+import 'package:muhallah/models/business_model.dart';
+import 'package:muhallah/widgets/business_card_widget.dart' hide deepNavy, sectionBg, teal, coral, whiteish, successGreen, primaryGradient, headingStyle;
+import 'package:muhallah/screens/business_registration_screen.dart' hide deepNavy, sectionBg, teal, coral, whiteish, successGreen, primaryGradient, headingStyle;
 
 class ProfileDashboard extends StatefulWidget {
   const ProfileDashboard({super.key});
@@ -19,6 +22,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   User? _currentUser;
+  String? _resolvedUid;
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
   bool _isUploadingImage = false;
@@ -44,39 +48,66 @@ class _ProfileDashboardState extends State<ProfileDashboard>
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
     try {
-      // Wait for Auth state to be ready
-      _currentUser = await FirebaseAuth.instance
-          .authStateChanges()
-          .firstWhere((user) => user != null, orElse: () => null);
+      _currentUser = FirebaseAuth.instance.currentUser;
+      _currentUser ??= await FirebaseAuth.instance
+            .authStateChanges()
+            .first
+            .timeout(const Duration(seconds: 2), onTimeout: () => null);
 
-      if (_currentUser != null) {
-        // 1. Fetch User Data
-        final uid = _currentUser!.uid;
-        final userDoc =
-            await FirebaseFirestore.instance.collection('users').doc(uid).get();
-        _userData = userDoc.data();
+      _resolvedUid = _currentUser?.uid;
+      if (_resolvedUid == null || _resolvedUid!.isEmpty) {
+        final args = ModalRoute.of(context)?.settings.arguments;
+        if (args is String && args.isNotEmpty) {
+          _resolvedUid = args;
+        }
+      }
 
-        // 2. Fetch Stats (Using Aggregation Queries if possible, or simple get size)
-        final postsQuery = await FirebaseFirestore.instance
-            .collection('posts')
-            .where('userId', isEqualTo: uid)
-            .get();
-        _postsCount = postsQuery.size;
+      if (_resolvedUid != null && _resolvedUid!.isNotEmpty) {
+        final uid = _resolvedUid!;
 
-        final propertiesQuery = await FirebaseFirestore.instance
-            .collection('properties')
-            .where('userId', isEqualTo: uid)
-            .get();
-        _propertiesCount = propertiesQuery.size;
+        // Fetch user doc in background
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get()
+            .then((doc) {
+          if (mounted) {
+            setState(() {
+              _userData = doc.data();
+            });
+          }
+        }).catchError((e) {
+          debugPrint('Profile userDoc fetch error: $e');
+        });
 
-        final complaintsQuery = await FirebaseFirestore.instance
-            .collection('complaints')
-            .where('userId', isEqualTo: uid)
-            .get();
-        _complaintsCount = complaintsQuery.size;
+        // Fetch stats in background
+        Future.wait([
+          FirebaseFirestore.instance
+              .collection('posts')
+              .where('userId', isEqualTo: uid)
+              .get(),
+          FirebaseFirestore.instance
+              .collection('properties')
+              .where('userId', isEqualTo: uid)
+              .get(),
+          FirebaseFirestore.instance
+              .collection('complaints')
+              .where('userId', isEqualTo: uid)
+              .get(),
+        ]).then((statsResults) {
+          if (mounted) {
+            setState(() {
+              _postsCount = statsResults[0].size;
+              _propertiesCount = statsResults[1].size;
+              _complaintsCount = statsResults[2].size;
+            });
+          }
+        }).catchError((e) {
+          debugPrint('Profile stats fetch error: $e');
+        });
       }
     } catch (e) {
-      debugPrint("Error fetching profile data: $e");
+      debugPrint('Profile fetch error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -106,7 +137,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
   }
 
   Future<void> _uploadProfilePicture(File imageFile) async {
-    final String uid = _currentUser?.uid ?? '';
+    final String uid = _resolvedUid ?? '';
     if (uid.isEmpty) return;
 
     setState(() => _isUploadingImage = true);
@@ -195,13 +226,55 @@ class _ProfileDashboardState extends State<ProfileDashboard>
       );
     }
 
-    final uid = _currentUser?.uid ?? '';
+    final uid = _resolvedUid ?? '';
     if (uid.isEmpty) {
-      // Still loading auth — show loading spinner
-      // This state is now extremely brief and recovers
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: deepNavy,
-        body: Center(child: CircularProgressIndicator(color: teal)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.account_circle_outlined, size: 80, color: teal),
+                const SizedBox(height: 16),
+                const Text(
+                  "Not Logged In",
+                  style: TextStyle(
+                    color: whiteish,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Please log in to view your profile dashboard.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: teal,
+                    foregroundColor: deepNavy,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Go to Login",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -223,6 +296,18 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                           .doc(uid)
                           .snapshots(),
                       builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Container(
+                            height: 280,
+                            color: deepNavy,
+                            child: const Center(
+                              child: Text(
+                                "Error loading profile details.",
+                                style: TextStyle(color: coral),
+                              ),
+                            ),
+                          );
+                        }
                         if (!snapshot.hasData) {
                           return Container(
                               height: 280,
@@ -230,6 +315,18 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                               child: const Center(
                                   child:
                                       CircularProgressIndicator(color: teal)));
+                        }
+                        if (!snapshot.data!.exists) {
+                          return Container(
+                            height: 280,
+                            color: deepNavy,
+                            child: const Center(
+                              child: Text(
+                                "Profile document not found.",
+                                style: TextStyle(color: coral),
+                              ),
+                            ),
+                          );
                         }
 
                         final data =
@@ -477,7 +574,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
   }
 
   Widget _buildContentTab(String collectionName) {
-    final uid = _currentUser?.uid ?? '';
+    final uid = _resolvedUid ?? '';
     if (uid.isEmpty) return _buildEmptyState();
 
     Query query = FirebaseFirestore.instance
@@ -551,30 +648,86 @@ class _ProfileDashboardState extends State<ProfileDashboard>
 
   Widget _buildAboutTab() {
     if (_userData == null) return const SizedBox.shrink();
+    final uid = _resolvedUid ?? '';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Card(
-        color: sectionBg,
-        elevation: 4,
-        shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInfoRow(Icons.email, "Email", _userData!['email']),
-              const Divider(color: Colors.white10, height: 24),
-              _buildInfoRow(Icons.phone, "Phone", _userData!['phone']),
-              const Divider(color: Colors.white10, height: 24),
-              _buildInfoRow(Icons.location_on, "Address",
-                  _userData!['fullAddress'] ?? _userData!['address']),
-              const Divider(color: Colors.white10, height: 24),
-              _buildInfoRow(Icons.perm_identity, "CNIC", _userData!['cnic']),
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            color: sectionBg,
+            elevation: 4,
+            shadowColor: Colors.black26,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow(Icons.email, "Email", _userData!['email']),
+                  const Divider(color: Colors.white10, height: 24),
+                  _buildInfoRow(Icons.phone, "Phone", _userData!['phone']),
+                  const Divider(color: Colors.white10, height: 24),
+                  _buildInfoRow(Icons.location_on, "Address",
+                      _userData!['fullAddress'] ?? _userData!['address']),
+                  const Divider(color: Colors.white10, height: 24),
+                  _buildInfoRow(Icons.perm_identity, "CNIC", _userData!['cnic']),
+                ],
+              ),
+            ),
           ),
-        ),
+          if (uid.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('businesses')
+                  .where('userId', isEqualTo: uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final doc = snapshot.data!.docs.first;
+                final data = doc.data() as Map<String, dynamic>;
+                final business = BusinessModel.fromMap(data);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4.0, bottom: 10.0),
+                      child: Text(
+                        'MY BUSINESS',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                    BusinessCardWidget(
+                      business: business,
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BusinessRegistrationScreen(
+                              existingBusiness: business,
+                              documentId: doc.id,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ],
       ),
     );
   }

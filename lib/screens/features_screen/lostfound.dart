@@ -14,7 +14,7 @@ class LostFoundApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xFF08D9D6),
-        scaffoldBackgroundColor: const Color(0xFF121212),
+        scaffoldBackgroundColor: const Color(0xFF252A34),
         fontFamily: 'Inter',
         useMaterial3: true,
       ),
@@ -170,7 +170,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lost & Found'),
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF252A34),
         elevation: 0,
       ),
       body: Column(
@@ -215,7 +215,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
                       decoration: BoxDecoration(
                         color: isSelected
                             ? const Color(0xFF08D9D6)
-                            : const Color(0xFF1E1E1E),
+                            : const Color(0xFF2A303C),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: const Color(0xFF33343A)),
                         boxShadow: isSelected
@@ -290,7 +290,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF121212),
+          color: const Color(0xFF252A34),
           border: Border(top: BorderSide(color: Colors.grey[800]!)),
         ),
         child: Row(
@@ -346,7 +346,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
 
   Widget _buildAnimatedListItem(Map<String, dynamic> item, int index) {
     return Card(
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFF2A303C),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
@@ -488,7 +488,7 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Report Item'),
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF252A34),
       ),
       body: AnimatedBuilder(
         animation: _animationController,
@@ -510,12 +510,11 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     TextField(
                       controller: _titleC,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFF141414),
+                        fillColor: const Color(0xFF3A4250),
                         hintText: 'Brief title (e.g., Black Wallet)',
                         hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
@@ -530,13 +529,13 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 12),
-
+ 
                     TextField(
                       controller: _descC,
                       maxLines: 5,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFF141414),
+                        fillColor: const Color(0xFF3A4250),
                         hintText: 'Describe item and circumstances',
                         hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
@@ -551,12 +550,12 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 12),
-
+ 
                     TextField(
                       controller: _locationC,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFF141414),
+                        fillColor: const Color(0xFF3A4250),
                         hintText: 'Location (e.g., Block A lobby)',
                         hintStyle: const TextStyle(color: Colors.grey),
                         border: OutlineInputBorder(
@@ -591,7 +590,7 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                               child: Container(
                                 width: 96,
                                 height: 96,
-                                color: const Color(0xFF2A2A2A),
+                                color: const Color(0xFF2A303C),
                                 child: const Icon(
                                   Icons.photo,
                                   size: 44,
@@ -605,7 +604,7 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                             width: 96,
                             height: 96,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF141414),
+                              color: const Color(0xFF3A4250),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: Colors.grey[800]!),
                             ),
@@ -725,7 +724,7 @@ class LostFoundPreviewScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           height: 200,
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFF2A303C),
           child: const Center(
             child: Icon(Icons.photo, size: 80, color: Color(0xFF08D9D6)),
           ),
@@ -735,7 +734,7 @@ class LostFoundPreviewScreen extends StatelessWidget {
       imageWidget = Container(
         height: 200,
         decoration: BoxDecoration(
-          color: const Color(0xFF141414),
+          color: const Color(0xFF3A4250),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey[800]!),
         ),
@@ -744,18 +743,18 @@ class LostFoundPreviewScreen extends StatelessWidget {
         ),
       );
     }
-
+ 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Report'),
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF252A34),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Card(
-              color: const Color(0xFF141414),
+              color: const Color(0xFF2A303C),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

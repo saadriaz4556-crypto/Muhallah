@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -18,7 +19,7 @@ const Map<String, Color> COLORS = {
   'premiumWhite': Color(0xFFEAEAEA),
   'successGreen': Color(0xFF10B981),
   'warningAmber': Color(0xFFF59E0B),
-  'background': Color(0xFF1F2430),
+  'background': Color(0xFF2A303C),
 };
 
 class MyApp extends StatelessWidget {

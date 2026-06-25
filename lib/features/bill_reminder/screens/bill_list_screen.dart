@@ -81,7 +81,7 @@ class BillListScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.attach_money, color: Color(0xFFFFB800), size: 32),
+                          const Icon(Icons.account_balance_wallet, color: Color(0xFFFFB800), size: 32),
                           const SizedBox(height: 12),
                           const Text(
                             'Total Amount',

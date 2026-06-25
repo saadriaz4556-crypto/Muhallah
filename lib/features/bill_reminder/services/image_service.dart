@@ -3,8 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import './cloudinary_service.dart';
 
 class ImageService {
-  final CloudinaryService _cloudinaryService = CloudinaryService();
-
   Future<File?> pickImageFromCamera() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -37,7 +35,9 @@ class ImageService {
   Future<String?> uploadImageToCloudinary(File imageFile) async {
     try {
       print('📤 Uploading image to Cloudinary...');
-      final url = await _cloudinaryService.uploadBillImage(imageFile);
+      // Convert File to XFile for CloudinaryService static method
+      final xFile = XFile(imageFile.path);
+      final url = await CloudinaryService.uploadBillImage(xFile);
       return url;
     } catch (e) {
       print('Upload error: $e');
@@ -45,15 +45,17 @@ class ImageService {
     }
   }
 
-  /// Delete from Cloudinary
+  /// Delete from Cloudinary — not supported by CloudinaryService; returns true to avoid blocking UI
   Future<bool> deleteImageFromCloudinary(String? imageUrl) async {
     if (imageUrl == null) return true;
-    return await _cloudinaryService.deleteBillImage(imageUrl);
+    // CloudinaryService does not expose a delete method; deletion must be done server-side
+    return true;
   }
 
-  /// Get thumbnail URL from Cloudinary
+  /// Get a thumbnail variant URL by appending Cloudinary transformation parameters
   String? getThumbnailUrl(String? imageUrl) {
     if (imageUrl == null) return null;
-    return _cloudinaryService.getThumbnailUrl(imageUrl);
+    // Insert w_200,h_200,c_thumb transformation into the Cloudinary URL
+    return imageUrl.replaceFirst('/upload/', '/upload/w_200,h_200,c_thumb/');
   }
 }

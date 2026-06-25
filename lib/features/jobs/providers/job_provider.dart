@@ -47,16 +47,18 @@ class JobProvider with ChangeNotifier {
       final String id = const Uuid().v4();
       final job = JobModel(
         id: id,
-        posterId: posterId,
-        title: title,
+        postedBy: posterId,
+        postedByName: '', // this needs to be filled
+        jobTitle: title,
         description: description,
-        companyName: companyName,
+        company: companyName,
         location: location,
-        salaryRange: salaryRange,
+        salary: salaryRange,
         jobType: jobType,
         category: category,
-        deadline: deadline,
+        lastDate: deadline,
         createdAt: DateTime.now(),
+        isActive: true,
       );
       await _jobService.createJob(job);
       _setLoading(false);
@@ -108,13 +110,17 @@ class JobProvider with ChangeNotifier {
       final application = JobApplicationModel(
         id: applicationId,
         jobId: jobId,
+        jobTitle: '', // Fill this in properly later
+        company: '', // Fill this in properly later
         applicantId: applicantId,
         applicantName: applicantName,
         applicantEmail: applicantEmail,
         applicantPhone: applicantPhone,
-        cvUrl: cvUrl,
-        coverLetter: coverLetter,
+        cvDownloadUrl: cvUrl,
+        cvFileName: cvFile.path.split('/').last,
+        coverLetter: coverLetter ?? '',
         appliedAt: DateTime.now(),
+        jobPosterId: '', // Fill this in properly later
       );
 
       await _applicationService.applyForJob(application);
@@ -127,8 +133,8 @@ class JobProvider with ChangeNotifier {
     }
   }
 
-  Stream<List<JobApplicationModel>> getApplicationsForJob(String jobId) {
-    return _applicationService.getApplicationsForJob(jobId);
+  Stream<List<JobApplicationModel>> getApplicationsForJob(String jobId, String posterId) {
+    return _applicationService.getApplicationsForJob(jobId, posterId);
   }
 
   Stream<List<JobApplicationModel>> getMyApplications(String applicantId) {
