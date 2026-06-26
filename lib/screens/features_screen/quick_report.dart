@@ -1,24 +1,29 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(const QuickReportApp());
 }
 
-/// Enhanced Color Palette
+/// Islamic Corner color palette
+const Color kBackgroundDark = Color(0xFF252A34);
+const Color kBackgroundCard = Color(0xFF2A303C);
 const Color kPrimaryTeal = Color(0xFF08D9D6);
-const Color kPrimaryVibrant = Color(0xFF00F5FF);
-const Color kBackgroundDark = Color(0xFF1A1F2B);
-const Color kBackgroundCard = Color(0xFF2D3748);
+const Color kPrimaryVibrant = kPrimaryTeal;
+const Color kAccentPurple = kPrimaryTeal;
+const Color kAccentBlue = kPrimaryTeal;
 const Color kAccentDanger = Color(0xFFFF2E63);
-const Color kAccentSuccess = Color(0xFF00E676);
 const Color kAccentWarning = Color(0xFFFF9800);
-const Color kAccentPurple = Color(0xFF9C27B0);
-const Color kAccentBlue = Color(0xFF2196F3);
+const Color kAccentSuccess = Color(0xFF00E676);
 const Color kNeutralText = Color(0xFFEAEAEA);
-const Color kNeutralLight = Color(0xFF94A3B8);
+const Color kNeutralLight = kNeutralText;
 
 class QuickReportApp extends StatelessWidget {
   const QuickReportApp({super.key});
@@ -35,7 +40,7 @@ class QuickReportApp extends StatelessWidget {
         primaryColor: kPrimaryTeal,
         colorScheme: const ColorScheme.dark(
           primary: kPrimaryTeal,
-          secondary: kAccentPurple,
+          secondary: kPrimaryTeal,
           surface: kBackgroundCard,
         ),
         textTheme: ThemeData.dark().textTheme.apply(
@@ -63,7 +68,13 @@ class QuickReport {
 class ReportImage {
   final String id;
   final Color color;
-  ReportImage({required this.id, required this.color});
+  String? url;
+  bool uploading;
+  ReportImage(
+      {required this.id,
+      required this.color,
+      this.url,
+      this.uploading = false});
 }
 
 /// Screen 1: Category Selection
@@ -84,43 +95,43 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
       'Safety',
       Icons.security,
       'Security & safety issues',
-      kAccentDanger,
-      Colors.redAccent,
+      kPrimaryTeal,
+      kPrimaryTeal,
     ),
     _CategoryItem(
       'Noise',
       Icons.volume_up,
       'Loud noise or disturbance',
-      kAccentWarning,
-      Colors.orangeAccent,
+      kPrimaryTeal,
+      kPrimaryTeal,
     ),
     _CategoryItem(
       'Trash',
       Icons.delete,
       'Garbage, overflowing bins',
-      kAccentSuccess,
-      Colors.greenAccent,
+      kPrimaryTeal,
+      kPrimaryTeal,
     ),
     _CategoryItem(
       'Lost Item',
       Icons.search,
       'Lost or found items',
-      kAccentBlue,
-      Colors.blueAccent,
+      kPrimaryTeal,
+      kPrimaryTeal,
     ),
     _CategoryItem(
       'Road',
       Icons.directions_car,
       'Road issues & potholes',
       kPrimaryTeal,
-      Colors.cyanAccent,
+      kPrimaryTeal,
     ),
     _CategoryItem(
       'Other',
       Icons.more_horiz,
       'Anything else',
-      kAccentPurple,
-      Colors.purpleAccent,
+      kPrimaryTeal,
+      kPrimaryTeal,
     ),
   ];
 
@@ -143,7 +154,14 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
             ),
             child: const Icon(Icons.close, size: 20),
           ),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () async {
+            // Try to pop inner navigator first; if that didn't pop anything,
+            // pop the outer/root navigator that opened this Quick Report flow.
+            final popped = await Navigator.of(context).maybePop();
+            if (!popped) {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          },
         ),
         actions: [
           IconButton(
@@ -172,7 +190,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                     // Header with gradient text
                     ShaderMask(
                       shaderCallback: (bounds) => const LinearGradient(
-                        colors: [kPrimaryVibrant, kAccentPurple],
+                        colors: [kPrimaryTeal, kPrimaryTeal],
                       ).createShader(bounds),
                       child: const Text(
                         'What would you like\nto report?',
@@ -226,7 +244,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                             boxShadow: selected
                                 ? [
                                     BoxShadow(
-                                      color: cat.gradientStart.withOpacity(0.4),
+                                      color: kPrimaryTeal.withOpacity(0.4),
                                       blurRadius: 12,
                                       offset: const Offset(0, 3),
                                     ),
@@ -340,7 +358,13 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          onPressed: () => Navigator.of(context).maybePop(),
+                          onPressed: () async {
+                            final popped =
+                                await Navigator.of(context).maybePop();
+                            if (!popped) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                            }
+                          },
                           child: const Text(
                             'Cancel',
                             style: TextStyle(
@@ -360,10 +384,11 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                           gradient: _selected == null
                               ? null
                               : const LinearGradient(
-                                  colors: [kPrimaryVibrant, kAccentPurple],
+                                  colors: [kPrimaryTeal, kPrimaryTeal],
                                 ),
-                          color:
-                              _selected == null ? Colors.grey.shade800 : null,
+                          color: _selected == null
+                              ? kBackgroundCard.withOpacity(0.7)
+                              : null,
                         ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -445,7 +470,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                 height: 48,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [kPrimaryVibrant, kAccentPurple],
+                    colors: [kPrimaryTeal, kPrimaryTeal],
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -529,14 +554,25 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
     ],
   };
 
-  String _urgency = 'Medium';
-  String _locationLabel = 'Tap "Use My Location" to set location';
+  final TextEditingController _locationCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _headlineCtrl.text = widget.report.headline;
     _descCtrl.text = widget.report.description;
+    _locationCtrl.text = (widget.report.locationLabel == 'Unknown location')
+        ? ''
+        : widget.report.locationLabel;
+    // Keep report fields and UI in sync as user types so the Next button updates
+    _headlineCtrl.addListener(() {
+      widget.report.headline = _headlineCtrl.text;
+      setState(() {});
+    });
+    _descCtrl.addListener(() {
+      widget.report.description = _descCtrl.text;
+      setState(() {});
+    });
   }
 
   @override
@@ -544,6 +580,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
     _headlineCtrl.dispose();
     _descCtrl.dispose();
     _headlineFocus.dispose();
+    _locationCtrl.dispose();
     super.dispose();
   }
 
@@ -560,14 +597,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
     HapticFeedback.selectionClick();
   }
 
-  Future<void> _useMyLocation() async {
-    setState(() {
-      // Location using logic could be added here
-      _locationLabel = '📍 F-8/3, Islamabad (simulated)';
-    });
-    widget.report.useMyLocation = true;
-    widget.report.locationLabel = _locationLabel;
-  }
+  // Location is now entered manually by the user via a text field.
 
   @override
   Widget build(BuildContext context) {
@@ -603,7 +633,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [kPrimaryVibrant, kAccentPurple],
+                    colors: [kPrimaryTeal, kPrimaryTeal],
                   ),
                   borderRadius: BorderRadius.circular(3),
                 ),
@@ -640,7 +670,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [kPrimaryVibrant, kAccentBlue],
+                                    colors: [kPrimaryTeal, kPrimaryTeal],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -771,220 +801,25 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Urgency section
-                          _buildSectionHeader(
-                            'Urgency Level',
-                            Icons.priority_high,
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              _buildUrgencyChip(
-                                'Low',
-                                Icons.low_priority,
-                                Colors.green,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildUrgencyChip(
-                                'Medium',
-                                Icons.warning,
-                                Colors.orange,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildUrgencyChip(
-                                'High',
-                                Icons.error,
-                                Colors.red,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Location section
+                          // Location section (manual input)
                           _buildSectionHeader('Location', Icons.location_on),
                           const SizedBox(height: 12),
                           Container(
-                            height: 140,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: LinearGradient(
-                                colors: [
-                                  kBackgroundDark,
-                                  kBackgroundDark.withOpacity(0.8),
-                                ],
-                              ),
+                              color: kBackgroundDark,
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Stack(
-                              children: [
-                                // Map placeholder
-                                Positioned.fill(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Container(
-                                      color: kAccentBlue.withOpacity(0.1),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.map,
-                                          size: 48,
-                                          color: kAccentBlue,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                // Location info overlay
-                                Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                        colors: [
-                                          Colors.black.withOpacity(0.8),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                      borderRadius: const BorderRadius.only(
-                                        bottomLeft: Radius.circular(20),
-                                        bottomRight: Radius.circular(20),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _locationLabel,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        const Text(
-                                          'Accuracy: simulated',
-                                          style: TextStyle(
-                                            color: kNeutralLight,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                // Action buttons
-                                Positioned(
-                                  top: 12,
-                                  right: 12,
-                                  child: Row(
-                                    children: [
-                                      FloatingActionButton.small(
-                                        heroTag: 'location_btn',
-                                        backgroundColor: kPrimaryTeal,
-                                        onPressed: _useMyLocation,
-                                        child: const Icon(
-                                          Icons.my_location,
-                                          size: 18,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      FloatingActionButton.small(
-                                        heroTag: 'edit_btn',
-                                        backgroundColor: kBackgroundCard,
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (c) => Dialog(
-                                              backgroundColor: kBackgroundCard,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(
-                                                  24,
-                                                ),
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.map,
-                                                      size: 48,
-                                                      color: kPrimaryTeal,
-                                                    ),
-                                                    const SizedBox(height: 16),
-                                                    const Text(
-                                                      'Map Editor',
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 12),
-                                                    const Text(
-                                                      'Map editing will be implemented with google_maps_flutter package',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                        color: kNeutralLight,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 24),
-                                                    Container(
-                                                      width: double.infinity,
-                                                      height: 48,
-                                                      decoration: BoxDecoration(
-                                                        gradient:
-                                                            const LinearGradient(
-                                                          colors: [
-                                                            kPrimaryVibrant,
-                                                            kAccentPurple,
-                                                          ],
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                          16,
-                                                        ),
-                                                      ),
-                                                      child: TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.of(
-                                                          c,
-                                                        ).pop(),
-                                                        child: const Text(
-                                                          'OK',
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: const Icon(
-                                          Icons.edit_location,
-                                          size: 18,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            child: TextField(
+                              controller: _locationCtrl,
+                              style: const TextStyle(color: kNeutralText),
+                              decoration: const InputDecoration(
+                                hintText:
+                                    'Enter your location, e.g. F-8/3, Rawalpindi',
+                                hintStyle: TextStyle(color: kNeutralLight),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.all(16),
+                              ),
+                              onChanged: (v) => widget.report.locationLabel = v,
                             ),
                           ),
                         ],
@@ -1033,11 +868,11 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                                     _descCtrl.text.trim().isEmpty)
                                 ? null
                                 : const LinearGradient(
-                                    colors: [kPrimaryVibrant, kAccentPurple],
+                                    colors: [kPrimaryTeal, kPrimaryTeal],
                                   ),
                             color: (_headlineCtrl.text.trim().isEmpty ||
                                     _descCtrl.text.trim().isEmpty)
-                                ? Colors.grey.shade800
+                                ? kBackgroundCard.withOpacity(0.7)
                                 : null,
                           ),
                           child: ElevatedButton(
@@ -1056,9 +891,11 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                                         _headlineCtrl.text.trim();
                                     widget.report.description =
                                         _descCtrl.text.trim();
-                                    widget.report.urgency = _urgency;
-                                    widget.report.locationLabel =
-                                        _locationLabel;
+                                    // Use manual location input if provided
+                                    final loc = _locationCtrl.text.trim();
+                                    if (loc.isNotEmpty) {
+                                      widget.report.locationLabel = loc;
+                                    }
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) => MediaPrivacyScreen(
@@ -1106,51 +943,6 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
       ],
     );
   }
-
-  Widget _buildUrgencyChip(String level, IconData icon, Color color) {
-    final isSelected = _urgency == level;
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            setState(() {
-              _urgency = level;
-              widget.report.urgency = level;
-            });
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            decoration: BoxDecoration(
-              color: isSelected ? color.withOpacity(0.2) : kBackgroundDark,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? color : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: isSelected ? color : kNeutralLight, size: 20),
-                const SizedBox(height: 4),
-                Text(
-                  level,
-                  style: TextStyle(
-                    color: isSelected ? color : kNeutralLight,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Screen 3: Media & Privacy
@@ -1163,21 +955,44 @@ class MediaPrivacyScreen extends StatefulWidget {
 }
 
 class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
-  bool _anonymous = false;
-  bool _simulateOffline = false;
+  Future<void> _pickAndUpload(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? file = await picker.pickImage(source: source);
+      if (file == null) return;
 
-  @override
-  void initState() {
-    super.initState();
-    _anonymous = widget.report.anonymous;
-  }
+      final id = DateTime.now().millisecondsSinceEpoch.toString();
+      final color = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+      final img = ReportImage(id: id, color: color, uploading: true);
+      setState(() {
+        widget.report.attachments.add(img);
+      });
 
-  void _addSampleImage() {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final color = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-    setState(() {
-      widget.report.attachments.add(ReportImage(id: id, color: color));
-    });
+      // Start upload
+      final secureUrl = await _uploadToCloudinary(file);
+      if (secureUrl != null) {
+        setState(() {
+          final idx = widget.report.attachments.indexWhere((a) => a.id == id);
+          if (idx != -1) {
+            widget.report.attachments[idx].url = secureUrl;
+            widget.report.attachments[idx].uploading = false;
+          }
+        });
+      } else {
+        // upload failed
+        setState(() {
+          widget.report.attachments.removeWhere((a) => a.id == id);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload image')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Image pick/upload error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error while picking image')),
+      );
+    }
     HapticFeedback.lightImpact();
   }
 
@@ -1188,62 +1003,45 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
     HapticFeedback.lightImpact();
   }
 
-  Future<void> _recordVoiceNote() async {
-    showDialog(
-      context: context,
-      builder: (c) => Dialog(
-        backgroundColor: kBackgroundCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: kAccentPurple.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.mic, color: kAccentPurple, size: 32),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Voice Recording',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Voice recording will be implemented with permission + recorder package',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: kNeutralLight),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [kPrimaryVibrant, kAccentPurple],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: TextButton(
-                  onPressed: () => Navigator.of(c).pop(),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  // Voice recording removed from this flow.
+
+  Future<String?> _uploadToCloudinary(XFile file) async {
+    const cloudName = 'drposqmf0';
+    const uploadPreset = 'flutter_uploads';
+
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+    final request = http.MultipartRequest('POST', url);
+    request.fields['upload_preset'] = uploadPreset;
+    request.headers['X-Requested-With'] = 'XMLHttpRequest';
+
+    final bytes = await file.readAsBytes();
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      bytes,
+      filename: file.name,
+    ));
+
+    try {
+      debugPrint('Starting Cloudinary upload for ${file.name}...');
+      final response = await request.send();
+      final responseData = await response.stream.toBytes();
+      final responseString = String.fromCharCodes(responseData);
+      final jsonResponse = jsonDecode(responseString);
+
+      if (response.statusCode == 200) {
+        final secureUrl = jsonResponse['secure_url'];
+        debugPrint('Cloudinary Upload Success: $secureUrl');
+        return secureUrl;
+      } else {
+        debugPrint(
+            'Cloudinary Upload Failed: ${response.statusCode} - $responseString');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Cloudinary Upload Error: $e');
+      return null;
+    }
   }
 
   @override
@@ -1266,30 +1064,6 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        actions: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: kBackgroundCard,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.wifi, size: 16, color: kNeutralLight),
-                const SizedBox(width: 6),
-                const Text('Offline', style: TextStyle(fontSize: 12)),
-                const SizedBox(width: 6),
-                Switch.adaptive(
-                  value: _simulateOffline,
-                  onChanged: (v) => setState(() => _simulateOffline = v),
-                  activeColor: kAccentDanger,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -1320,7 +1094,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [kAccentPurple, kAccentBlue],
+                                colors: [kPrimaryTeal, kPrimaryTeal],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -1342,28 +1116,21 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Media action buttons
+                      // Media action buttons (photo & gallery)
                       Row(
                         children: [
                           _buildMediaButton(
                             'Take Photo',
                             Icons.camera_alt,
                             kPrimaryTeal,
-                            _addSampleImage,
+                            () => _pickAndUpload(ImageSource.camera),
                           ),
                           const SizedBox(width: 12),
                           _buildMediaButton(
                             'Gallery',
                             Icons.photo_library,
-                            kAccentBlue,
-                            _addSampleImage,
-                          ),
-                          const SizedBox(width: 12),
-                          _buildMediaButton(
-                            'Record Voice',
-                            Icons.mic,
-                            kAccentPurple,
-                            _recordVoiceNote,
+                            kPrimaryTeal,
+                            () => _pickAndUpload(ImageSource.gallery),
                           ),
                         ],
                       ),
@@ -1395,11 +1162,38 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                                         ),
                                       ],
                                     ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.image,
-                                        size: 36,
-                                        color: Colors.white,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Stack(
+                                        children: [
+                                          Positioned.fill(
+                                            child: img.url != null
+                                                ? Image.network(
+                                                    img.url!,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Container(
+                                                    color: img.color,
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.image,
+                                                        size: 36,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                          ),
+                                          if (img.uploading)
+                                            const Positioned.fill(
+                                              child: ColoredBox(
+                                                color: Colors.black45,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -1447,7 +1241,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                             color: Colors.transparent,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),
-                              onTap: _addSampleImage,
+                              onTap: () => _pickAndUpload(ImageSource.gallery),
                               child: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -1475,124 +1269,6 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Privacy Section
-              Container(
-                decoration: BoxDecoration(
-                  color: kBackgroundCard,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [kAccentSuccess, kPrimaryTeal],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.privacy_tip,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Privacy Settings',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: kNeutralText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Anonymous toggle
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: kBackgroundDark,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: _anonymous
-                                  ? kAccentSuccess.withOpacity(0.2)
-                                  : kPrimaryTeal.withOpacity(0.2),
-                              child: Icon(
-                                _anonymous
-                                    ? Icons.visibility_off
-                                    : Icons.person,
-                                color:
-                                    _anonymous ? kAccentSuccess : kPrimaryTeal,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _anonymous
-                                        ? 'Anonymous Report'
-                                        : 'Public Report',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: kNeutralText,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _anonymous
-                                        ? 'Your name will be hidden from admins and the public'
-                                        : 'This report will be linked to your profile',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: kNeutralLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Transform.scale(
-                              scale: 1.2,
-                              child: Switch.adaptive(
-                                value: _anonymous,
-                                onChanged: (v) {
-                                  setState(() {
-                                    _anonymous = v;
-                                    widget.report.anonymous = v;
-                                  });
-                                  HapticFeedback.lightImpact();
-                                },
-                                activeColor: kAccentSuccess,
-                                activeTrackColor: kAccentSuccess.withOpacity(
-                                  0.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               const Spacer(),
 
               // Navigation buttons
@@ -1632,7 +1308,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         gradient: const LinearGradient(
-                          colors: [kPrimaryVibrant, kAccentPurple],
+                          colors: [kPrimaryTeal, kPrimaryTeal],
                         ),
                       ),
                       child: ElevatedButton(
@@ -1644,12 +1320,10 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                           ),
                         ),
                         onPressed: () {
-                          widget.report.anonymous = _anonymous;
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => PreviewSendScreen(
                                 report: widget.report,
-                                simulateOffline: _simulateOffline,
                               ),
                             ),
                           );
@@ -1759,7 +1433,18 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
 
   Future<void> _sendReport() async {
     setState(() => _sending = true);
+    bool dialogOpen = false;
 
+    // Do not proceed if uploads are still in progress
+    if (widget.report.attachments.any((a) => a.uploading)) {
+      setState(() => _sending = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please wait for uploads to finish')),
+      );
+      return;
+    }
+
+    dialogOpen = true;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1805,7 +1490,8 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      Navigator.of(c).pop();
+                      Navigator.of(context, rootNavigator: true).pop();
+                      dialogOpen = false;
                       setState(() => _sending = false);
                     },
                     child: const Text('Cancel'),
@@ -1816,21 +1502,60 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      dialogOpen = false;
+    });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final authorId = user?.uid ?? 'unknown';
+      final authorName =
+          user?.displayName ?? (user?.email?.split('@').first ?? 'Resident');
+      final firstImage = widget.report.attachments.firstWhere(
+        (a) => a.url != null,
+        orElse: () => ReportImage(id: '', color: Colors.black),
+      );
+      final imageUrl = firstImage.url;
 
-    final offline = widget.simulateOffline;
-    final randomFail = Random().nextInt(100) < 8;
+      final data = {
+        'postType': 'announcement',
+        'authorName': authorName,
+        'authorId': authorId,
+        'headline': widget.report.headline,
+        'description': widget.report.description,
+        'imageUrl': imageUrl,
+        'createdAt': Timestamp.now(),
+        'likes': 0,
+        'comments': 0,
+        'shares': 0,
+        'pinned': false,
+        'verified': false,
+        'location': widget.report.locationLabel,
+        'category': widget.report.category,
+      };
 
-    Navigator.of(context).pop();
+      await FirebaseFirestore.instance.collection('announcements').add(data);
 
-    if (offline || randomFail) {
-      _showFailureSaved();
-    } else {
+      if (dialogOpen && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Report submitted successfully')),
+      );
       _showSuccess();
+    } catch (e) {
+      if (dialogOpen && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      debugPrint('Failed to send report: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send report: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+      }
     }
-    setState(() => _sending = false);
   }
 
   void _showSuccess() {
@@ -1913,7 +1638,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [kPrimaryVibrant, kAccentPurple],
+                          colors: [kPrimaryTeal, kPrimaryTeal],
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -1965,12 +1690,12 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kAccentWarning.withOpacity(0.1),
+                  color: kPrimaryTeal.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.wifi_off,
-                  color: kAccentWarning,
+                  color: kPrimaryTeal,
                   size: 48,
                 ),
               ),
@@ -1991,7 +1716,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                 height: 48,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [kPrimaryVibrant, kAccentPurple],
+                    colors: [kPrimaryTeal, kPrimaryTeal],
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -2075,7 +1800,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [kPrimaryVibrant, kAccentBlue],
+                                        colors: [kPrimaryTeal, kPrimaryTeal],
                                       ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -2352,9 +2077,10 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                         gradient: _sending
                             ? null
                             : const LinearGradient(
-                                colors: [kPrimaryVibrant, kAccentPurple],
+                                colors: [kPrimaryTeal, kPrimaryTeal],
                               ),
-                        color: _sending ? Colors.grey.shade800 : null,
+                        color:
+                            _sending ? kBackgroundCard.withOpacity(0.7) : null,
                       ),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
