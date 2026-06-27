@@ -87,7 +87,7 @@ class _AzanScreenState extends State<AzanScreen> {
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               leading: CircleAvatar(
-                backgroundColor: teal.withOpacity(0.2),
+                backgroundColor: teal.withValues(alpha: 0.2),
                 radius: 25,
                 child: const Icon(Icons.mosque, color: teal),
               ),

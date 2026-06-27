@@ -109,9 +109,9 @@ class _SplashScreenState extends State<SplashScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    deepNavy.withOpacity(0.85),
-                    deepNavy.withOpacity(0.72),
-                    deepNavy.withOpacity(0.95),
+                    deepNavy.withValues(alpha: 0.85),
+                    deepNavy.withValues(alpha: 0.72),
+                    deepNavy.withValues(alpha: 0.95),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -138,7 +138,7 @@ class _SplashScreenState extends State<SplashScreen>
                           border: Border.all(color: primaryTeal, width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),
@@ -171,7 +171,7 @@ class _SplashScreenState extends State<SplashScreen>
                       'Connecting Communities',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: primaryTeal.withOpacity(0.95),
+                        color: primaryTeal.withValues(alpha: 0.95),
                         fontSize: baseText + 0.0,
                         fontWeight: FontWeight.w500,
                       ),
@@ -190,14 +190,14 @@ class _SplashScreenState extends State<SplashScreen>
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               accentCoral,
                             ),
-                            backgroundColor: primaryTeal.withOpacity(0.18),
+                            backgroundColor: primaryTeal.withValues(alpha: 0.18),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'Loading...',
                           style: TextStyle(
-                            color: premiumWhite.withOpacity(0.9),
+                            color: premiumWhite.withValues(alpha: 0.9),
                             fontSize: baseText,
                           ),
                         ),
@@ -219,7 +219,7 @@ class _SplashScreenState extends State<SplashScreen>
                     'Your Local Community Platform',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: premiumWhite.withOpacity(0.72),
+                      color: premiumWhite.withValues(alpha: 0.72),
                       fontSize: (w < 360) ? 12 : 14,
                     ),
                   ),
@@ -228,7 +228,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     'v1.0',
                     style: TextStyle(
-                      color: premiumWhite.withOpacity(0.48),
+                      color: premiumWhite.withValues(alpha: 0.48),
                       fontSize: 12,
                     ),
                   ),

@@ -484,7 +484,7 @@ class _AddRentalListingScreenState extends State<AddRentalListingScreen> {
       child: SwitchListTile(
         title: Text(label, style: const TextStyle(color: lightText)),
         value: value,
-        activeColor: accentTeal,
+        activeThumbColor: accentTeal,
         onChanged: onChanged,
         contentPadding: EdgeInsets.zero,
       ),

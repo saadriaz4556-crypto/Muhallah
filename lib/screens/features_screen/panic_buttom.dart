@@ -247,9 +247,9 @@ class _PanicScreenState extends State<PanicScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: teal.withOpacity(0.1),
+                    color: teal.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: teal.withOpacity(0.3)),
+                    border: Border.all(color: teal.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -270,7 +270,7 @@ class _PanicScreenState extends State<PanicScreen> {
                             Text(
                               'Emergency services have been notified',
                               style: TextStyle(
-                                color: teal.withOpacity(0.8),
+                                color: teal.withValues(alpha: 0.8),
                                 fontSize: 14,
                               ),
                             ),
@@ -309,7 +309,7 @@ class _PanicScreenState extends State<PanicScreen> {
                               height: buttonDiameter + (value * 60),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: teal.withOpacity(0.2 * (1 - value)),
+                                color: teal.withValues(alpha: 0.2 * (1 - value)),
                               ),
                             );
                           },
@@ -324,8 +324,8 @@ class _PanicScreenState extends State<PanicScreen> {
                           boxShadow: [
                             BoxShadow(
                               color: _alertSent
-                                  ? teal.withOpacity(0.4)
-                                  : panicRed.withOpacity(0.4),
+                                  ? teal.withValues(alpha: 0.4)
+                                  : panicRed.withValues(alpha: 0.4),
                               blurRadius: 30,
                               spreadRadius: 5,
                             ),
@@ -344,18 +344,18 @@ class _PanicScreenState extends State<PanicScreen> {
                               ? LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: [teal, teal.withOpacity(0.8)],
+                                  colors: [teal, teal.withValues(alpha: 0.8)],
                                 )
                               : LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: [panicRed, panicRed.withOpacity(0.8)],
+                                  colors: [panicRed, panicRed.withValues(alpha: 0.8)],
                                 ),
                           boxShadow: [
                             BoxShadow(
                               color: _alertSent
-                                  ? teal.withOpacity(0.5)
-                                  : panicRed.withOpacity(0.5),
+                                  ? teal.withValues(alpha: 0.5)
+                                  : panicRed.withValues(alpha: 0.5),
                               blurRadius: 20,
                               spreadRadius: 2,
                               offset: const Offset(0, 4),
@@ -547,7 +547,7 @@ class _InfoCard extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(8),

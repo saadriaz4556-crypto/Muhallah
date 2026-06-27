@@ -115,7 +115,7 @@ class BusinessCardWidget extends StatelessWidget {
                             return Container(
                               width: 80,
                               height: 80,
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               child: const Icon(Icons.storefront, color: Colors.white24, size: 36),
                             );
                           },
@@ -123,7 +123,7 @@ class BusinessCardWidget extends StatelessWidget {
                       : Container(
                           width: 80,
                           height: 80,
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           child: const Icon(Icons.storefront, color: Colors.white24, size: 36),
                         ),
                 ),
@@ -160,9 +160,9 @@ class BusinessCardWidget extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: teal.withOpacity(0.12),
+                          color: teal.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: teal.withOpacity(0.3), width: 1),
+                          border: Border.all(color: teal.withValues(alpha: 0.3), width: 1),
                         ),
                         child: Text(
                           business.category,
@@ -205,7 +205,7 @@ class BusinessCardWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: successGreen.withOpacity(0.15),
+                      color: successGreen.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Row(

@@ -987,7 +987,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF08D9D6).withOpacity(0.35),
+                  color: const Color(0xFF08D9D6).withValues(alpha: 0.35),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -1045,12 +1045,12 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: const Color(0xFFFF2E63).withOpacity(0.5),
+                  color: const Color(0xFFFF2E63).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFF2E63).withOpacity(0.2),
+                    color: const Color(0xFFFF2E63).withValues(alpha: 0.2),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -1071,7 +1071,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF2E63).withOpacity(0.4),
+                          color: const Color(0xFFFF2E63).withValues(alpha: 0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -1104,7 +1104,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         Text(
                           'Register as Owner in your community',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -1127,7 +1127,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF2E63).withOpacity(0.15),
+                      color: const Color(0xFFFF2E63).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -1153,7 +1153,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                       ],
                     ),
                   ),
@@ -1164,7 +1164,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 child: Text(
                   'OR',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 2,
@@ -1177,7 +1177,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                         Colors.transparent,
                       ],
                     ),
@@ -1203,12 +1203,12 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: const Color(0xFF08D9D6).withOpacity(0.5),
+                  color: const Color(0xFF08D9D6).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF08D9D6).withOpacity(0.2),
+                    color: const Color(0xFF08D9D6).withValues(alpha: 0.2),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -1229,7 +1229,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF08D9D6).withOpacity(0.4),
+                          color: const Color(0xFF08D9D6).withValues(alpha: 0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -1262,7 +1262,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         Text(
                           'Register as Renter in your community',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -1283,7 +1283,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF08D9D6).withOpacity(0.15),
+                      color: const Color(0xFF08D9D6).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -1309,7 +1309,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                       ],
                     ),
                   ),
@@ -1320,7 +1320,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 child: Text(
                   'OR',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 2,
@@ -1333,7 +1333,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                         Colors.transparent,
                       ],
                     ),
@@ -1366,12 +1366,12 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: const Color(0xFF7C3AED).withOpacity(0.5),
+                  color: const Color(0xFF7C3AED).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF7C3AED).withOpacity(0.25),
+                    color: const Color(0xFF7C3AED).withValues(alpha: 0.25),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -1392,7 +1392,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF7C3AED).withOpacity(0.4),
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -1425,7 +1425,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         Text(
                           'Register as a family member in your community',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -1446,7 +1446,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7C3AED).withOpacity(0.15),
+                      color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -1470,10 +1470,10 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -1600,7 +1600,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -1769,7 +1769,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -1780,7 +1780,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               children: [
                 // Country Dropdown
                 DropdownButtonFormField<String>(
-                  value: selectedCountry,
+                  initialValue: selectedCountry,
                   decoration: const InputDecoration(
                       labelText: "Country",
                       labelStyle: TextStyle(color: Colors.white70)),
@@ -1803,7 +1803,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                 // Province Dropdown
                 if (selectedCountry == "Pakistan") ...[
                   DropdownButtonFormField<String>(
-                    value: selectedProvince,
+                    initialValue: selectedProvince,
                     decoration: const InputDecoration(
                         labelText: "Province / Region",
                         labelStyle: TextStyle(color: Colors.white70)),
@@ -1824,7 +1824,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
                   // District Dropdown
                   DropdownButtonFormField<String>(
-                    value: selectedDistrict,
+                    initialValue: selectedDistrict,
                     decoration: const InputDecoration(
                         labelText: "District",
                         labelStyle: TextStyle(color: Colors.white70)),
@@ -1844,7 +1844,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
 
                   // Tehsil Dropdown
                   DropdownButtonFormField<String>(
-                    value: selectedTehsil,
+                    initialValue: selectedTehsil,
                     decoration: const InputDecoration(
                         labelText: "Tehsil / Town",
                         labelStyle: TextStyle(color: Colors.white70)),
@@ -2008,7 +2008,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -2094,7 +2094,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -2136,7 +2136,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -2161,7 +2161,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide(
-                              color: teal.withOpacity(0.3),
+                              color: teal.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -2199,7 +2199,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -2224,7 +2224,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide(
-                              color: teal.withOpacity(0.3),
+                              color: teal.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -2324,7 +2324,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -2380,12 +2380,12 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [strengthColor, strengthColor.withOpacity(0.7)],
+                    colors: [strengthColor, strengthColor.withValues(alpha: 0.7)],
                   ),
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
-                      color: strengthColor.withOpacity(0.3),
+                      color: strengthColor.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -2464,7 +2464,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
         border: Border.all(color: Colors.white12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -2497,7 +2497,7 @@ class _RegistrationFlowState extends State<RegistrationFlow> {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: inputBg.withOpacity(0.7),
+        color: inputBg.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white12),
       ),

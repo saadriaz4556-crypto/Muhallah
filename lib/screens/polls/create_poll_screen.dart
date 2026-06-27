@@ -186,10 +186,10 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
                 subtitle: Text(
                     'Users can vote without revealing their identity',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                        color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                 value: _isAnonymous,
                 onChanged: (val) => setState(() => _isAnonymous = val),
-                activeColor: accent,
+                activeThumbColor: accent,
                 contentPadding: EdgeInsets.zero,
               ),
               const SizedBox(height: 32),
@@ -239,12 +239,12 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.2)),
+        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
         prefixIcon: Icon(icon, color: const Color(0xFF08D9D6), size: 20),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
+        fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none),
@@ -264,12 +264,12 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
       children: [
         Text(label,
             style:
-                TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonHideUnderline(
@@ -301,12 +301,12 @@ class _CreatePollScreenState extends State<CreatePollScreen> {
         children: [
           Text(label,
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                  color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(

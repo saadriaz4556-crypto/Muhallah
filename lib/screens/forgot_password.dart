@@ -598,7 +598,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                         counterText: '',
                         hintText: 'DD',
                         hintStyle: TextStyle(
-                          color: COLORS['premiumWhite']!.withOpacity(0.6),
+                          color: COLORS['premiumWhite']!.withValues(alpha: 0.6),
                         ),
                         filled: true,
                         fillColor: COLORS['deepNavy'],
@@ -628,7 +628,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                         counterText: '',
                         hintText: 'MM',
                         hintStyle: TextStyle(
-                          color: COLORS['premiumWhite']!.withOpacity(0.6),
+                          color: COLORS['premiumWhite']!.withValues(alpha: 0.6),
                         ),
                         filled: true,
                         fillColor: COLORS['deepNavy'],
@@ -658,7 +658,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                         counterText: '',
                         hintText: 'YYYY',
                         hintStyle: TextStyle(
-                          color: COLORS['premiumWhite']!.withOpacity(0.6),
+                          color: COLORS['premiumWhite']!.withValues(alpha: 0.6),
                         ),
                         filled: true,
                         fillColor: COLORS['deepNavy'],
@@ -813,13 +813,13 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           end: Alignment.bottomCenter,
           colors: [
             COLORS['background']!,
-            COLORS['background']!.withOpacity(0.9),
+            COLORS['background']!.withValues(alpha: 0.9),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -852,7 +852,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 Text(
                   'Verify your identity using CNIC details to secure your account',
                   style: TextStyle(
-                    color: COLORS['premiumWhite']!.withOpacity(0.8),
+                    color: COLORS['premiumWhite']!.withValues(alpha: 0.8),
                     fontSize: 14,
                   ),
                 ),
@@ -866,7 +866,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: COLORS['primaryTeal']!.withOpacity(0.4),
+                color: COLORS['primaryTeal']!.withValues(alpha: 0.4),
                 width: 2,
               ),
             ),
@@ -880,7 +880,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: _userRole == 'owner'
-                            ? COLORS['primaryTeal']!.withOpacity(0.3)
+                            ? COLORS['primaryTeal']!.withValues(alpha: 0.3)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -907,7 +907,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: _userRole == 'family_member'
-                            ? COLORS['primaryTeal']!.withOpacity(0.3)
+                            ? COLORS['primaryTeal']!.withValues(alpha: 0.3)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -943,7 +943,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -956,7 +956,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 counterText: '',
                 hintText: 'XXXXX-XXXXXXX-X',
                 hintStyle: TextStyle(
-                  color: COLORS['premiumWhite']!.withOpacity(0.5),
+                  color: COLORS['premiumWhite']!.withValues(alpha: 0.5),
                 ),
                 filled: true,
                 fillColor: COLORS['deepNavy'],
@@ -975,7 +975,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: COLORS['primaryTeal']!.withOpacity(0.3),
+                    color: COLORS['primaryTeal']!.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -997,7 +997,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -1039,12 +1039,12 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                   color: COLORS['deepNavy'],
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: COLORS['primaryTeal']!.withOpacity(0.3),
+                    color: COLORS['primaryTeal']!.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -1061,7 +1061,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                       style: TextStyle(
                         color: _issueDate != null
                             ? Colors.white
-                            : COLORS['premiumWhite']!.withOpacity(0.5),
+                            : COLORS['premiumWhite']!.withValues(alpha: 0.5),
                         fontSize: 16,
                       ),
                     ),
@@ -1080,7 +1080,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: COLORS['accentCoral']!.withOpacity(0.4),
+                  color: COLORS['accentCoral']!.withValues(alpha: 0.4),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -1137,13 +1137,13 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           end: Alignment.bottomCenter,
           colors: [
             COLORS['background']!,
-            COLORS['background']!.withOpacity(0.9),
+            COLORS['background']!.withValues(alpha: 0.9),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1163,7 +1163,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: COLORS['successGreen']!.withOpacity(0.4),
+                  color: COLORS['successGreen']!.withValues(alpha: 0.4),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -1190,7 +1190,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           Text(
             'Your CNIC has been authenticated. OTP will be sent to your registered email address.',
             style: TextStyle(
-              color: COLORS['premiumWhite']!.withOpacity(0.8),
+              color: COLORS['premiumWhite']!.withValues(alpha: 0.8),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -1244,7 +1244,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: gradient.first.withOpacity(0.3),
+              color: gradient.first.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -1260,7 +1260,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: Colors.white, size: 24),
@@ -1282,7 +1282,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                       Text(
                         description,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 12,
                         ),
                       ),
@@ -1296,7 +1296,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(emoji, style: const TextStyle(fontSize: 14)),
@@ -1318,13 +1318,13 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           end: Alignment.bottomCenter,
           colors: [
             COLORS['background']!,
-            COLORS['background']!.withOpacity(0.9),
+            COLORS['background']!.withValues(alpha: 0.9),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1344,7 +1344,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: COLORS['primaryTeal']!.withOpacity(0.4),
+                  color: COLORS['primaryTeal']!.withValues(alpha: 0.4),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -1370,7 +1370,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           Text(
             "We've sent a 6-digit code to\n${_maskedEmail()}",
             style: TextStyle(
-              color: COLORS['premiumWhite']!.withOpacity(0.8),
+              color: COLORS['premiumWhite']!.withValues(alpha: 0.8),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -1379,7 +1379,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           Text(
             "Please also check your spam/junk folder",
             style: TextStyle(
-              color: COLORS['primaryTeal']!.withOpacity(0.9),
+              color: COLORS['primaryTeal']!.withValues(alpha: 0.9),
               fontSize: 12,
               fontStyle: FontStyle.italic,
             ),
@@ -1399,12 +1399,12 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                   color: COLORS['deepNavy'],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: COLORS['primaryTeal']!.withOpacity(0.5),
+                    color: COLORS['primaryTeal']!.withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),
@@ -1453,7 +1453,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: COLORS['primaryTeal']!.withOpacity(0.4),
+                        color: COLORS['primaryTeal']!.withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -1530,13 +1530,13 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
           end: Alignment.bottomCenter,
           colors: [
             COLORS['background']!,
-            COLORS['background']!.withOpacity(0.9),
+            COLORS['background']!.withValues(alpha: 0.9),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1560,7 +1560,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: COLORS['accentCoral']!.withOpacity(0.4),
+                    color: COLORS['accentCoral']!.withValues(alpha: 0.4),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -1593,7 +1593,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             child: Text(
               'Choose a strong password for your account',
               style: TextStyle(
-                color: COLORS['premiumWhite']!.withOpacity(0.7),
+                color: COLORS['premiumWhite']!.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -1617,7 +1617,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             decoration: InputDecoration(
               hintText: 'Enter new password',
               hintStyle: TextStyle(
-                color: COLORS['premiumWhite']!.withOpacity(0.4),
+                color: COLORS['premiumWhite']!.withValues(alpha: 0.4),
               ),
               filled: true,
               fillColor: COLORS['deepNavy'],
@@ -1628,7 +1628,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
-                  color: COLORS['primaryTeal']!.withOpacity(0.3),
+                  color: COLORS['primaryTeal']!.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -1673,7 +1673,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
             decoration: InputDecoration(
               hintText: 'Confirm new password',
               hintStyle: TextStyle(
-                color: COLORS['premiumWhite']!.withOpacity(0.4),
+                color: COLORS['premiumWhite']!.withValues(alpha: 0.4),
               ),
               filled: true,
               fillColor: COLORS['deepNavy'],
@@ -1684,7 +1684,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
-                  color: COLORS['primaryTeal']!.withOpacity(0.3),
+                  color: COLORS['primaryTeal']!.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -1729,7 +1729,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: COLORS['accentCoral']!.withOpacity(0.4),
+                  color: COLORS['accentCoral']!.withValues(alpha: 0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -1883,7 +1883,7 @@ class _ForgotPasswordFlowState extends State<ForgotPasswordFlow> {
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF08D9D6)
-                        .withOpacity(_verifyingCnic ? 0.1 : 0.4),
+                        .withValues(alpha: _verifyingCnic ? 0.1 : 0.4),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),

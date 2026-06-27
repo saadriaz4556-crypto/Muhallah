@@ -223,7 +223,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
                                 BoxShadow(
                                   color: const Color(
                                     0xFF08D9D6,
-                                  ).withOpacity(0.3),
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 ),

@@ -210,10 +210,10 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
       decoration: BoxDecoration(
         color: sectionBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -239,9 +239,9 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
                   height: 60,
                   width: 60,
                   decoration: BoxDecoration(
-                    color: teal.withOpacity(0.08),
+                    color: teal.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: teal.withOpacity(0.15)),
+                    border: Border.all(color: teal.withValues(alpha: 0.15)),
                   ),
                   child: Icon(
                     icon,
@@ -268,7 +268,7 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
                       Text(
                         description,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withValues(alpha: 0.4),
                           fontSize: 13,
                         ),
                       ),
@@ -279,7 +279,7 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
                 // Arrow indicator
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   size: 18,
                 ),
               ],
@@ -341,7 +341,7 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: teal.withOpacity(0.2),
+                      color: teal.withValues(alpha: 0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

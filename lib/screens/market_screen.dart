@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'chat_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:muhallah/screens/new_listing_screen.dart';
+import 'package:muhallah/services/marketplace_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MarketplaceModule extends StatefulWidget {
   const MarketplaceModule({super.key});
@@ -15,6 +18,9 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
   String sortBy = 'mostRecent';
   bool showFilters = false;
   int currentStep = 1;
+  String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  final MarketplaceService _marketplaceService = MarketplaceService();
   List<double> priceRange = [10, 250];
   Map<String, bool> condition = {
     'new': true,
@@ -40,16 +46,15 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
     'error': const Color(0xFFFF2E63),
   };
 
-  // Mock Data
   final List<Map<String, dynamic>> categories = [
-    {'id': 'all', 'label': 'All', 'count': 1234, 'icon': '🛍️'},
-    {'id': 'electronics', 'label': 'Electronics', 'count': 234, 'icon': '📱'},
-    {'id': 'furniture', 'label': 'Furniture', 'count': 189, 'icon': '🛋️'},
-    {'id': 'vehicles', 'label': 'Vehicles', 'count': 67, 'icon': '🚗'},
-    {'id': 'books', 'label': 'Books', 'count': 156, 'icon': '📚'},
-    {'id': 'services', 'label': 'Services', 'count': 89, 'icon': '🔧'},
-    {'id': 'appliances', 'label': 'Appliances', 'count': 123, 'icon': '🏠'},
-    {'id': 'others', 'label': 'Others', 'count': 276, 'icon': '📦'},
+    {'id': 'all', 'label': 'All', 'icon': '🛍️'},
+    {'id': 'Electronics', 'label': 'Electronics', 'icon': '📱'},
+    {'id': 'Furniture', 'label': 'Furniture', 'icon': '🛋️'},
+    {'id': 'Vehicles', 'label': 'Vehicles', 'icon': '🚗'},
+    {'id': 'Books', 'label': 'Books', 'icon': '📚'},
+    {'id': 'Clothing', 'label': 'Clothing', 'icon': '👕'},
+    {'id': 'Sports', 'label': 'Sports', 'icon': '⚽'},
+    {'id': 'Other', 'label': 'Other', 'icon': '📦'},
   ];
 
   final List<Map<String, String>> sortOptions = [
@@ -60,94 +65,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
     {'id': 'nearest', 'label': 'Nearest'},
   ];
 
-  final List<Map<String, dynamic>> listings = [
-    {
-      'id': '1',
-      'title': 'Vintage Leather Sofa',
-      'price': 500,
-      'seller': 'John Doe',
-      'sellerUid': 'seller1_uid',
-      'location': 'Islamabad',
-      'timestamp': '2 hours ago',
-      'category': 'furniture',
-      'featured': true,
-      'endingSoon': false,
-      'verifiedSeller': true,
-      'image': 'assets/images/Sofa.jpg', // CHANGED: Local asset
-      'condition': 'used',
-    },
-    {
-      'id': '2',
-      'title': 'Mountain Bike',
-      'price': 250,
-      'seller': 'Jane Smith',
-      'sellerUid': 'seller2_uid',
-      'location': 'Jubilee Hills',
-      'timestamp': '1 day ago',
-      'category': 'vehicles',
-      'featured': false,
-      'endingSoon': true,
-      'verifiedSeller': false,
-      'image': 'assets/images/Bike.jpg', // CHANGED: Local asset
-      'condition': 'used',
-    },
-    {
-      'id': '3',
-      'title': 'Cycle',
-      'price': 45,
-      'seller': 'Bookworm',
-      'location': 'Jubilee Hills',
-      'timestamp': '5 hours ago',
-      'category': 'books',
-      'featured': false,
-      'endingSoon': false,
-      'verifiedSeller': true,
-      'image': 'assets/images/Cycle.jpg', // CHANGED: Local asset
-      'condition': 'likeNew',
-    },
-    {
-      'id': '4',
-      'title': 'MacBook Pro 14"',
-      'price': 1200,
-      'seller': 'Techie Tom',
-      'location': 'Jubilee Hills',
-      'timestamp': '3 days ago',
-      'category': 'electronics',
-      'featured': true,
-      'endingSoon': false,
-      'verifiedSeller': false,
-      'image': 'assets/images/MacBook.jpg', // CHANGED: Local asset
-      'condition': 'used',
-    },
-    {
-      'id': '5',
-      'title': 'Mid-Century Modern Armchair',
-      'price': 250,
-      'seller': 'Sarah J.',
-      'location': 'Jubilee Hills',
-      'timestamp': '6 hours ago',
-      'category': 'furniture',
-      'featured': false,
-      'endingSoon': true,
-      'verifiedSeller': true,
-      'image': 'assets/images/ModernChair.jpg', // CHANGED: Local asset
-      'condition': 'likeNew',
-    },
-    {
-      'id': '6',
-      'title': 'iPhone 13 Pro',
-      'price': 750,
-      'seller': 'Tech Guru',
-      'location': 'Islamabad',
-      'timestamp': '1 day ago',
-      'category': 'electronics',
-      'featured': false,
-      'endingSoon': false,
-      'verifiedSeller': true,
-      'image': 'assets/images/Iphone.jpg', // CHANGED: Local asset
-      'condition': 'refurbished',
-    },
-  ];
+  final List<Map<String, dynamic>> listings = [];
 
   final Map<String, dynamic> productDetail = {
     'id': '5',
@@ -169,6 +87,25 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
     ],
   };
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> _listingStream() {
+    return _marketplaceService.listingStream();
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price == null) {
+      return '0';
+    }
+
+    if (price is num) {
+      final value = price.toDouble();
+      return value % 1 == 0
+          ? value.toInt().toString()
+          : value.toStringAsFixed(2);
+    }
+
+    return price.toString();
+  }
+
   // Marketplace Home Screen - ULTRA COMPACT VERSION
   Widget _buildMarketplaceHome() {
     return Scaffold(
@@ -184,18 +121,6 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
-            color: colors['textPrimary'],
-          ),
-          IconButton(
-            onPressed: () => setState(() => showFilters = true),
-            icon: const Icon(Icons.tune),
-            color: colors['textPrimary'],
-          ),
-        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -229,7 +154,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                         ),
                         const SizedBox(height: 2), // Reduced from 4
                         Text(
-                          '1,234 Listings',
+                          'Live marketplace listings',
                           style: TextStyle(
                             color: colors['textSecondary'],
                             fontSize: 14, // Reduced from 16
@@ -244,6 +169,8 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) => setState(() => searchQuery = value),
                       decoration: InputDecoration(
                         hintText: 'Search items, categories or sellers...',
                         hintStyle: TextStyle(color: colors['textTertiary']),
@@ -324,7 +251,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                                 ),
                                 const SizedBox(height: 1), // Reduced
                                 Text(
-                                  category['count'].toString(),
+                                  category['count']?.toString() ?? '0',
                                   style: TextStyle(
                                     color: isSelected
                                         ? Colors.white
@@ -383,7 +310,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                             vertical: 4, // Reduced
                           ),
                           decoration: BoxDecoration(
-                            color: colors['accent']!.withOpacity(0.12),
+                            color: colors['accent']!.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12), // Reduced
                           ),
                           child: Text(
@@ -402,7 +329,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                             vertical: 4, // Reduced
                           ),
                           decoration: BoxDecoration(
-                            color: colors['error']!.withOpacity(0.12),
+                            color: colors['error']!.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12), // Reduced
                           ),
                           child: Text(
@@ -419,23 +346,89 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   ),
                   const SizedBox(height: 12), // Reduced from 14
                   // Listings Grid - ULTRA COMPACT
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                    ), // Reduced
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 4, // Reduced from 6
-                      mainAxisSpacing: 4, // Reduced from 6
-                      childAspectRatio: 0.65, // Reduced from 0.70
-                    ),
-                    itemCount: listings.length,
-                    itemBuilder: (context, index) {
-                      final item = listings[index];
-                      return _buildListingCard(item);
+                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: _listingStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final docs = snapshot.data?.docs ?? [];
+                      final marketplaceItems = docs
+                          .map((doc) => {'id': doc.id, ...doc.data()})
+                          .toList();
+
+                      final query = searchQuery.trim().toLowerCase();
+                      final filteredItems = marketplaceItems.where((item) {
+                        final matchesCategory = selectedCategory == 'all' ||
+                            (item['category'] ?? '').toString().toLowerCase() ==
+                                selectedCategory.toLowerCase();
+                        if (!matchesCategory) {
+                          return false;
+                        }
+                        if (query.isEmpty) {
+                          return true;
+                        }
+                        final title =
+                            (item['title'] ?? '').toString().toLowerCase();
+                        final category =
+                            (item['category'] ?? '').toString().toLowerCase();
+                        return title.contains(query) ||
+                            category.contains(query);
+                      }).toList();
+
+                      final counts = <String, int>{};
+                      for (final item in marketplaceItems) {
+                        final category =
+                            (item['category'] ?? 'Other').toString();
+                        counts[category] = (counts[category] ?? 0) + 1;
+                      }
+
+                      for (final category in categories) {
+                        if (category['id'] != 'all') {
+                          category['count'] = counts[category['id']] ?? 0;
+                        }
+                      }
+
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Live listings (${filteredItems.length})',
+                                style: TextStyle(
+                                  color: colors['textSecondary'],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 4,
+                              mainAxisSpacing: 4,
+                              childAspectRatio: 0.65,
+                            ),
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              return _buildListingCard(item);
+                            },
+                          ),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16), // Reduced bottom padding
@@ -446,12 +439,17 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => setState(() => activeScreen = 'create'),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NewListingScreen()),
+          );
+        },
         backgroundColor: colors['primary'],
         elevation: 8,
         icon: const Icon(Icons.add, color: Colors.white, size: 18), // Reduced
         label: const Text(
-          'Sell Item',
+          '+ Sell Item',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -462,7 +460,85 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
     );
   }
 
+  Future<void> _toggleLike(Map<String, dynamic> item) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    final listingRef =
+        FirebaseFirestore.instance.collection('marketplace').doc(item['id']);
+    final likedBy = List<dynamic>.from(item['likedBy'] ?? []);
+
+    if (likedBy.contains(currentUserId)) {
+      await listingRef.update({
+        'likedBy': FieldValue.arrayRemove([currentUserId]),
+      });
+    } else {
+      await listingRef.update({
+        'likedBy': FieldValue.arrayUnion([currentUserId]),
+      });
+    }
+  }
+
+  void _showContactSheet(BuildContext context, Map<String, dynamic> item) {
+    final contactNumber = (item['contactNumber'] ?? '').toString().trim();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors['cardBackground'],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Contact Seller',
+              style: TextStyle(
+                color: colors['textPrimary'],
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              contactNumber.isEmpty
+                  ? 'No contact number provided'
+                  : contactNumber,
+              style: TextStyle(
+                color: colors['textSecondary'],
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (contactNumber.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final phoneUri = Uri(scheme: 'tel', path: contactNumber);
+                    if (await launchUrl(phoneUri)) {
+                      if (context.mounted) Navigator.pop(ctx);
+                    }
+                  },
+                  icon: const Icon(Icons.call),
+                  label: const Text('Call'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors['primary'],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildListingCard(Map<String, dynamic> item) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    final likedBy = List<dynamic>.from(item['likedBy'] ?? []);
+    final isLiked = likedBy.contains(currentUserId);
+
     return Card(
       color: colors['cardBackground'],
       shape: RoundedRectangleBorder(
@@ -483,8 +559,11 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                     topRight: Radius.circular(8),
                   ),
                   image: DecorationImage(
-                    // CHANGED: NetworkImage to AssetImage
-                    image: AssetImage(item['image']),
+                    image: item['imageUrl'] != null &&
+                            item['imageUrl'].toString().isNotEmpty
+                        ? NetworkImage(item['imageUrl'].toString())
+                        : const AssetImage('assets/images/ModernChair.jpg')
+                            as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -503,7 +582,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                     borderRadius: BorderRadius.circular(4), // Reduced
                   ),
                   child: Text(
-                    '\$${item['price']}',
+                    '\$${_formatPrice(item['price'])}',
                     style: const TextStyle(
                       fontSize: 10, // Reduced from 11
                       fontWeight: FontWeight.w700,
@@ -512,8 +591,21 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   ),
                 ),
               ),
+              Positioned(
+                top: 4,
+                right: 40,
+                child: IconButton(
+                  onPressed: () => _showListingMenu(context, item),
+                  icon: const Icon(Icons.more_vert,
+                      color: Colors.white, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 24, minHeight: 24),
+                  splashRadius: 16,
+                ),
+              ),
               // Featured Badge
-              if (item['featured'])
+              if (item['isFeatured'] == true)
                 Positioned(
                   top: 4, // Reduced
                   left: 4, // Reduced
@@ -537,7 +629,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   ),
                 ),
               // Ending Soon Badge
-              if (item['endingSoon'])
+              if (item['isEndingSoon'] == true)
                 Positioned(
                   bottom: 4, // Reduced
                   left: 4, // Reduced
@@ -583,14 +675,14 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                 Row(
                   children: [
                     Text(
-                      item['seller'],
+                      item['userName'] ?? 'Seller',
                       style: TextStyle(
                         color: colors['textSecondary'],
                         fontSize: 10, // Reduced from 11
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (item['verifiedSeller']) ...[
+                    if (item['userId'] != null) ...[
                       const SizedBox(width: 2), // Reduced
                       const Text(
                         '💺',
@@ -604,7 +696,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item['location'],
+                      item['location'] ?? '',
                       style: TextStyle(
                         color: colors['textTertiary'],
                         fontSize: 8, // Reduced from 9
@@ -612,7 +704,9 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                       ),
                     ),
                     Text(
-                      item['timestamp'],
+                      item['timestamp'] != null
+                          ? 'Just now'
+                          : 'Recently listed',
                       style: TextStyle(
                         color: colors['textTertiary'],
                         fontSize: 8, // Reduced from 9
@@ -634,38 +728,31 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.favorite_border, size: 16), // Reduced
-                  color: colors['textTertiary'],
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 24), // Smaller
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => _toggleLike(item),
+                      icon: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        size: 16,
+                      ),
+                      color:
+                          isLiked ? colors['accent'] : colors['textTertiary'],
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 24),
+                    ),
+                    Text(
+                      likedBy.length.toString(),
+                      style: TextStyle(
+                        color: colors['textSecondary'],
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
                 GestureDetector(
-                  onTap: () {
-                    final currentUser = FirebaseAuth.instance.currentUser;
-                    if (currentUser == null) return;
-
-                    final currentUid = currentUser.uid;
-                    final sellerUid = item['sellerUid'] as String? ?? '';
-                    final sellerName = item['seller'] as String? ?? 'Unknown';
-
-                    if (sellerUid.isEmpty) return;
-
-                    // Generate chatId by sorting UIDs alphabetically and joining with underscore
-                    final uids = [currentUid, sellerUid]..sort();
-                    final chatId = uids.join('_');
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          chatId: chatId,
-                          otherUserName: sellerName,
-                        ),
-                      ),
-                    );
-                  },
+                  onTap: () => _showContactSheet(context, item),
                   child: Text(
                     'Contact',
                     style: TextStyle(
@@ -679,6 +766,251 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showListingMenu(BuildContext context, Map<String, dynamic> item) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    final isOwner = item['userId'] == currentUserId;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors['cardBackground'],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isOwner)
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit Listing'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showEditSheet(context, item);
+                },
+              ),
+            if (isOwner)
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete Listing'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (dctx) => AlertDialog(
+                      title: const Text('Delete listing?'),
+                      content: const Text(
+                          'Are you sure you want to delete this listing?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(dctx, true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await FirebaseFirestore.instance
+                        .collection('marketplace')
+                        .doc(item['id'])
+                        .delete();
+                  }
+                },
+              ),
+            if (!isOwner)
+              ListTile(
+                leading: const Icon(Icons.flag),
+                title: const Text('Report'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (dctx) => AlertDialog(
+                      title: const Text('Report listing?'),
+                      content:
+                          const Text('Do you want to report this listing?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(dctx, true),
+                          child: const Text('Report'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Listing reported')),
+                      );
+                    }
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditSheet(BuildContext context, Map<String, dynamic> item) {
+    final titleController =
+        TextEditingController(text: item['title']?.toString() ?? '');
+    final categoryController =
+        TextEditingController(text: item['category']?.toString() ?? '');
+    final priceController =
+        TextEditingController(text: _formatPrice(item['price']));
+    final descriptionController =
+        TextEditingController(text: item['description']?.toString() ?? '');
+    final locationController =
+        TextEditingController(text: item['location']?.toString() ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colors['cardBackground'],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Edit Listing',
+              style: TextStyle(
+                color: colors['textPrimary'],
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: titleController,
+              style: TextStyle(color: colors['textPrimary']),
+              decoration: InputDecoration(
+                hintText: 'Title',
+                hintStyle: TextStyle(color: colors['textTertiary']),
+                filled: true,
+                fillColor: colors['surface'],
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: categoryController,
+              style: TextStyle(color: colors['textPrimary']),
+              decoration: InputDecoration(
+                hintText: 'Category',
+                hintStyle: TextStyle(color: colors['textTertiary']),
+                filled: true,
+                fillColor: colors['surface'],
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(color: colors['textPrimary']),
+              decoration: InputDecoration(
+                hintText: 'Price',
+                prefixText: '\$',
+                hintStyle: TextStyle(color: colors['textTertiary']),
+                filled: true,
+                fillColor: colors['surface'],
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: descriptionController,
+              maxLines: 4,
+              style: TextStyle(color: colors['textPrimary']),
+              decoration: InputDecoration(
+                hintText: 'Description',
+                hintStyle: TextStyle(color: colors['textTertiary']),
+                filled: true,
+                fillColor: colors['surface'],
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: locationController,
+              style: TextStyle(color: colors['textPrimary']),
+              decoration: InputDecoration(
+                hintText: 'Location',
+                hintStyle: TextStyle(color: colors['textTertiary']),
+                filled: true,
+                fillColor: colors['surface'],
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: colors['primary']),
+                  onPressed: () async {
+                    final title = titleController.text.trim();
+                    final category = categoryController.text.trim();
+                    final description = descriptionController.text.trim();
+                    final location = locationController.text.trim();
+                    final price = double.tryParse(
+                            priceController.text.replaceAll('\$', '').trim()) ??
+                        0;
+                    if (title.isEmpty || description.isEmpty) {
+                      return;
+                    }
+                    await FirebaseFirestore.instance
+                        .collection('marketplace')
+                        .doc(item['id'])
+                        .update({
+                      'title': title,
+                      'category': category.isNotEmpty ? category : 'Other',
+                      'price': price,
+                      'description': description,
+                      'location': location,
+                    });
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -895,8 +1227,8 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                                     onChanged: (value) => setState(
                                       () => deliveryRequested = value,
                                     ),
-                                    thumbColor: WidgetStateProperty
-                                        .resolveWith<Color>(
+                                    thumbColor:
+                                        WidgetStateProperty.resolveWith<Color>(
                                       (Set<WidgetState> states) {
                                         if (states
                                             .contains(WidgetState.selected)) {

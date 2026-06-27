@@ -181,7 +181,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_darkColor, _primaryColor.withOpacity(0.3)],
+          colors: [_darkColor, _primaryColor.withValues(alpha: 0.3)],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
@@ -201,7 +201,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.arrow_back, color: _lightColor),
@@ -223,7 +223,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
             Text(
               'Services in',
               style: TextStyle(
-                color: _lightColor.withOpacity(0.8),
+                color: _lightColor.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),
@@ -246,7 +246,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
             Text(
               _getStatsText(),
               style: TextStyle(
-                color: _lightColor.withOpacity(0.7),
+                color: _lightColor.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -282,7 +282,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -353,7 +353,7 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
                   border: Border.all(
                     color: isSelected
                         ? _primaryColor
-                        : _darkSecondaryText.withOpacity(0.3),
+                        : _darkSecondaryText.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
@@ -472,12 +472,12 @@ class _MarriageEventsScreenState extends State<MarriageEventsScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [_accentColor, _accentColor.withOpacity(0.8)],
+            colors: [_accentColor, _accentColor.withValues(alpha: 0.8)],
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: _accentColor.withOpacity(0.3),
+              color: _accentColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -643,7 +643,7 @@ class _EventCardState extends State<EventCard> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isHovered ? 0.4 : 0.2),
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: Offset(0, _isHovered ? 4 : 2),
               ),
@@ -668,15 +668,15 @@ class _EventCardState extends State<EventCard> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          widget.primaryColor.withOpacity(0.6),
-                          widget.accentColor.withOpacity(0.4),
+                          widget.primaryColor.withValues(alpha: 0.6),
+                          widget.accentColor.withValues(alpha: 0.4),
                         ],
                       ),
                     ),
                     child: Center(
                       child: Icon(
                         Icons.celebration,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         size: 50,
                       ),
                     ),
@@ -691,7 +691,7 @@ class _EventCardState extends State<EventCard> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -722,7 +722,7 @@ class _EventCardState extends State<EventCard> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: widget.accentColor.withOpacity(0.9),
+                          color: widget.accentColor.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -849,10 +849,10 @@ class _EventCardState extends State<EventCard> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: widget.primaryColor.withOpacity(0.1),
+                                color: widget.primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: widget.primaryColor.withOpacity(0.3),
+                                  color: widget.primaryColor.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
@@ -904,14 +904,14 @@ class _EventCardState extends State<EventCard> {
                                     ? LinearGradient(
                                         colors: [
                                           widget.primaryColor,
-                                          widget.primaryColor.withOpacity(0.8),
+                                          widget.primaryColor.withValues(alpha: 0.8),
                                         ],
                                       )
                                     : null,
                                 borderRadius: BorderRadius.circular(12),
                                 color: widget.event['isAvailable']
                                     ? null
-                                    : Colors.grey.withOpacity(0.5),
+                                    : Colors.grey.withValues(alpha: 0.5),
                               ),
                               child: Center(
                                 child: Text(
@@ -986,7 +986,7 @@ class _RishtaProfileCardState extends State<RishtaProfileCard> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isHovered ? 0.4 : 0.2),
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: Offset(0, _isHovered ? 4 : 2),
               ),
@@ -1007,15 +1007,15 @@ class _RishtaProfileCardState extends State<RishtaProfileCard> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        widget.primaryColor.withOpacity(0.6),
-                        widget.accentColor.withOpacity(0.4),
+                        widget.primaryColor.withValues(alpha: 0.6),
+                        widget.accentColor.withValues(alpha: 0.4),
                       ],
                     ),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.person,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       size: 40,
                     ),
                   ),
@@ -1139,7 +1139,7 @@ class _RishtaProfileCardState extends State<RishtaProfileCard> {
                                   gradient: LinearGradient(
                                     colors: [
                                       widget.primaryColor,
-                                      widget.primaryColor.withOpacity(0.8),
+                                      widget.primaryColor.withValues(alpha: 0.8),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
@@ -1216,7 +1216,7 @@ class _MarriageOfficeCardState extends State<MarriageOfficeCard> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isHovered ? 0.4 : 0.2),
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: Offset(0, _isHovered ? 4 : 2),
               ),
@@ -1245,7 +1245,7 @@ class _MarriageOfficeCardState extends State<MarriageOfficeCard> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -1313,10 +1313,10 @@ class _MarriageOfficeCardState extends State<MarriageOfficeCard> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: widget.primaryColor.withOpacity(0.1),
+                        color: widget.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: widget.primaryColor.withOpacity(0.3),
+                          color: widget.primaryColor.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
@@ -1366,7 +1366,7 @@ class _MarriageOfficeCardState extends State<MarriageOfficeCard> {
                             gradient: LinearGradient(
                               colors: [
                                 widget.primaryColor,
-                                widget.primaryColor.withOpacity(0.8),
+                                widget.primaryColor.withValues(alpha: 0.8),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -1442,7 +1442,7 @@ class BookingBottomSheet extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.celebration, color: primaryColor),
@@ -1460,7 +1460,7 @@ class BookingBottomSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -1507,7 +1507,7 @@ class BookingBottomSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                    colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -1584,7 +1584,7 @@ class ContactFamilySheet extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.person, color: primaryColor),
@@ -1602,7 +1602,7 @@ class ContactFamilySheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -1649,7 +1649,7 @@ class ContactFamilySheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                    colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -1726,7 +1726,7 @@ class ContactOfficeSheet extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.business, color: primaryColor),
@@ -1744,7 +1744,7 @@ class ContactOfficeSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -1791,7 +1791,7 @@ class ContactOfficeSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                    colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),

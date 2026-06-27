@@ -208,7 +208,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
                             onTap: () => setState(() => _selectedFile = null),
                             child: CircleAvatar(
                               radius: 14,
-                              backgroundColor: Colors.black.withOpacity(0.6),
+                              backgroundColor: Colors.black.withValues(alpha: 0.6),
                               child: const Icon(Icons.close, size: 16, color: Colors.white),
                             ),
                           ),

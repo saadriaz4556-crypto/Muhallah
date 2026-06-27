@@ -61,7 +61,7 @@ class _VoteBottomSheetState extends State<VoteBottomSheet> {
             widget.poll.pollType == 'single' 
               ? 'Select one option' 
               : 'You can select multiple options',
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
           ),
           const SizedBox(height: 20),
           Flexible(
@@ -90,7 +90,7 @@ class _VoteBottomSheetState extends State<VoteBottomSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
-                          color: isSelected ? accent.withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                          color: isSelected ? accent.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected ? accent : Colors.transparent,
@@ -150,7 +150,7 @@ class _VoteBottomSheetState extends State<VoteBottomSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 foregroundColor: Colors.black,
-                disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),

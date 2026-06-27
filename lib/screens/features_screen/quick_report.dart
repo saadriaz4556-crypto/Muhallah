@@ -237,21 +237,21 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                                 : LinearGradient(
                                     colors: [
                                       kBackgroundCard,
-                                      kBackgroundCard.withOpacity(0.8),
+                                      kBackgroundCard.withValues(alpha: 0.8),
                                     ],
                                   ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: selected
                                 ? [
                                     BoxShadow(
-                                      color: kPrimaryTeal.withOpacity(0.4),
+                                      color: kPrimaryTeal.withValues(alpha: 0.4),
                                       blurRadius: 12,
                                       offset: const Offset(0, 3),
                                     ),
                                   ]
                                 : [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
+                                      color: Colors.black.withValues(alpha: 0.2),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -284,8 +284,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
                                         color: selected
-                                            ? Colors.white.withOpacity(0.2)
-                                            : cat.color.withOpacity(0.2),
+                                            ? Colors.white.withValues(alpha: 0.2)
+                                            : cat.color.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Icon(
@@ -312,7 +312,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: selected
-                                            ? Colors.white.withOpacity(0.8)
+                                            ? Colors.white.withValues(alpha: 0.8)
                                             : kNeutralLight,
                                       ),
                                       maxLines: 2,
@@ -348,7 +348,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: kNeutralLight.withOpacity(0.3),
+                            color: kNeutralLight.withValues(alpha: 0.3),
                           ),
                         ),
                         child: TextButton(
@@ -387,7 +387,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
                                   colors: [kPrimaryTeal, kPrimaryTeal],
                                 ),
                           color: _selected == null
-                              ? kBackgroundCard.withOpacity(0.7)
+                              ? kBackgroundCard.withValues(alpha: 0.7)
                               : null,
                         ),
                         child: ElevatedButton(
@@ -444,7 +444,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kPrimaryTeal.withOpacity(0.1),
+                  color: kPrimaryTeal.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.help, color: kPrimaryTeal, size: 32),
@@ -652,7 +652,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -837,7 +837,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: kNeutralLight.withOpacity(0.3),
+                              color: kNeutralLight.withValues(alpha: 0.3),
                             ),
                           ),
                           child: TextButton(
@@ -872,7 +872,7 @@ class _DetailsLocationScreenState extends State<DetailsLocationScreen> {
                                   ),
                             color: (_headlineCtrl.text.trim().isEmpty ||
                                     _descCtrl.text.trim().isEmpty)
-                                ? kBackgroundCard.withOpacity(0.7)
+                                ? kBackgroundCard.withValues(alpha: 0.7)
                                 : null,
                           ),
                           child: ElevatedButton(
@@ -1077,7 +1077,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -1156,7 +1156,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                                       color: img.color,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: img.color.withOpacity(0.3),
+                                          color: img.color.withValues(alpha: 0.3),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         ),
@@ -1233,7 +1233,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                             color: kBackgroundDark,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: kNeutralLight.withOpacity(0.3),
+                              color: kNeutralLight.withValues(alpha: 0.3),
                               width: 2,
                             ),
                           ),
@@ -1280,7 +1280,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: kNeutralLight.withOpacity(0.3),
+                          color: kNeutralLight.withValues(alpha: 0.3),
                         ),
                       ),
                       child: TextButton(
@@ -1373,7 +1373,7 @@ class _MediaPrivacyScreenState extends State<MediaPrivacyScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: color, size: 20),
@@ -1485,7 +1485,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                   width: double.infinity,
                   height: 48,
                   decoration: BoxDecoration(
-                    border: Border.all(color: kNeutralLight.withOpacity(0.3)),
+                    border: Border.all(color: kNeutralLight.withValues(alpha: 0.3)),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: TextButton(
@@ -1575,7 +1575,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kAccentSuccess.withOpacity(0.1),
+                  color: kAccentSuccess.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.check, color: kAccentSuccess, size: 48),
@@ -1600,7 +1600,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                 decoration: BoxDecoration(
                   color: kBackgroundDark,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kPrimaryTeal.withOpacity(0.3)),
+                  border: Border.all(color: kPrimaryTeal.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   'Reference ID: $refId',
@@ -1619,7 +1619,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: kNeutralLight.withOpacity(0.3),
+                          color: kNeutralLight.withValues(alpha: 0.3),
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -1690,7 +1690,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kPrimaryTeal.withOpacity(0.1),
+                  color: kPrimaryTeal.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -1781,7 +1781,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha: 0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -1834,7 +1834,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                                           decoration: BoxDecoration(
                                             color: _getUrgencyColor(
                                               r.urgency,
-                                            ).withOpacity(0.2),
+                                            ).withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
@@ -1944,8 +1944,8 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: r.anonymous
-                                              ? kAccentSuccess.withOpacity(0.2)
-                                              : kPrimaryTeal.withOpacity(0.2),
+                                              ? kAccentSuccess.withValues(alpha: 0.2)
+                                              : kPrimaryTeal.withValues(alpha: 0.2),
                                           radius: 16,
                                           child: Icon(
                                             r.anonymous
@@ -1998,7 +1998,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: kAccentSuccess.withOpacity(0.1),
+                                color: kAccentSuccess.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -2047,7 +2047,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: kNeutralLight.withOpacity(0.3),
+                          color: kNeutralLight.withValues(alpha: 0.3),
                         ),
                       ),
                       child: TextButton(
@@ -2080,7 +2080,7 @@ class _PreviewSendScreenState extends State<PreviewSendScreen> {
                                 colors: [kPrimaryTeal, kPrimaryTeal],
                               ),
                         color:
-                            _sending ? kBackgroundCard.withOpacity(0.7) : null,
+                            _sending ? kBackgroundCard.withValues(alpha: 0.7) : null,
                       ),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(

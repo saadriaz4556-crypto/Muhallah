@@ -140,7 +140,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF252C42),
                   border: Border.all(
-                    color: dueDateError != null ? Colors.red : Colors.grey.withOpacity(0.3),
+                    color: dueDateError != null ? Colors.red : Colors.grey.withValues(alpha: 0.3),
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -255,7 +255,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
                 color: isSelected ? const Color(0xFF00BCD4) : const Color(0xFF252C42),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withOpacity(0.3),
+                  color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               child: Center(
@@ -295,11 +295,11 @@ class _AddBillScreenState extends State<AddBillScreen> {
         fillColor: const Color(0xFF252C42),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -318,7 +318,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
       label: Text(isUploading ? 'Uploading...' : '📷 Upload Bill Image'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        backgroundColor: const Color(0xFF00BCD4).withOpacity(0.1),
+        backgroundColor: const Color(0xFF00BCD4).withValues(alpha: 0.1),
         foregroundColor: const Color(0xFF00BCD4),
         side: const BorderSide(color: Color(0xFF00BCD4), width: 1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -335,7 +335,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: const Color(0xFF252C42),
-            border: Border.all(color: const Color(0xFF00BCD4).withOpacity(0.3)),
+            border: Border.all(color: const Color(0xFF00BCD4).withValues(alpha: 0.3)),
           ),
           child: Stack(
             children: [
@@ -424,7 +424,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
                     color: isSelected ? const Color(0xFF00BCD4) : const Color(0xFF252C42),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withOpacity(0.3),
+                      color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Center(
