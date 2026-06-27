@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:muhallah/screens/features_screen/lost_item_detail_screen.dart';
+import 'package:muhallah/screens/features_screen/lost_items_list_screen.dart';
+import 'package:muhallah/screens/features_screen/report_lost_item_sheet.dart';
+import 'package:muhallah/services/lost_found_service.dart';
 
 void main() {
   runApp(const LostFoundApp());
@@ -269,14 +275,16 @@ class _LostFoundHomeState extends State<LostFoundHome>
                     opacity: _fadeAnimation,
                     child: ScaleTransition(
                       scale: _scaleAnimation,
-                      child: ListView.separated(
-                        itemCount: currentItems.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final item = currentItems[index];
-                          return _buildAnimatedListItem(item, index);
-                        },
-                      ),
+                      child: selectedCategory == 'Lost'
+                          ? _buildLostItemsStreamList()
+                          : ListView.separated(
+                              itemCount: currentItems.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                final item = currentItems[index];
+                                return _buildAnimatedListItem(item, index);
+                              },
+                            ),
                     ),
                   );
                 },
@@ -298,7 +306,12 @@ class _LostFoundHomeState extends State<LostFoundHome>
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  // View all
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LostItemsListScreen(),
+                    ),
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF08D9D6),
@@ -315,10 +328,22 @@ class _LostFoundHomeState extends State<LostFoundHome>
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => LostFoundFormScreen(data: _data),
+                  // Capture user before async gap — safest on Flutter Web
+                  final currentUser = FirebaseAuth.instance.currentUser;
+                  final uid = currentUser?.uid ?? '';
+                  final name = currentUser?.displayName?.isNotEmpty == true
+                      ? currentUser!.displayName!
+                      : (currentUser?.email?.split('@').first ?? 'Resident');
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => ReportLostItemSheet(
+                      currentUserId: uid,
+                      currentUserName: name,
+                      onSubmitted: () {
+                        // Dynamic Firestore stream will automatically refresh.
+                      },
                     ),
                   );
                 },
@@ -342,6 +367,127 @@ class _LostFoundHomeState extends State<LostFoundHome>
         ),
       ),
     );
+  }
+
+  Widget _buildLostItemsStreamList() {
+    final lostFoundService = LostFoundService();
+    return StreamBuilder<QuerySnapshot>(
+      stream: lostFoundService.getLostItemsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF08D9D6),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No lost items reported yet',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          );
+        }
+
+        final docs = snapshot.data!.docs;
+        final int itemCount = docs.length > 5 ? 5 : docs.length;
+
+        return ListView.separated(
+          itemCount: itemCount,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+
+            final category = data['category'] ?? 'Other';
+            final itemName = data['itemName'] ?? 'Unnamed Item';
+            final description = data['description'] ?? '';
+
+            return Card(
+              color: const Color(0xFF2A303C),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LostItemDetailScreen(itemData: data),
+                    ),
+                  );
+                },
+                leading: CircleAvatar(
+                  backgroundColor: _getCategoryColor(category),
+                  child: Icon(_getCategoryIcon(category), color: Colors.black),
+                ),
+                title: Text(
+                  itemName,
+                  style: const TextStyle(
+                    color: Color(0xFFEAEAEA),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Color(0xFFB0B0B0)),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFFB0B0B0),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'wallet':
+        return Icons.wallet;
+      case 'keys':
+        return Icons.key;
+      case 'phone':
+        return Icons.phone_iphone;
+      case 'bag':
+        return Icons.backpack;
+      case 'documents':
+        return Icons.description;
+      case 'electronics':
+        return Icons.devices;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'wallet':
+        return Colors.brown;
+      case 'keys':
+        return Colors.amber;
+      case 'phone':
+        return Colors.grey;
+      case 'bag':
+        return Colors.red;
+      case 'documents':
+        return Colors.blue;
+      case 'electronics':
+        return Colors.orange;
+      default:
+        return Colors.blueGrey;
+    }
   }
 
   Widget _buildAnimatedListItem(Map<String, dynamic> item, int index) {
