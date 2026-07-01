@@ -188,7 +188,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_darkColor, _primaryColor.withOpacity(0.3)],
+          colors: [_darkColor, _primaryColor.withValues(alpha: 0.3)],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -208,7 +208,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.arrow_back, color: _lightColor, size: 20),
@@ -238,7 +238,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
             Text(
               'Design and share invitations for any occasion',
               style: TextStyle(
-                color: _lightColor.withOpacity(0.8),
+                color: _lightColor.withValues(alpha: 0.8),
                 fontSize: 12,
               ),
             ),
@@ -341,12 +341,12 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [_accentColor, _accentColor.withOpacity(0.8)],
+            colors: [_accentColor, _accentColor.withValues(alpha: 0.8)],
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: _accentColor.withOpacity(0.3),
+              color: _accentColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -483,7 +483,7 @@ class _RecentInvitationCardState extends State<RecentInvitationCard> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isHovered ? 0.4 : 0.2),
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: Offset(0, _isHovered ? 4 : 2),
               ),
@@ -541,8 +541,8 @@ class _RecentInvitationCardState extends State<RecentInvitationCard> {
                           ),
                           decoration: BoxDecoration(
                             color: widget.invitation['status'] == 'Active'
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.grey.withOpacity(0.2),
+                                ? Colors.green.withValues(alpha: 0.2)
+                                : Colors.grey.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -643,7 +643,7 @@ class _RecentInvitationCardState extends State<RecentInvitationCard> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: widget.primaryColor.withOpacity(0.1),
+                              color: widget.primaryColor.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -706,7 +706,7 @@ class _CategoryCardState extends State<CategoryCard> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isHovered ? 0.4 : 0.2),
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
                 blurRadius: _isHovered ? 12 : 8,
                 offset: Offset(0, _isHovered ? 4 : 2),
               ),
@@ -872,16 +872,16 @@ class CreateOptionsSheet extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryColor.withOpacity(0.3)),
+                  border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.abc, color: primaryColor, size: 20),
@@ -927,16 +927,16 @@ class CreateOptionsSheet extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accentColor.withOpacity(0.3)),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.1),
+                        color: accentColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.edit, color: accentColor, size: 20),

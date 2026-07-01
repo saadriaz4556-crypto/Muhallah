@@ -399,7 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               // ── Dark Overlay ──
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.38),
+                                  color: Colors.black.withValues(alpha: 0.38),
                                 ),
                               ),
 
@@ -411,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   width: 120,
                                   height: 120,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: Colors.white.withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -423,7 +423,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   width: 100,
                                   height: 100,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.05),
+                                    color: Colors.white.withValues(alpha: 0.05),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -501,7 +501,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       decoration: BoxDecoration(
                                         color: isActive
                                             ? const Color(0xFF08D9D6)
-                                            : Colors.white.withOpacity(0.4),
+                                            : Colors.white.withValues(alpha: 0.4),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                     );
@@ -516,7 +516,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: cardBg.withOpacity(0.95),
+                          color: cardBg.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: const [
                             BoxShadow(
@@ -527,7 +527,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             width: 1,
                           ),
                         ),
@@ -556,10 +556,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               // NEW: Role selector (Owner vs Family Member)
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: primaryTeal.withOpacity(0.3),
+                                    color: primaryTeal.withValues(alpha: 0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -580,7 +580,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               vertical: 10),
                                           decoration: BoxDecoration(
                                             color: _loginRole == 'owner'
-                                                ? primaryTeal.withOpacity(0.3)
+                                                ? primaryTeal.withValues(alpha: 0.3)
                                                 : Colors.transparent,
                                             borderRadius:
                                                 BorderRadius.circular(10),
@@ -615,7 +615,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               vertical: 10),
                                           decoration: BoxDecoration(
                                             color: _loginRole == 'family_member'
-                                                ? primaryTeal.withOpacity(0.3)
+                                                ? primaryTeal.withValues(alpha: 0.3)
                                                 : Colors.transparent,
                                             borderRadius:
                                                 BorderRadius.circular(10),
@@ -646,7 +646,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -663,7 +663,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
                                     filled: true,
-                                    fillColor: Colors.black.withOpacity(0.3),
+                                    fillColor: Colors.black.withValues(alpha: 0.3),
                                     hintText: '12345-1234567-1',
                                     hintStyle: const TextStyle(
                                       color: Colors.white38,
@@ -675,7 +675,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     prefixIcon: Container(
                                       margin: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: primaryTeal.withOpacity(0.2),
+                                        color: primaryTeal.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: const Icon(
@@ -690,7 +690,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: primaryTeal.withOpacity(0.3),
+                                        color: primaryTeal.withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -711,7 +711,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -724,7 +724,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
                                     filled: true,
-                                    fillColor: Colors.black.withOpacity(0.3),
+                                    fillColor: Colors.black.withValues(alpha: 0.3),
                                     hintText: 'Enter your password',
                                     hintStyle: const TextStyle(
                                       color: Colors.white38,
@@ -736,7 +736,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     prefixIcon: Container(
                                       margin: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: coral.withOpacity(0.2),
+                                        color: coral.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: const Icon(
@@ -751,7 +751,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: coral.withOpacity(0.3),
+                                        color: coral.withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),

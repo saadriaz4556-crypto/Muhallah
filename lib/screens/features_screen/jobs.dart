@@ -93,10 +93,10 @@ class _JobsHomeScreenState extends State<JobsHomeScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          const BrowseJobsTab(),
-          const MyApplicationsScreen(),
-          const PostedJobsScreen(),
+        children: const [
+          BrowseJobsTab(),
+          MyApplicationsScreen(),
+          PostedJobsScreen(),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -327,7 +327,7 @@ class JobCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF08D9D6).withOpacity(0.2),
+                  color: const Color(0xFF08D9D6).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -985,7 +985,7 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color),
       ),
@@ -1146,7 +1146,7 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: accentTeal.withOpacity(0.15),
+                    color: accentTeal.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.work, color: accentTeal, size: 24),
@@ -1545,7 +1545,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                                   style: TextStyle(color: accentTeal)),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<String>(
-                                value: _jobType,
+                                initialValue: _jobType,
                                 dropdownColor: bgDeepNavy,
                                 decoration: _inputDeco(),
                                 items: _types
@@ -1569,7 +1569,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                                   style: TextStyle(color: accentTeal)),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<String>(
-                                value: _category,
+                                initialValue: _category,
                                 dropdownColor: bgDeepNavy,
                                 decoration: _inputDeco(),
                                 items: _categories

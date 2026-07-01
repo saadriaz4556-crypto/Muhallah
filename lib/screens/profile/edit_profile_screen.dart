@@ -269,7 +269,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 right: 20,
                 child: Container(
                   padding: const EdgeInsets.all(12),
-                  color: deepNavy.withOpacity(0.8),
+                  color: deepNavy.withValues(alpha: 0.8),
                   child: const Text("Tap anywhere to select location",
                       style: TextStyle(color: whiteish),
                       textAlign: TextAlign.center),
@@ -343,7 +343,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             validator: validator,
             decoration: InputDecoration(
               filled: true,
-              fillColor: isLocked ? sectionBg.withOpacity(0.5) : inputBg,
+              fillColor: isLocked ? sectionBg.withValues(alpha: 0.5) : inputBg,
               hintText: hint,
               hintStyle: const TextStyle(color: Colors.white30),
               contentPadding:
@@ -384,7 +384,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: isLocked ? sectionBg.withOpacity(0.5) : inputBg,
+              color: isLocked ? sectionBg.withValues(alpha: 0.5) : inputBg,
               borderRadius: BorderRadius.circular(10),
             ),
             child: DropdownButtonHideUnderline(
@@ -559,8 +559,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
                             color: isOwner
-                                ? teal.withOpacity(0.2)
-                                : coral.withOpacity(0.2),
+                                ? teal.withValues(alpha: 0.2)
+                                : coral.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: isOwner ? teal : coral),
                           ),
@@ -766,8 +766,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: warningAmber.withOpacity(0.1),
-                      border: Border.all(color: warningAmber.withOpacity(0.3)),
+                      color: warningAmber.withValues(alpha: 0.1),
+                      border: Border.all(color: warningAmber.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Row(
@@ -913,7 +913,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: teal.withOpacity(0.3),
+                            color: teal.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )

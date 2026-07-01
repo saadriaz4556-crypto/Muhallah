@@ -123,7 +123,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               Icon(
                 Icons.screen_rotation,
                 size: 64,
-                color: teal.withOpacity(0.8),
+                color: teal.withValues(alpha: 0.8),
               ),
             ],
           ),
@@ -232,7 +232,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                 decoration: BoxDecoration(
                                   color: sectionBg,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white.withOpacity(0.03)),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
                                 ),
                                 child: Row(
                                   children: [
@@ -273,10 +273,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: sectionBg,
-                                    border: Border.all(color: Colors.white.withOpacity(0.04), width: 3),
+                                    border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 3),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.25),
+                                        color: Colors.black.withValues(alpha: 0.25),
                                         blurRadius: 15,
                                         spreadRadius: 2,
                                       ),
@@ -350,7 +350,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                       decoration: BoxDecoration(
                                         color: sectionBg,
                                         borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(color: Colors.white.withOpacity(0.03)),
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
                                       ),
                                       child: Column(
                                         children: [
@@ -378,7 +378,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                       decoration: BoxDecoration(
                                         color: sectionBg,
                                         borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(color: Colors.white.withOpacity(0.03)),
+                                        border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
                                       ),
                                       child: Column(
                                         children: [
@@ -415,7 +415,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: teal.withOpacity(0.2),
+                                      color: teal.withValues(alpha: 0.2),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),

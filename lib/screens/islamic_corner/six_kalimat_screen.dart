@@ -103,10 +103,10 @@ class _SixKalimatScreenState extends State<SixKalimatScreen> {
                     decoration: BoxDecoration(
                       color: sectionBg,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.05)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -129,7 +129,7 @@ class _SixKalimatScreenState extends State<SixKalimatScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: teal.withOpacity(0.1),
+                                        color: teal.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
@@ -167,7 +167,7 @@ class _SixKalimatScreenState extends State<SixKalimatScreen> {
                                   kalima.nameUrdu,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: teal.withOpacity(0.8),
+                                    color: teal.withValues(alpha: 0.8),
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -294,7 +294,7 @@ class _SixKalimatScreenState extends State<SixKalimatScreen> {
                   Text(
                     'Swipe to read more',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       fontSize: 12,
                     ),
                   ),

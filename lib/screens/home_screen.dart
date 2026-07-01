@@ -10,7 +10,8 @@ import 'package:muhallah/screens/rental/rental_listings_screen.dart';
 import 'package:muhallah/screens/features_screen/invitation_card.dart';
 import 'package:muhallah/screens/features_screen/jobs.dart';
 import 'package:muhallah/screens/features_screen/localservices.dart';
-import 'package:muhallah/screens/features_screen/lostfound.dart';
+import 'package:muhallah/screens/features_screen/lostfound.dart'
+    show LostFoundHome;
 import 'package:muhallah/screens/features_screen/marriage_event.dart';
 import 'package:muhallah/screens/features_screen/panic_buttom.dart';
 import 'package:muhallah/screens/features_screen/quick_report.dart';
@@ -21,6 +22,9 @@ import 'feed_screen.dart';
 import 'complaints_screen.dart';
 import 'market_screen.dart';
 import 'profile_screen.dart';
+import 'new_complaint_screen.dart';
+import 'new_listing_screen.dart';
+import 'package:muhallah/services/complaint_service.dart';
 // import 'inbox_screen.dart';
 
 const Map<String, Color> COLORS = {
@@ -91,6 +95,7 @@ class _HomeScreenState extends State<HomeScreeen>
 
   // Unread messages count
   int _unreadCount = 0;
+  int _complaintsCount = 0;
 
   @override
   void initState() {
@@ -175,6 +180,17 @@ class _HomeScreenState extends State<HomeScreeen>
 
     // Listen for unread messages
     _listenForUnreadMessages();
+    _listenForComplaintsCount();
+  }
+
+  void _listenForComplaintsCount() {
+    ComplaintService().complaintsCount().listen((count) {
+      if (mounted) {
+        setState(() {
+          _complaintsCount = count;
+        });
+      }
+    });
   }
 
   void _listenForUnreadMessages() {
@@ -221,21 +237,23 @@ class _HomeScreenState extends State<HomeScreeen>
         break;
 
       case 'Complaints':
-        setState(() {
-          _currentIndex = 2;
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NewComplaintScreen()),
+        );
         break;
 
       case 'Marketplace':
-        setState(() {
-          _currentIndex = 3;
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NewListingScreen()),
+        );
         break;
 
       case 'Lost & Found':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LostFoundApp()),
+          MaterialPageRoute(builder: (context) => const LostFoundHome()),
         );
         break;
 
@@ -415,10 +433,10 @@ class _HomeScreenState extends State<HomeScreeen>
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: COLORS['accent']!.withOpacity(0.15),
+                    color: COLORS['accent']!.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: COLORS['accent']!.withOpacity(0.4),
+                      color: COLORS['accent']!.withValues(alpha: 0.4),
                       width: 1.5,
                     ),
                   ),
@@ -455,7 +473,7 @@ class _HomeScreenState extends State<HomeScreeen>
                     borderRadius: BorderRadius.circular(RADIUS),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF2E63).withOpacity(0.4),
+                        color: const Color(0xFFFF2E63).withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -513,10 +531,10 @@ class _HomeScreenState extends State<HomeScreeen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                   decoration: BoxDecoration(
-                    color: COLORS['accent']!.withOpacity(0.12),
+                    color: COLORS['accent']!.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(RADIUS),
                     border: Border.all(
-                      color: COLORS['accent']!.withOpacity(0.5),
+                      color: COLORS['accent']!.withValues(alpha: 0.5),
                       width: 1.2,
                     ),
                   ),
@@ -534,7 +552,8 @@ class _HomeScreenState extends State<HomeScreeen>
                       ),
                       const Spacer(),
                       Icon(Icons.arrow_forward_ios,
-                          color: COLORS['accent']!.withOpacity(0.5), size: 14),
+                          color: COLORS['accent']!.withValues(alpha: 0.5),
+                          size: 14),
                     ],
                   ),
                 ),
@@ -558,10 +577,10 @@ class _HomeScreenState extends State<HomeScreeen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                   decoration: BoxDecoration(
-                    color: COLORS['accent']!.withOpacity(0.12),
+                    color: COLORS['accent']!.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(RADIUS),
                     border: Border.all(
-                      color: COLORS['accent']!.withOpacity(0.5),
+                      color: COLORS['accent']!.withValues(alpha: 0.5),
                       width: 1.2,
                     ),
                   ),
@@ -579,7 +598,8 @@ class _HomeScreenState extends State<HomeScreeen>
                       ),
                       const Spacer(),
                       Icon(Icons.arrow_forward_ios,
-                          color: COLORS['accent']!.withOpacity(0.5), size: 14),
+                          color: COLORS['accent']!.withValues(alpha: 0.5),
+                          size: 14),
                     ],
                   ),
                 ),
@@ -619,12 +639,12 @@ class _HomeScreenState extends State<HomeScreeen>
               color: const Color(0xFF1A1F2E),
               borderRadius: BorderRadius.circular(RADIUS),
               border: Border.all(
-                color: COLORS['accent']!.withOpacity(0.15),
+                color: COLORS['accent']!.withValues(alpha: 0.15),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -743,7 +763,7 @@ class _HomeScreenState extends State<HomeScreeen>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -766,19 +786,22 @@ class _HomeScreenState extends State<HomeScreeen>
                                     size: 26, color: Colors.white)
                                 : Text(
                                     f['emoji']!,
-                                    style: const TextStyle(fontSize: 22),
+                                    style: TextStyle(
+                                      fontSize:
+                                          f['title'] == 'Complaints' ? 18 : 22,
+                                    ),
                                   ),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: f['title'] == 'Complaints' ? 4 : 6),
                         Text(
                           f['title']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFF252A34),
-                            fontSize: 10,
+                          style: TextStyle(
+                            color: const Color(0xFF252A34),
+                            fontSize: f['title'] == 'Complaints' ? 9 : 10,
                             fontWeight: FontWeight.w700,
-                            height: 1.2,
+                            height: f['title'] == 'Complaints' ? 1.1 : 1.2,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -840,8 +863,7 @@ class _HomeScreenState extends State<HomeScreeen>
             icon: Icon(Icons.shopping_cart),
             label: "Market",
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

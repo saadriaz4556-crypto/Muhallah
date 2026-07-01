@@ -199,7 +199,7 @@ class _RentalDetailScreenState extends State<RentalDetailScreen> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: accentTeal.withOpacity(0.1),
+                      backgroundColor: accentTeal.withValues(alpha: 0.1),
                       child: const Icon(Icons.person, color: accentTeal),
                     ),
                     title: Text(_listing.ownerName, style: const TextStyle(color: lightText, fontWeight: FontWeight.bold)),
@@ -289,7 +289,7 @@ class _RentalDetailScreenState extends State<RentalDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color),
       ),

@@ -1,11 +1,95 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class LostItemDetailScreen extends StatelessWidget {
+class LostItemDetailScreen extends StatefulWidget {
   final Map<String, dynamic> itemData;
 
   const LostItemDetailScreen({super.key, required this.itemData});
+
+  @override
+  State<LostItemDetailScreen> createState() => _LostItemDetailScreenState();
+}
+
+class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
+  Future<void> _deletePost() async {
+    final itemId = (widget.itemData['id'] ??
+            widget.itemData['docId'] ??
+            widget.itemData['lostItemId'] ??
+            widget.itemData['itemId'] ??
+            '')
+        .toString();
+
+    if (itemId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to find this post to delete'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        title: const Text(
+          'Delete this post?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'This action cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF08D9D6)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('lost_found_reports')
+          .doc(itemId)
+          .delete();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Post deleted'),
+            backgroundColor: Color(0xFF08D9D6),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete post: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   String _formatTimestamp(dynamic timestamp) {
     if (timestamp == null) return 'Just now';
@@ -22,13 +106,17 @@ class LostItemDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String itemName = itemData['itemName'] ?? 'Unnamed Item';
-    final String category = itemData['category'] ?? 'Other';
-    final String description = itemData['description'] ?? 'No description provided.';
-    final String lastSeenLocation = itemData['lastSeenLocation'] ?? 'Unknown location';
-    final String imageUrl = itemData['imageUrl'] ?? '';
-    final String reporterName = itemData['reporterName'] ?? 'Resident';
-    final dynamic rawTimestamp = itemData['timestamp'];
+    final String itemName = widget.itemData['itemName'] ?? 'Unnamed Item';
+    final String category = widget.itemData['category'] ?? 'Other';
+    final String description =
+        widget.itemData['description'] ?? 'No description provided.';
+    final String lastSeenLocation =
+        widget.itemData['lastSeenLocation'] ?? 'Unknown location';
+    final String imageUrl = widget.itemData['imageUrl'] ?? '';
+    final dynamic rawTimestamp = widget.itemData['timestamp'];
+    final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final String posterUid =
+        widget.itemData['reportedBy'] ?? widget.itemData['postedBy'] ?? '';
 
     return Scaffold(
       backgroundColor: const Color(0xFF252A34),
@@ -98,7 +186,8 @@ class LostItemDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: const Color(0xFF08D9D6).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
@@ -117,7 +206,8 @@ class LostItemDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white10,
                           borderRadius: BorderRadius.circular(20),
@@ -152,11 +242,13 @@ class LostItemDetailScreen extends StatelessWidget {
                   // Timestamp
                   Row(
                     children: [
-                      const Icon(Icons.access_time, color: Colors.white54, size: 16),
+                      const Icon(Icons.access_time,
+                          color: Colors.white54, size: 16),
                       const SizedBox(width: 6),
                       Text(
                         _formatTimestamp(rawTimestamp),
-                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                        style: const TextStyle(
+                            color: Colors.white54, fontSize: 13),
                       ),
                     ],
                   ),
@@ -195,7 +287,8 @@ class LostItemDetailScreen extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on, color: Color(0xFFFF2E63), size: 20),
+                      const Icon(Icons.location_on,
+                          color: Color(0xFFFF2E63), size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -210,49 +303,39 @@ class LostItemDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Reporter Info
-                  const Text(
-                    'Reported By',
-                    style: TextStyle(
-                      color: Color(0xFF08D9D6),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const CircleAvatar(
-                        backgroundColor: Color(0xFF3A4250),
-                        child: Icon(Icons.person, color: Colors.white),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        reporterName,
-                        style: const TextStyle(
-                          color: Color(0xFFEAEAEA),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-
                   // Contact Reporter Button
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Contact feature coming soon'),
-                            backgroundColor: Color(0xFF08D9D6),
-                          ),
-                        );
+                      onPressed: () async {
+                        final contactNumber =
+                            (widget.itemData['contactNumber'] ?? '')
+                                .toString()
+                                .trim();
+                        if (contactNumber.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('No contact number provided'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final Uri launchUri =
+                            Uri(scheme: 'tel', path: contactNumber);
+                        if (!await launchUrl(launchUri)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Unable to open the dialer'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       },
-                      icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF08D9D6)),
+                      icon: const Icon(Icons.chat_bubble_outline,
+                          color: Color(0xFF08D9D6)),
                       label: const Text(
                         'Contact Reporter',
                         style: TextStyle(
@@ -262,13 +345,40 @@ class LostItemDetailScreen extends StatelessWidget {
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF08D9D6), width: 1.5),
+                        side: const BorderSide(
+                            color: Color(0xFF08D9D6), width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
                   ),
+                  if (currentUid.isNotEmpty && currentUid == posterUid) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: _deletePost,
+                        icon:
+                            const Icon(Icons.delete_outline, color: Colors.red),
+                        label: const Text(
+                          'Delete My Post',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

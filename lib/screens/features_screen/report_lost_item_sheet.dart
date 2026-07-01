@@ -29,6 +29,7 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
+  final _contactController = TextEditingController();
 
   String _selectedCategory = 'Wallet';
   final List<String> _categories = [
@@ -51,6 +52,7 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
     _nameController.dispose();
     _descController.dispose();
     _locationController.dispose();
+    _contactController.dispose();
     super.dispose();
   }
 
@@ -59,15 +61,18 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2A303C),
-        title: const Text('Select Image Source', style: TextStyle(color: Colors.white)),
+        title: const Text('Select Image Source',
+            style: TextStyle(color: Colors.white)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, ImageSource.camera),
-            child: const Text('Camera', style: TextStyle(color: Color(0xFF08D9D6))),
+            child: const Text('Camera',
+                style: TextStyle(color: Color(0xFF08D9D6))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, ImageSource.gallery),
-            child: const Text('Gallery', style: TextStyle(color: Color(0xFF08D9D6))),
+            child: const Text('Gallery',
+                style: TextStyle(color: Color(0xFF08D9D6))),
           ),
         ],
       ),
@@ -114,7 +119,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
 
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permissions are permanently denied.')),
+        const SnackBar(
+            content: Text('Location permissions are permanently denied.')),
       );
       return;
     }
@@ -136,30 +142,37 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
         if (placemarks.isNotEmpty) {
           final place = placemarks.first;
           final List<String> parts = [];
-          
+
           if (place.locality != null && place.locality!.isNotEmpty) {
             parts.add(place.locality!);
           }
-          if (place.subLocality != null && place.subLocality!.isNotEmpty && place.subLocality != place.locality) {
+          if (place.subLocality != null &&
+              place.subLocality!.isNotEmpty &&
+              place.subLocality != place.locality) {
             parts.add(place.subLocality!);
           }
-          if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty && place.administrativeArea != place.locality && place.administrativeArea != place.subLocality) {
+          if (place.administrativeArea != null &&
+              place.administrativeArea!.isNotEmpty &&
+              place.administrativeArea != place.locality &&
+              place.administrativeArea != place.subLocality) {
             parts.add(place.administrativeArea!);
           }
           if (place.country != null && place.country!.isNotEmpty) {
             parts.add(place.country!);
           }
-          
+
           final String address = parts.join(', ');
-          
-          _locationController.text = address.isNotEmpty 
-              ? address 
+
+          _locationController.text = address.isNotEmpty
+              ? address
               : "Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}";
         } else {
-          _locationController.text = "Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}";
+          _locationController.text =
+              "Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}";
         }
       } catch (_) {
-        _locationController.text = "Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}";
+        _locationController.text =
+            "Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}";
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -226,7 +239,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
       String imageUrl = '';
       if (_imageFile != null) {
         debugPrint('DEBUG: Uploading image...');
-        final uploadedUrl = await CloudinaryService.uploadBillImage(_imageFile!);
+        final uploadedUrl =
+            await CloudinaryService.uploadBillImage(_imageFile!);
         if (uploadedUrl == null) {
           throw Exception('Image upload failed');
         }
@@ -242,6 +256,7 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
         'category': _selectedCategory,
         'description': _descController.text.trim(),
         'lastSeenLocation': _locationController.text.trim(),
+        'contactNumber': _contactController.text.trim(),
         'imageUrl': imageUrl,
         'type': 'lost',
         'reportedBy': uid,
@@ -430,12 +445,12 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
               ),
               const SizedBox(height: 12),
 
-              // Last Seen Location
+              // Lost Location
               TextFormField(
                 controller: _locationController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Last Seen Location',
+                  labelText: 'Lost Location',
                   labelStyle: const TextStyle(color: Colors.white54),
                   filled: true,
                   fillColor: const Color(0xFF2A303C),
@@ -449,7 +464,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                               color: Color(0xFF08D9D6),
                             ),
                           )
-                        : const Icon(Icons.my_location, color: Color(0xFF08D9D6)),
+                        : const Icon(Icons.my_location,
+                            color: Color(0xFF08D9D6)),
                     onPressed: _isLocating ? null : _getCurrentLocation,
                   ),
                   enabledBorder: OutlineInputBorder(
@@ -463,7 +479,35 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Location is required';
+                    return 'Please enter lost location';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Contact Number
+              TextFormField(
+                controller: _contactController,
+                keyboardType: TextInputType.phone,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Your Contact Number',
+                  labelStyle: const TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: const Color(0xFF2A303C),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Please enter your contact number';
                   }
                   return null;
                 },
@@ -492,10 +536,13 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: kIsWeb
-                                  ? Image.network(_imageFile!.path, fit: BoxFit.cover)
-                                  : Image.file(File(_imageFile!.path), fit: BoxFit.cover),
+                                  ? Image.network(_imageFile!.path,
+                                      fit: BoxFit.cover)
+                                  : Image.file(File(_imageFile!.path),
+                                      fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.add_a_photo, color: Color(0xFF08D9D6)),
+                          : const Icon(Icons.add_a_photo,
+                              color: Color(0xFF08D9D6)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -504,7 +551,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                       _imageFile != null
                           ? 'Image selected. Tap on the preview box to change.'
                           : 'Tap on the box to capture/select a photo.',
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style:
+                          const TextStyle(color: Colors.white54, fontSize: 12),
                     ),
                   ),
                 ],
@@ -516,7 +564,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                      onPressed:
+                          _isSubmitting ? null : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF08D9D6),
                         side: const BorderSide(color: Color(0xFF08D9D6)),

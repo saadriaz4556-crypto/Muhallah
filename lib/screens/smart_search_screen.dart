@@ -347,7 +347,7 @@ class _SmartSearchScreenState extends State<SmartSearchScreen> {
                       height: 24,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.3),
+                          color: Colors.blue.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.blue, width: 2),
                         ),
@@ -374,7 +374,7 @@ class _SmartSearchScreenState extends State<SmartSearchScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
+                                color: Colors.black.withValues(alpha: 0.15),
                                 blurRadius: 6),
                           ],
                         ),
@@ -393,7 +393,7 @@ class _SmartSearchScreenState extends State<SmartSearchScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
+                                  color: Colors.black.withValues(alpha: 0.15),
                                   blurRadius: 6),
                             ],
                           ),
@@ -1042,7 +1042,7 @@ class PlaceDetailSheet extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: cat.color.withOpacity(0.15),
+                backgroundColor: cat.color.withValues(alpha: 0.15),
                 child: Icon(cat.icon, size: 28, color: cat.color),
               ),
               const SizedBox(width: 14),
@@ -1178,7 +1178,7 @@ class PlaceDetailSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

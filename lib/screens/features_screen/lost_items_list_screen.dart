@@ -60,7 +60,7 @@ class LostItemsListScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: lostFoundService.getLostItemsStream(),
+        stream: lostFoundService.getItemsStreamForType('lost'),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -113,7 +113,8 @@ class LostItemsListScreen extends StatelessWidget {
                   },
                   leading: CircleAvatar(
                     backgroundColor: _getCategoryColor(category),
-                    child: Icon(_getCategoryIcon(category), color: Colors.black),
+                    child:
+                        Icon(_getCategoryIcon(category), color: Colors.black),
                   ),
                   title: Text(
                     itemName,

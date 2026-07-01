@@ -154,7 +154,7 @@ class _LocalServicesScreenState extends State<LocalServicesScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_darkBackground, _primaryColor.withOpacity(0.3)],
+          colors: [_darkBackground, _primaryColor.withValues(alpha: 0.3)],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),

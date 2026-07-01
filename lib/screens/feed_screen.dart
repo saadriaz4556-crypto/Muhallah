@@ -5,6 +5,7 @@ import 'dart:async';
 import 'post_creation_screen.dart';
 import 'my_posts_screen.dart';
 import 'post_detail_screen.dart';
+import 'package:muhallah/screens/features_screen/found_item_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/lost_item_detail_screen.dart';
 import 'package:muhallah/services/lost_found_service.dart';
 
@@ -49,12 +50,9 @@ class _FeedScreenState extends State<FeedScreen> {
     {'id': 'polls', 'label': 'Polls', 'count': 3},
   ];
 
-
-
-
-
   Future<void> handleLike(String postId) async {
-    final postRef = FirebaseFirestore.instance.collection('announcements').doc(postId);
+    final postRef =
+        FirebaseFirestore.instance.collection('announcements').doc(postId);
     if (likedPosts.contains(postId)) {
       likedPosts.remove(postId);
       await postRef.update({'likes': FieldValue.increment(-1)});
@@ -86,7 +84,9 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
-          left: 16, right: 16, top: 16,
+          left: 16,
+          right: 16,
+          top: 16,
           bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
         ),
         child: Column(
@@ -94,8 +94,10 @@ class _FeedScreenState extends State<FeedScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Comments',
-              style: TextStyle(color: Color(0xFFEAEAEA),
-              fontSize: 16, fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    color: Color(0xFFEAEAEA),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -109,7 +111,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
                     child: Text('No comments yet',
-                      style: TextStyle(color: Colors.white54)),
+                        style: TextStyle(color: Colors.white54)),
                   );
                 }
                 return SizedBox(
@@ -122,20 +124,22 @@ class _FeedScreenState extends State<FeedScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const CircleAvatar(radius: 16,
-                              backgroundColor: Color(0xFF3A4250)),
+                            const CircleAvatar(
+                                radius: 16, backgroundColor: Color(0xFF3A4250)),
                             const SizedBox(width: 8),
-                            Expanded(child: Column(
+                            Expanded(
+                                child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(d['authorName'] ?? 'Resident',
-                                  style: const TextStyle(
-                                    color: Color(0xFF08D9D6),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13)),
+                                    style: const TextStyle(
+                                        color: Color(0xFF08D9D6),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13)),
                                 Text(d['text'] ?? '',
-                                  style: const TextStyle(
-                                    color: Color(0xFFEAEAEA), fontSize: 14)),
+                                    style: const TextStyle(
+                                        color: Color(0xFFEAEAEA),
+                                        fontSize: 14)),
                               ],
                             )),
                           ],
@@ -162,7 +166,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
+                        horizontal: 16, vertical: 10),
                   ),
                 ),
               ),
@@ -172,15 +176,19 @@ class _FeedScreenState extends State<FeedScreen> {
                   final text = commentController.text.trim();
                   if (text.isEmpty) return;
                   final postRef = FirebaseFirestore.instance
-                      .collection('announcements').doc(post['id']);
+                      .collection('announcements')
+                      .doc(post['id']);
                   await postRef.collection('comments').add({
                     'text': text,
                     'authorId': FirebaseAuth.instance.currentUser?.uid ?? '',
-                    'authorName': FirebaseAuth.instance.currentUser
-                        ?.displayName?.isNotEmpty == true
+                    'authorName': FirebaseAuth.instance.currentUser?.displayName
+                                ?.isNotEmpty ==
+                            true
                         ? FirebaseAuth.instance.currentUser!.displayName!
                         : (FirebaseAuth.instance.currentUser?.email
-                            ?.split('@').first ?? 'Resident'),
+                                ?.split('@')
+                                .first ??
+                            'Resident'),
                     'createdAt': Timestamp.now(),
                   });
                   await postRef.update({'comments': FieldValue.increment(1)});
@@ -224,7 +232,20 @@ class _FeedScreenState extends State<FeedScreen> {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.day} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.month-1]} ${dt.year}';
+    return '${dt.day} ${[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ][dt.month - 1]} ${dt.year}';
   }
 
   Widget _buildFilterChip(Map<String, dynamic> item) {
@@ -284,7 +305,7 @@ class _FeedScreenState extends State<FeedScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
@@ -741,7 +762,8 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildCard({required Map<String, dynamic> post, required Widget child}) {
+  Widget _buildCard(
+      {required Map<String, dynamic> post, required Widget child}) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -859,8 +881,10 @@ class _FeedScreenState extends State<FeedScreen> {
                           Row(
                             children: [
                               GestureDetector(
-                                onTap: () => Navigator.push(context,
-                                  MaterialPageRoute(builder: (_) => const MyPostsScreen())),
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => const MyPostsScreen())),
                                 child: Container(
                                   width: 40,
                                   height: 40,
@@ -896,7 +920,9 @@ class _FeedScreenState extends State<FeedScreen> {
                               IconButton(
                                 onPressed: () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const PostCreationScreen()),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const PostCreationScreen()),
                                 ),
                                 icon: Icon(
                                   Icons.photo_camera,
@@ -916,7 +942,8 @@ class _FeedScreenState extends State<FeedScreen> {
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const SizedBox.shrink(); // hide section if no pinned items
+                          return const SizedBox
+                              .shrink(); // hide section if no pinned items
                         }
                         final pinned = snapshot.data!.docs.map((doc) {
                           final d = doc.data() as Map<String, dynamic>;
@@ -946,7 +973,8 @@ class _FeedScreenState extends State<FeedScreen> {
                                 height: 140,
                                 child: ListView(
                                   scrollDirection: Axis.horizontal,
-                                  children: pinned.map(_buildPinnedItem).toList(),
+                                  children:
+                                      pinned.map(_buildPinnedItem).toList(),
                                 ),
                               ),
                             ],
@@ -969,8 +997,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             ),
                           );
                         }
-                        if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40),
                             child: Center(
@@ -986,10 +1013,12 @@ class _FeedScreenState extends State<FeedScreen> {
                         }
                         final posts = snapshot.data!;
                         return Container(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
                             children: posts.map<Widget>((post) {
+                              if (post['isFoundItem'] == true) {
+                                return _buildFoundItemCard(post);
+                              }
                               if (post['isLostItem'] == true) {
                                 return _buildLostItemCard(post);
                               }
@@ -1029,78 +1058,109 @@ class _FeedScreenState extends State<FeedScreen> {
   Stream<List<Map<String, dynamic>>> _getCombinedFeedStream() {
     final controller = StreamController<List<Map<String, dynamic>>>();
 
-    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('announcements')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+    final Stream<QuerySnapshot> stream =
+        FirebaseFirestore.instance.collection('announcements').snapshots();
 
     StreamSubscription? sub;
 
-    sub = stream.listen(
-      (snapshot) {
-        final combined = <Map<String, dynamic>>[];
-        for (var doc in snapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          try {
-            if (data['isLostItem'] == true) {
-              combined.add({
-                'id': doc.id,
-                'isLostItem': true,
-                'type': data['type'] ?? 'lost_item',
-                'title': data['title'] ?? '',
-                'body': data['body'] ?? '',
-                'imageUrl': data['imageUrl'] ?? '',
-                'location': data['location'] ?? '',
-                'category': data['category'] ?? '',
-                'lostItemId': data['lostItemId'] ?? '',
-                'postedBy': data['postedBy'] ?? '',
-                'postedByName': data['postedByName'] ?? 'Resident',
-                'timestamp': data['timestamp'] ?? data['createdAt'],
-                'time': _timeAgo(data['timestamp'] ?? data['createdAt']),
-              });
-            } else {
-              combined.add({
-                'id': doc.id,
-                'type': data['postType'] ?? 'announcement',
-                'author': data['authorName'] ?? '',
-                'time': _timeAgo(data['createdAt']),
-                'verified': data['verified'] ?? false,
-                'pinned': data['pinned'] ?? false,
-                'title': data['headline'] ?? '',
-                'content': data['description'] ?? '',
-                'image': data['imageUrl'],
-                'likes': (data['likes'] ?? 0) as int,
-                'comments': (data['comments'] ?? 0) as int,
-                'shares': (data['shares'] ?? 0) as int,
-                'isLostItem': false,
-              });
-            }
-          } catch (e) {
+    sub = stream.listen((snapshot) {
+      final combined = <Map<String, dynamic>>[];
+      final sortedDocs = snapshot.docs.toList();
+      sortedDocs.sort((a, b) {
+        final aData = a.data() as Map<String, dynamic>;
+        final bData = b.data() as Map<String, dynamic>;
+        final aTime = aData['timestamp'] ?? aData['createdAt'];
+        final bTime = bData['timestamp'] ?? bData['createdAt'];
+        if (aTime == null) return 1;
+        if (bTime == null) return -1;
+        return bTime.compareTo(aTime);
+      });
+      for (var doc in sortedDocs) {
+        final data = doc.data() as Map<String, dynamic>;
+        try {
+          final rawType = (data['type'] ?? '').toString().toLowerCase();
+          final isFoundItem = data['isFoundItem'] == true ||
+              rawType == 'found' ||
+              rawType == 'found_item';
+          final isLostItem = data['isLostItem'] == true ||
+              rawType == 'lost' ||
+              rawType == 'lost_item';
+
+          if (isFoundItem) {
             combined.add({
               'id': doc.id,
-              'type': 'announcement',
-              'author': 'User',
-              'time': 'Just now',
-              'verified': false,
-              'pinned': false,
-              'title': 'Loading...',
-              'content': '',
-              'image': null,
-              'likes': 0,
-              'comments': 0,
-              'shares': 0,
+              'isFoundItem': true,
+              'type': data['type'] ?? 'found_item',
+              'title': data['title'] ?? '',
+              'body': data['body'] ?? '',
+              'imageUrls':
+                  (data['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
+              'location': data['location'] ?? '',
+              'category': data['category'] ?? '',
+              'foundItemId': data['foundItemId'] ?? doc.id,
+              'postedBy': data['postedBy'] ?? '',
+              'postedByName': data['postedByName'] ?? 'Resident',
+              'timestamp': data['timestamp'] ?? data['createdAt'],
+              'time': _timeAgo(data['timestamp'] ?? data['createdAt']),
+              'rawData': data,
+            });
+          } else if (isLostItem) {
+            combined.add({
+              'id': doc.id,
+              'isLostItem': true,
+              'type': data['type'] ?? 'lost_item',
+              'title': data['title'] ?? '',
+              'body': data['body'] ?? '',
+              'imageUrl': data['imageUrl'] ?? '',
+              'location': data['location'] ?? '',
+              'category': data['category'] ?? '',
+              'lostItemId': data['lostItemId'] ?? '',
+              'postedBy': data['postedBy'] ?? '',
+              'postedByName': data['postedByName'] ?? 'Resident',
+              'timestamp': data['timestamp'] ?? data['createdAt'],
+              'time': _timeAgo(data['timestamp'] ?? data['createdAt']),
+            });
+          } else {
+            combined.add({
+              'id': doc.id,
+              'type': data['postType'] ?? 'announcement',
+              'author': data['authorName'] ?? '',
+              'time': _timeAgo(data['createdAt']),
+              'verified': data['verified'] ?? false,
+              'pinned': data['pinned'] ?? false,
+              'title': data['headline'] ?? '',
+              'content': data['description'] ?? '',
+              'image': data['imageUrl'],
+              'likes': (data['likes'] ?? 0) as int,
+              'comments': (data['comments'] ?? 0) as int,
+              'shares': (data['shares'] ?? 0) as int,
               'isLostItem': false,
             });
           }
+        } catch (e) {
+          combined.add({
+            'id': doc.id,
+            'type': 'announcement',
+            'author': 'User',
+            'time': 'Just now',
+            'verified': false,
+            'pinned': false,
+            'title': 'Loading...',
+            'content': '',
+            'image': null,
+            'likes': 0,
+            'comments': 0,
+            'shares': 0,
+            'isLostItem': false,
+          });
         }
-        if (!controller.isClosed) {
-          controller.add(combined);
-        }
-      },
-      onError: (err) {
-        debugPrint('Announcements stream error: $err');
       }
-    );
+      if (!controller.isClosed) {
+        controller.add(combined);
+      }
+    }, onError: (err) {
+      debugPrint('Announcements stream error: $err');
+    });
 
     controller.onCancel = () {
       sub?.cancel();
@@ -1116,7 +1176,8 @@ class _FeedScreenState extends State<FeedScreen> {
     return GestureDetector(
       onTap: () {
         final detailData = {
-          'itemName': post['title']?.toString().replaceFirst('Lost: ', '') ?? 'Lost Item',
+          'itemName': post['title']?.toString().replaceFirst('Lost: ', '') ??
+              'Lost Item',
           'category': post['category'],
           'description': post['body'],
           'lastSeenLocation': post['location'],
@@ -1190,7 +1251,8 @@ class _FeedScreenState extends State<FeedScreen> {
               Container(
                 width: double.infinity,
                 height: 200,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(8)),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
@@ -1226,7 +1288,8 @@ class _FeedScreenState extends State<FeedScreen> {
             // Location row: Icons.location_on (pink) + location text (gray small)
             Row(
               children: [
-                const Icon(Icons.location_on, color: Color(0xFFFF2E63), size: 16),
+                const Icon(Icons.location_on,
+                    color: Color(0xFFFF2E63), size: 16),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -1260,6 +1323,253 @@ class _FeedScreenState extends State<FeedScreen> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFoundItemCard(Map<String, dynamic> post) {
+    final rawTitle = post['title'] ?? post['itemName'] ?? '';
+    final itemName = rawTitle.toString().startsWith('Found: ')
+        ? rawTitle.toString().substring(7)
+        : rawTitle.toString();
+    final description = post['body'] ?? post['description'] ?? '';
+    final location =
+        post['location'] ?? post['foundLocation'] ?? 'Unknown location';
+    final reporterName =
+        post['postedByName'] ?? post['reporterName'] ?? 'Anonymous';
+    List<String> imageUrls = [];
+    final rawImageData = post['imageUrls'];
+    if (rawImageData is List) {
+      imageUrls = List<String>.from(
+        rawImageData.where((e) => e != null && e.toString().isNotEmpty),
+      );
+    }
+    final rawData = post['rawData'] as Map<String, dynamic>? ?? post;
+    final itemId = post['foundItemId'] ?? post['id'];
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FoundItemDetailScreen(
+              itemId: itemId,
+              data: rawData,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: colors['cardBackground'],
+          border: Border.all(color: colors['border']!),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors['primary']!.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: colors['primary']!.withOpacity(0.3)),
+              ),
+              child: Text(
+                '✓ Found Item',
+                style: TextStyle(
+                  color: colors['primary'],
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              itemName.isNotEmpty ? itemName : 'Unknown Item',
+              style: TextStyle(
+                color: colors['textPrimary'],
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description.toString(),
+              style: TextStyle(
+                color: colors['textSecondary'],
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            if (imageUrls.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrls[0],
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 180,
+                      color: colors['surface'],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: colors['primary'],
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.location_on,
+                    color: Color(0xFFFF2E63), size: 16),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    location,
+                    style: TextStyle(
+                      color: colors['textSecondary'],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if ((post['contactNumber'] ?? '').toString().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.phone, color: Color(0xFF00D4C8), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      post['contactNumber'].toString(),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            const Divider(color: Colors.white10, height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Reported by: $reporterName',
+                  style: TextStyle(
+                    color: colors['textTertiary'],
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  post['time'] ?? 'Just now',
+                  style: TextStyle(
+                    color: colors['textTertiary'],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            Builder(
+              builder: (context) {
+                final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+                final posterUid = post['postedBy'] ?? '';
+                if (currentUid.isEmpty || currentUid != posterUid) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          backgroundColor: const Color(0xFF2A2A3E),
+                          title: const Text('Delete Post',
+                              style: TextStyle(color: Colors.white)),
+                          content: const Text(
+                            'Delete this found item post?',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel',
+                                  style: TextStyle(color: Colors.grey)),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm != true) return;
+
+                      try {
+                        final foundItemId = post['foundItemId'] ?? '';
+                        await FirebaseFirestore.instance
+                            .collection('announcements')
+                            .doc(post['id'])
+                            .delete();
+
+                        if (foundItemId.isNotEmpty) {
+                          await FirebaseFirestore.instance
+                              .collection('lost_found_reports')
+                              .doc(foundItemId)
+                              .delete();
+                        }
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Post deleted',
+                                  style: TextStyle(color: Colors.white)),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        SizedBox(width: 4),
+                        Text('Delete Post',
+                            style: TextStyle(color: Colors.red, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

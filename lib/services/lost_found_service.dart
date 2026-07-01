@@ -34,26 +34,30 @@ class LostFoundService {
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'active',
     });
-    
+
     return docRef.id;
   }
 
-  /// Stream of all lost items sorted by timestamp descending
+  /// Stream of lost items only (type == 'lost')
   Stream<QuerySnapshot> getLostItemsStream() {
-    return _firestore
-        .collection('lost_found_reports')
-        .where('type', isEqualTo: 'lost')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+    return getItemsStreamForType('lost');
   }
 
-  /// Stream of active lost items sorted by timestamp descending
+  /// Stream of active lost items only (type == 'lost')
   Stream<QuerySnapshot> getActiveLostItemsStream() {
+    return getItemsStreamForType('lost');
+  }
+
+  /// Stream of found items only (type == 'found')
+  Stream<QuerySnapshot> getFoundItemsStream() {
+    return getItemsStreamForType('found');
+  }
+
+  /// Stream of items filtered by the saved Firestore type value.
+  Stream<QuerySnapshot> getItemsStreamForType(String type) {
     return _firestore
         .collection('lost_found_reports')
-        .where('type', isEqualTo: 'lost')
-        .where('status', isEqualTo: 'active')
-        .orderBy('timestamp', descending: true)
+        .where('type', isEqualTo: type.toLowerCase())
         .snapshots();
   }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:muhallah/screens/features_screen/found_item_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/lost_item_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/lost_items_list_screen.dart';
+import 'package:muhallah/screens/features_screen/report_found_item_sheet.dart';
 import 'package:muhallah/screens/features_screen/report_lost_item_sheet.dart';
 import 'package:muhallah/services/lost_found_service.dart';
 
@@ -91,46 +93,6 @@ class _LostFoundHomeState extends State<LostFoundHome>
     },
   ];
 
-  // Sample data for found items
-  final List<Map<String, dynamic>> foundItems = [
-    {
-      'name': 'Umbrella',
-      'image': Icons.beach_access,
-      'description': 'Found in lobby',
-      'color': Colors.purple,
-    },
-    {
-      'name': 'Notebook',
-      'image': Icons.book,
-      'description': 'Math notebook, name inside',
-      'color': Colors.green,
-    },
-    {
-      'name': 'Earphones',
-      'image': Icons.headphones,
-      'description': 'White wireless earphones',
-      'color': Colors.white,
-    },
-    {
-      'name': 'Watch',
-      'image': Icons.watch,
-      'description': 'Silver wristwatch',
-      'color': Colors.blueGrey,
-    },
-    {
-      'name': 'Jacket',
-      'image': Icons.checkroom,
-      'description': 'Blue denim jacket',
-      'color': Colors.blue,
-    },
-    {
-      'name': 'Power Bank',
-      'image': Icons.battery_charging_full,
-      'description': '10000mAh power bank',
-      'color': Colors.orange,
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -171,8 +133,6 @@ class _LostFoundHomeState extends State<LostFoundHome>
 
   @override
   Widget build(BuildContext context) {
-    final currentItems = selectedCategory == 'Lost' ? lostItems : foundItems;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lost & Found'),
@@ -229,7 +189,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
                                 BoxShadow(
                                   color: const Color(
                                     0xFF08D9D6,
-                                  ).withOpacity(0.3),
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 ),
@@ -277,14 +237,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
                       scale: _scaleAnimation,
                       child: selectedCategory == 'Lost'
                           ? _buildLostItemsStreamList()
-                          : ListView.separated(
-                              itemCount: currentItems.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final item = currentItems[index];
-                                return _buildAnimatedListItem(item, index);
-                              },
-                            ),
+                          : _buildFoundItemsStreamList(),
                     ),
                   );
                 },
@@ -328,23 +281,42 @@ class _LostFoundHomeState extends State<LostFoundHome>
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  // Capture user before async gap — safest on Flutter Web
-                  final currentUser = FirebaseAuth.instance.currentUser;
-                  final uid = currentUser?.uid ?? '';
-                  final name = currentUser?.displayName?.isNotEmpty == true
-                      ? currentUser!.displayName!
-                      : (currentUser?.email?.split('@').first ?? 'Resident');
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please log in first'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => ReportLostItemSheet(
-                      currentUserId: uid,
-                      currentUserName: name,
-                      onSubmitted: () {
-                        // Dynamic Firestore stream will automatically refresh.
-                      },
+                    backgroundColor: const Color(0xFF1E1E2E),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
+                    builder: (_) {
+                      if (selectedCategory.toLowerCase() == 'lost') {
+                        return ReportLostItemSheet(
+                          onSubmitted: () {},
+                          currentUserId: user.uid,
+                          currentUserName:
+                              user.displayName ?? user.email ?? 'Anonymous',
+                        );
+                      }
+
+                      return ReportFoundItemSheet(
+                        currentUserId: user.uid,
+                        currentUserName:
+                            user.displayName ?? user.email ?? 'Anonymous',
+                      );
+                    },
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -372,7 +344,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
   Widget _buildLostItemsStreamList() {
     final lostFoundService = LostFoundService();
     return StreamBuilder<QuerySnapshot>(
-      stream: lostFoundService.getLostItemsStream(),
+      stream: lostFoundService.getItemsStreamForType('lost'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -490,52 +462,118 @@ class _LostFoundHomeState extends State<LostFoundHome>
     }
   }
 
-  Widget _buildAnimatedListItem(Map<String, dynamic> item, int index) {
-    return Card(
-      color: const Color(0xFF2A303C),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: item['color'] as Color,
-          child: Icon(item['image'] as IconData, color: Colors.black),
-        ),
-        title: Text(
-          item['name'],
-          style: const TextStyle(
-            color: Color(0xFFEAEAEA),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Text(
-          item['description'],
-          style: const TextStyle(color: Color(0xFFB0B0B0)),
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.chevron_right, color: Color(0xFFB0B0B0)),
-          onPressed: () {
-            // Add detail animation
-            _navigateToDetail(item);
+  Widget _buildFoundItemsStreamList() {
+    final lostFoundService = LostFoundService();
+    return StreamBuilder<QuerySnapshot>(
+      stream: lostFoundService.getItemsStreamForType('found'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF00D4C8)),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No found items reported yet',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+
+        final docs = snapshot.data!.docs.toList();
+
+        docs.sort((a, b) {
+          final aData = a.data() as Map<String, dynamic>;
+          final bData = b.data() as Map<String, dynamic>;
+          final aTs = aData['timestamp'] as Timestamp?;
+          final bTs = bData['timestamp'] as Timestamp?;
+          return (bTs?.compareTo(aTs ??
+                  Timestamp.fromDate(DateTime.fromMillisecondsSinceEpoch(0))) ??
+              0);
+        });
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final data = docs[index].data() as Map<String, dynamic>;
+            final category = data['category'] ?? 'Other';
+            final categoryColors = {
+              'Umbrella': Colors.purple,
+              'Notebook': Colors.green,
+              'Electronics': Colors.blue,
+              'Clothing': Colors.orange,
+              'Keys': Colors.amber,
+              'Wallet': Colors.brown,
+              'Jewelry': Colors.pink,
+              'Documents': Colors.indigo,
+              'Other': Colors.teal,
+            };
+            final color = categoryColors[category] ?? Colors.teal;
+
+            return GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FoundItemDetailScreen(
+                    itemId: docs[index].id,
+                    data: data,
+                  ),
+                ),
+              ),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2A3E),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: color,
+                      child: const Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data['itemName'] ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            data['description'] ?? '',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: Colors.grey),
+                  ],
+                ),
+              ),
+            );
           },
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  void _navigateToDetail(Map<String, dynamic> item) {
-    // Add scale animation when navigating to detail
-    _animationController.reverse().then((_) {
-      // Navigate to detail page here
-      // For now, just show a snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Viewing details for ${item['name']}'),
-          backgroundColor: const Color(0xFF08D9D6),
-        ),
-      );
-
-      // Restart animation
-      _animationController.forward();
-    });
   }
 }
 
@@ -675,7 +713,7 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 12),
- 
+
                     TextField(
                       controller: _descC,
                       maxLines: 5,
@@ -696,7 +734,7 @@ class _LostFoundFormScreenState extends State<LostFoundFormScreen>
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 12),
- 
+
                     TextField(
                       controller: _locationC,
                       decoration: InputDecoration(
@@ -889,7 +927,7 @@ class LostFoundPreviewScreen extends StatelessWidget {
         ),
       );
     }
- 
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Report'),

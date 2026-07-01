@@ -301,15 +301,15 @@ class _NamazTimesScreenState extends State<NamazTimesScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: isNext ? teal.withOpacity(0.12) : sectionBg,
+        color: isNext ? teal.withValues(alpha: 0.12) : sectionBg,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isNext ? teal : Colors.white.withOpacity(0.05),
+          color: isNext ? teal : Colors.white.withValues(alpha: 0.05),
           width: isNext ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -322,8 +322,8 @@ class _NamazTimesScreenState extends State<NamazTimesScreen> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isNext
-                  ? teal.withOpacity(0.2)
-                  : Colors.white.withOpacity(0.03),
+                  ? teal.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.03),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -395,8 +395,8 @@ class _NamazTimesScreenState extends State<NamazTimesScreen> {
                     child: Switch(
                       value: _azanToggles[nameEng] ?? false,
                       onChanged: (val) => _onToggleChanged(nameEng, val),
-                      activeColor: teal,
-                      activeTrackColor: teal.withOpacity(0.3),
+                      activeThumbColor: teal,
+                      activeTrackColor: teal.withValues(alpha: 0.3),
                       inactiveThumbColor: Colors.white38,
                       inactiveTrackColor: Colors.white10,
                     ),
@@ -497,7 +497,7 @@ class _NamazTimesScreenState extends State<NamazTimesScreen> {
                             color: sectionBg,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.03)),
+                                color: Colors.white.withValues(alpha: 0.03)),
                           ),
                           child: Row(
                             children: [
@@ -544,7 +544,7 @@ class _NamazTimesScreenState extends State<NamazTimesScreen> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: teal.withOpacity(0.2),
+                                color: teal.withValues(alpha: 0.2),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),

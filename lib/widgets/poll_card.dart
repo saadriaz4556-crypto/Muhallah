@@ -83,12 +83,12 @@ class _PollCardState extends State<PollCard> {
         color: background,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: widget.isCompleted ? Colors.amber.withOpacity(0.3) : accent.withOpacity(0.2),
+          color: widget.isCompleted ? Colors.amber.withValues(alpha: 0.3) : accent.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -139,7 +139,7 @@ class _PollCardState extends State<PollCard> {
                     maxLines: _isExpanded ? null : 2,
                     overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -155,11 +155,11 @@ class _PollCardState extends State<PollCard> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Icon(Icons.people, size: 16, color: Colors.white.withOpacity(0.5)),
+                Icon(Icons.people, size: 16, color: Colors.white.withValues(alpha: 0.5)),
                 const SizedBox(width: 4),
                 Text(
                   '$totalVotes voters',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                 ),
                 const Spacer(),
                 Icon(Icons.timer, size: 16, color: widget.isCompleted ? Colors.red : accent),
@@ -223,7 +223,7 @@ class _PollCardState extends State<PollCard> {
                           Text(
                             '${(percent * 100).toStringAsFixed(1)}%',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
@@ -236,7 +236,7 @@ class _PollCardState extends State<PollCard> {
                             height: 8,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -250,7 +250,7 @@ class _PollCardState extends State<PollCard> {
                               boxShadow: [
                                 if (isWinner)
                                   BoxShadow(
-                                    color: Colors.amber.withOpacity(0.3),
+                                    color: Colors.amber.withValues(alpha: 0.3),
                                     blurRadius: 4,
                                     spreadRadius: 1,
                                   ),
@@ -290,7 +290,7 @@ class _PollCardState extends State<PollCard> {
               child: Center(
                 child: Text(
                   'You have already voted',
-                  style: TextStyle(color: accent.withOpacity(0.7), fontStyle: FontStyle.italic),
+                  style: TextStyle(color: accent.withValues(alpha: 0.7), fontStyle: FontStyle.italic),
                 ),
               ),
             ),
@@ -303,7 +303,7 @@ class _PollCardState extends State<PollCard> {
                 children: [
                   Text(
                     'Ended on ${DateFormat('MMM dd, yyyy').format(widget.poll.endDate)}',
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                   ),
                 ],
               ),
@@ -317,9 +317,9 @@ class _PollCardState extends State<PollCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,

@@ -363,14 +363,14 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
-                    color: selected ? teal.withOpacity(0.1) : sectionBg,
+                    color: selected ? teal.withValues(alpha: 0.1) : sectionBg,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: selected ? teal : Colors.white12,
                       width: selected ? 2 : 1,
                     ),
                     boxShadow: selected
-                        ? [BoxShadow(color: teal.withOpacity(0.2), blurRadius: 8)]
+                        ? [BoxShadow(color: teal.withValues(alpha: 0.2), blurRadius: 8)]
                         : [],
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -394,7 +394,7 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: selected ? teal.withOpacity(0.7) : Colors.white38,
+                          color: selected ? teal.withValues(alpha: 0.7) : Colors.white38,
                           fontSize: 9,
                         ),
                       ),
@@ -526,8 +526,8 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                         Switch(
                           value: _homeDelivery,
                           onChanged: (v) => setState(() => _homeDelivery = v),
-                          activeColor: teal,
-                          activeTrackColor: teal.withOpacity(0.3),
+                          activeThumbColor: teal,
+                          activeTrackColor: teal.withValues(alpha: 0.3),
                           inactiveThumbColor: Colors.white30,
                           inactiveTrackColor: Colors.white10,
                         ),
@@ -704,7 +704,7 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
         border: Border.all(color: Colors.white12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

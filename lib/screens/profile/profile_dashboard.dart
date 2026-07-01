@@ -378,7 +378,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                                               boxShadow: [
                                                 BoxShadow(
                                                     color:
-                                                        teal.withOpacity(0.3),
+                                                        teal.withValues(alpha: 0.3),
                                                     blurRadius: 15,
                                                     spreadRadius: 2),
                                               ],
@@ -447,7 +447,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: successGreen.withOpacity(0.2),
+                                          color: successGreen.withValues(alpha: 0.2),
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           border: Border.all(
@@ -552,7 +552,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
     return Container(
       height: 40,
       width: 1,
-      color: teal.withOpacity(0.3),
+      color: teal.withValues(alpha: 0.3),
     );
   }
 
@@ -739,7 +739,7 @@ class _ProfileDashboardState extends State<ProfileDashboard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-              color: teal.withOpacity(0.15),
+              color: teal.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: teal, size: 20),
         ),

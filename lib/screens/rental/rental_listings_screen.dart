@@ -146,7 +146,7 @@ class _RentalListingsScreenState extends State<RentalListingsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.home_work_outlined, color: accentTeal.withOpacity(0.5), size: 80),
+          Icon(Icons.home_work_outlined, color: accentTeal.withValues(alpha: 0.5), size: 80),
           const SizedBox(height: 16),
           const Text(
             'No listings found',
@@ -189,7 +189,7 @@ class RentalListingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

@@ -164,9 +164,9 @@ class _PollsScreenState extends State<PollsScreen>
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: Row(
                 children: [
@@ -190,7 +190,7 @@ class _PollsScreenState extends State<PollsScreen>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF08D9D6).withOpacity(0.1),
+                                color: const Color(0xFF08D9D6).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -209,8 +209,8 @@ class _PollsScreenState extends State<PollsScreen>
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: isClosed
-                          ? Colors.grey.withOpacity(0.2)
-                          : Colors.green.withOpacity(0.2),
+                          ? Colors.grey.withValues(alpha: 0.2)
+                          : Colors.green.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -249,7 +249,7 @@ class _PollsScreenState extends State<PollsScreen>
             const SizedBox(height: 8),
             Text(
               'Only moderators can create new polls.',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -269,7 +269,7 @@ class _PollsScreenState extends State<PollsScreen>
           Text(
             message,
             style:
-                TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
           ),
         ],
       ),
