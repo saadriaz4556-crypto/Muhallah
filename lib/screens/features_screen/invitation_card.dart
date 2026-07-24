@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
+import 'add_invitation_sheet.dart';
+import 'invitation_detail_screen.dart';
 
 class InvitationCardScreen extends StatefulWidget {
   final String townName;
@@ -14,6 +20,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
   final List<Map<String, dynamic>> _categories = [
     {
       'id': '1',
+      'categoryCode': 'wedding',
       'title': 'Shaadi / Valima',
       'subtitle': 'Wedding Invitations',
       'icon': Icons.favorite,
@@ -25,6 +32,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
     {
       'id': '2',
+      'categoryCode': 'dua_khawani',
       'title': 'Dua / Qur\'an Khawani',
       'subtitle': 'Religious Gatherings',
       'icon': Icons.mosque,
@@ -41,6 +49,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
     {
       'id': '3',
+      'categoryCode': 'mehndi_dholki',
       'title': 'Mehndi / Dholki',
       'subtitle': 'Pre-Wedding Events',
       'icon': Icons.celebration,
@@ -56,6 +65,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
     {
       'id': '4',
+      'categoryCode': 'aqeeqa_bismillah',
       'title': 'Aqeeqa / Bismillah',
       'subtitle': 'Baby Celebrations',
       'icon': Icons.child_care,
@@ -71,6 +81,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
     {
       'id': '5',
+      'categoryCode': 'condolence_majlis',
       'title': 'Condolence / Majlis',
       'subtitle': 'Sympathy Invitations',
       'icon': Icons.flag,
@@ -86,6 +97,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
     {
       'id': '6',
+      'categoryCode': 'community_event',
       'title': 'Community Events',
       'subtitle': 'Neighborhood Gatherings',
       'icon': Icons.people,
@@ -101,45 +113,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
     },
   ];
 
-  // Recent invitations mock data
-  final List<Map<String, dynamic>> _recentInvitations = [
-    {
-      'id': '1',
-      'type': 'Shaadi',
-      'title': 'Ali & Fatima Wedding',
-      'date': 'Dec 15, 2024',
-      'time': '6:00 PM',
-      'venue': 'Grand Palace Hotel',
-      'status': 'Active',
-      'created': '2 days ago',
-      'views': 45,
-      'color': const Color(0xFF08d9d6),
-    },
-    {
-      'id': '2',
-      'type': 'Dua',
-      'title': 'Qur\'an Khawani',
-      'date': 'Nov 20, 2024',
-      'time': '4:00 PM',
-      'venue': 'Central Mosque',
-      'status': 'Active',
-      'created': '1 week ago',
-      'views': 23,
-      'color': const Color(0xFF4CAF50),
-    },
-    {
-      'id': '3',
-      'type': 'Aqeeqa',
-      'title': 'Baby Ahmed Aqeeqa',
-      'date': 'Nov 25, 2024',
-      'time': '1:00 PM',
-      'venue': 'Community Hall',
-      'status': 'Expired',
-      'created': '2 weeks ago',
-      'views': 67,
-      'color': const Color(0xFF9C27B0),
-    },
-  ];
+  // Recent invitations mock data removed -> Using Firestore Stream
 
   // Color palette for dark theme
   final Color _primaryColor = const Color(0xFF08d9d6);
@@ -283,19 +257,77 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
             const SizedBox(height: 12),
             SizedBox(
               height: 130, // Reduced from 160 to 130
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _recentInvitations.length,
-                itemBuilder: (context, index) {
-                  final invitation = _recentInvitations[index];
-                  return RecentInvitationCard(
-                    invitation: invitation,
-                    primaryColor: _primaryColor,
-                    darkCardColor: _darkCardColor,
-                    darkTextColor: _darkTextColor,
-                    darkSecondaryText: _darkSecondaryText,
-                    onTap: () => _viewInvitation(invitation),
-                    onShare: () => _shareInvitation(invitation),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('invitations')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading invitations'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final docs = snapshot.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No recent invitations. Create one below!',
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    );
+                  }
+
+                  // Sort locally by createdAt descending (newest first)
+                  final sortedDocs = docs.toList()
+                    ..sort((a, b) {
+                      final aData = a.data() as Map<String, dynamic>;
+                      final bData = b.data() as Map<String, dynamic>;
+                      final aTime = aData['createdAt'] as Timestamp?;
+                      final bTime = bData['createdAt'] as Timestamp?;
+                      if (aTime == null || bTime == null) return 0;
+                      return bTime.compareTo(aTime);
+                    });
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: sortedDocs.length,
+                    itemBuilder: (context, index) {
+                      final doc = sortedDocs[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      data['id'] = doc.id; // Inject ID for tapping/routing
+
+                      // Format for RecentInvitationCard
+                      final dateTime = data['dateTime'] as Timestamp?;
+                      if (dateTime != null) {
+                        data['date'] = DateFormat('MMM d, yyyy').format(dateTime.toDate());
+                        data['time'] = DateFormat('h:mm a').format(dateTime.toDate());
+                      } else {
+                        data['date'] = 'TBD';
+                        data['time'] = '';
+                      }
+                      
+                      final catCode = data['category'] ?? '';
+                      final catMatch = _categories.firstWhere(
+                        (c) => c['categoryCode'] == catCode,
+                        orElse: () => _categories[0],
+                      );
+                      data['type'] = catMatch['title'];
+                      data['color'] = catMatch['color'];
+                      data['status'] = 'Active'; // Or base it on date
+
+                      return RecentInvitationCard(
+                        invitation: data,
+                        primaryColor: _primaryColor,
+                        darkCardColor: _darkCardColor,
+                        darkTextColor: _darkTextColor,
+                        darkSecondaryText: _darkSecondaryText,
+                        onTap: () => _viewInvitation(data),
+                        onShare: () => _shareInvitation(data),
+                      );
+                    },
                   );
                 },
               ),
@@ -335,7 +367,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
   // Create new invitation FAB
   Widget _buildCreateButton() {
     return ScaleTapAnimation(
-      onTap: () => _createCustomInvitation(),
+      onTap: () => _createInvitation(null),
       child: Container(
         padding: const EdgeInsets.all(14),
         margin: const EdgeInsets.only(bottom: 16),
@@ -358,44 +390,40 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
   }
 
   // Navigation and action methods
-  void _createInvitation(Map<String, dynamic> category) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Creating ${category['title']} invitation'),
-        backgroundColor: _primaryColor,
-        behavior: SnackBarBehavior.floating,
+  void _createInvitation(Map<String, dynamic>? category) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in first.')),
+      );
+      return;
+    }
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddInvitationSheet(
+        currentUserId: user.uid,
+        currentUserName: user.displayName ?? 'User',
+        initialCategoryCode: category?['categoryCode'],
       ),
     );
   }
 
   void _createCustomInvitation() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CreateOptionsSheet(
-        primaryColor: _primaryColor,
-        accentColor: _accentColor,
-        darkCardColor: _darkCardColor,
-        darkTextColor: _darkTextColor,
-        darkSecondaryText: _darkSecondaryText,
-        onTemplate: () {
-          Navigator.pop(context);
-          _showTemplateSelection();
-        },
-        onCustom: () {
-          Navigator.pop(context);
-          _createBlankInvitation();
-        },
-      ),
-    );
+    // Left for legacy or if needed, but FAB uses _createInvitation directly now
+    _createInvitation(null);
   }
 
   void _viewInvitation(Map<String, dynamic> invitation) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Viewing ${invitation['title']}'),
-        backgroundColor: _primaryColor,
-        behavior: SnackBarBehavior.floating,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InvitationDetailScreen(
+          invitationId: invitation['id'],
+          data: invitation,
+        ),
       ),
     );
   }

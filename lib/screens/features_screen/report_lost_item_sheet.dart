@@ -42,7 +42,7 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
     'Other'
   ];
 
-  XFile? _imageFile;
+  final List<XFile> _imageFiles = [];
   final ImagePicker _picker = ImagePicker();
   bool _isLocating = false;
   bool _isSubmitting = false;
@@ -57,6 +57,13 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
   }
 
   Future<void> _pickImage() async {
+    if (_imageFiles.length >= 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You can add up to 5 images only')),
+      );
+      return;
+    }
+
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (context) => AlertDialog(
@@ -80,16 +87,51 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
 
     if (source != null) {
       try {
-        final pickedFile = await _picker.pickImage(source: source);
-        if (pickedFile != null) {
-          setState(() {
-            _imageFile = pickedFile;
-          });
+        if (source == ImageSource.camera) {
+          final pickedFile = await _picker.pickImage(source: source);
+          if (pickedFile != null) {
+            if (_imageFiles.length >= 5) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('You can add up to 5 images only')),
+                );
+              }
+            } else {
+              setState(() {
+                _imageFiles.add(pickedFile);
+              });
+            }
+          }
+        } else {
+          final pickedFiles = await _picker.pickMultiImage();
+          if (pickedFiles.isNotEmpty) {
+            List<XFile> newFiles = [];
+            bool exceeded = false;
+            for (var file in pickedFiles) {
+              if (_imageFiles.length + newFiles.length < 5) {
+                newFiles.add(file);
+              } else {
+                exceeded = true;
+              }
+            }
+            if (newFiles.isNotEmpty) {
+              setState(() {
+                _imageFiles.addAll(newFiles);
+              });
+            }
+            if (exceeded && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('You can add up to 5 images only')),
+              );
+            }
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error picking image: $e')),
+          );
+        }
       }
     }
   }
@@ -236,17 +278,20 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
     });
 
     try {
-      String imageUrl = '';
-      if (_imageFile != null) {
-        debugPrint('DEBUG: Uploading image...');
-        final uploadedUrl =
-            await CloudinaryService.uploadBillImage(_imageFile!);
-        if (uploadedUrl == null) {
-          throw Exception('Image upload failed');
+      List<String> imageUrls = [];
+      if (_imageFiles.isNotEmpty) {
+        debugPrint('DEBUG: Uploading ${_imageFiles.length} images...');
+        for (final file in _imageFiles) {
+          final uploadedUrl = await CloudinaryService.uploadBillImage(file);
+          if (uploadedUrl == null) {
+            throw Exception('Image upload failed for ${file.name}');
+          }
+          imageUrls.add(uploadedUrl);
         }
-        imageUrl = uploadedUrl;
-        debugPrint('DEBUG: Image uploaded: $imageUrl');
+        debugPrint('DEBUG: All images uploaded: $imageUrls');
       }
+
+      final String mainImageUrl = imageUrls.isNotEmpty ? imageUrls[0] : '';
 
       debugPrint('DEBUG: Saving to lost_found_reports...');
       final docRef = await FirebaseFirestore.instance
@@ -257,7 +302,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
         'description': _descController.text.trim(),
         'lastSeenLocation': _locationController.text.trim(),
         'contactNumber': _contactController.text.trim(),
-        'imageUrl': imageUrl,
+        'imageUrl': mainImageUrl,
+        'imageUrls': imageUrls,
         'type': 'lost',
         'reportedBy': uid,
         'reporterName': reporterName,
@@ -272,7 +318,8 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
         'type': 'lost_item',
         'title': 'Lost: ${_nameController.text.trim()}',
         'body': _descController.text.trim(),
-        'imageUrl': imageUrl,
+        'imageUrl': mainImageUrl,
+        'imageUrls': imageUrls,
         'location': _locationController.text.trim(),
         'category': _selectedCategory,
         'lostItemId': reportId,
@@ -454,20 +501,6 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                   labelStyle: const TextStyle(color: Colors.white54),
                   filled: true,
                   fillColor: const Color(0xFF2A303C),
-                  suffixIcon: IconButton(
-                    icon: _isLocating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFF08D9D6),
-                            ),
-                          )
-                        : const Icon(Icons.my_location,
-                            color: Color(0xFF08D9D6)),
-                    onPressed: _isLocating ? null : _getCurrentLocation,
-                  ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(color: Colors.white10),
                     borderRadius: BorderRadius.circular(10),
@@ -516,47 +549,104 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
 
               // Image Selector and Preview Thumbnail
               const Text(
-                'Attach Image',
-                style: TextStyle(color: Colors.white54, fontSize: 13),
+                'Images (max 5)',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A303C),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: _imageFile != null
-                          ? ClipRRect(
+              _imageFiles.isEmpty
+                  ? Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A303C),
                               borderRadius: BorderRadius.circular(10),
-                              child: kIsWeb
-                                  ? Image.network(_imageFile!.path,
-                                      fit: BoxFit.cover)
-                                  : Image.file(File(_imageFile!.path),
-                                      fit: BoxFit.cover),
-                            )
-                          : const Icon(Icons.add_a_photo,
-                              color: Color(0xFF08D9D6)),
+                              border: Border.all(color: Colors.white10),
+                            ),
+                            child: const Icon(Icons.add_a_photo,
+                                color: Color(0xFF08D9D6)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Tap on the box to capture/select a photo.',
+                            style:
+                                TextStyle(color: Colors.white54, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        ..._imageFiles.map((file) {
+                          return Stack(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.white10),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: kIsWeb
+                                      ? Image.network(file.path,
+                                          fit: BoxFit.cover)
+                                      : Image.file(File(file.path),
+                                          fit: BoxFit.cover),
+                                ),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _imageFiles.remove(file);
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.redAccent,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                        if (_imageFiles.length < 5)
+                          GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2A303C),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.white10),
+                              ),
+                              child: const Icon(Icons.add_a_photo,
+                                  color: Color(0xFF08D9D6), size: 24),
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _imageFile != null
-                          ? 'Image selected. Tap on the preview box to change.'
-                          : 'Tap on the box to capture/select a photo.',
-                      style:
-                          const TextStyle(color: Colors.white54, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 24),
 
               // Buttons
@@ -566,13 +656,26 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                     child: OutlinedButton(
                       onPressed:
                           _isSubmitting ? null : () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF08D9D6),
-                        side: const BorderSide(color: Color(0xFF08D9D6)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                      style: ButtonStyle(
+                        foregroundColor:
+                            WidgetStateProperty.resolveWith<Color?>(
+                          (states) => const Color(0xFF08D9D6),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: WidgetStateProperty.resolveWith<BorderSide?>(
+                          (states) => const BorderSide(
+                            color: Color(0xFF08D9D6),
+                          ),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        padding: WidgetStateProperty.all(
+                          const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        overlayColor:
+                            WidgetStateProperty.all(Colors.transparent),
                       ),
                       child: const Text('CANCEL'),
                     ),
@@ -581,32 +684,58 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF08D9D6),
-                        foregroundColor: Colors.white,
-                        disabledForegroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.resolveWith<Color?>(
+                          (states) => const Color(0xFF08D9D6),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        foregroundColor:
+                            WidgetStateProperty.resolveWith<Color?>(
+                          (states) => Colors.black,
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        padding: WidgetStateProperty.all(
+                          const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        overlayColor:
+                            WidgetStateProperty.all(Colors.transparent),
+                        textStyle: WidgetStateProperty.all(
+                          const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
+                          ? const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'SUBMIT',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             )
                           : const Text(
                               'SUBMIT',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

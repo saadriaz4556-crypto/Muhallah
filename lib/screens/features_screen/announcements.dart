@@ -51,9 +51,25 @@ class _AnnouncementTypeScreenState extends State<AnnouncementTypeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Community Announcements'),
-        backgroundColor: const Color(0xFF2A303C),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: const Color(0xFF08D9D6),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          },
+        ),
+        title: const Text(
+          'Community Announcements',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF252A34),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF08D9D6)),
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -180,6 +196,7 @@ class _AnnouncementTypeScreenState extends State<AnnouncementTypeScreen> {
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF08D9D6),
+              foregroundColor: Colors.black,
               disabledBackgroundColor: Colors.grey[600],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -188,7 +205,7 @@ class _AnnouncementTypeScreenState extends State<AnnouncementTypeScreen> {
             child: const Text(
               'NEXT: CRAFT MESSAGE',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 letterSpacing: 0.5,

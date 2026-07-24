@@ -15,6 +15,7 @@ import 'screens/features_screen/quick_report.dart';
 import 'screens/features_screen/announcements.dart';
 import 'screens/features_screen/lostfound.dart';
 import 'screens/features_screen/localservices.dart';
+import 'screens/features_screen/add_local_service_screen.dart';
 import 'screens/features_screen/marriage_event.dart';
 import 'screens/features_screen/invitation_card.dart';
 import 'screens/features_screen/jobs.dart';
@@ -114,6 +115,7 @@ class MyApp extends StatelessWidget {
         '/merriage_event': (context) => const MarriageEventsScreen(),
         '/invitation_card': (context) => const InvitationCardScreen(),
         '/localservices': (context) => const LocalServicesScreen(),
+        '/add_service': (context) => const AddLocalServiceScreen(),
         '/bill_remminder': (context) => BillListScreen(),
         '/jobs': (context) => const JobsApp(),
         '/poll_voting': (context) => const PollsVotingApp(),

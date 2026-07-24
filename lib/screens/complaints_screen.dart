@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:muhallah/screens/new_complaint_screen.dart';
 import 'package:muhallah/services/complaint_service.dart';
+import 'package:muhallah/widgets/fullscreen_image_viewer.dart';
 
 class ComplaintsScreen extends StatefulWidget {
   const ComplaintsScreen({super.key});
@@ -607,19 +608,30 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: imageUrl.isNotEmpty
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: colors['surface'],
-                                child: Icon(
-                                  Icons.image_not_supported,
-                                  color: colors['textTertiary'],
-                                  size: 24,
+                        ? GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FullscreenImageViewer(imageUrl: imageUrl),
                                 ),
                               );
                             },
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: colors['surface'],
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    color: colors['textTertiary'],
+                                    size: 24,
+                                  ),
+                                );
+                              },
+                            ),
                           )
                         : Container(
                             color: colors['surface'],
@@ -917,7 +929,8 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                         stream: _complaintStream(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                                  ConnectionState.waiting &&
+                              !snapshot.hasData) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -987,25 +1000,20 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
       ),
 
       // Floating Action Button
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const NewComplaintScreen()),
           );
+          if (result == true && mounted) {
+            setState(() {});
+          }
         },
         backgroundColor: colors['primary'],
         elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        icon: const Icon(Icons.add, color: Colors.white, size: 20),
-        label: const Text(
-          'New Complaint',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

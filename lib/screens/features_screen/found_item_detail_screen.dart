@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:muhallah/widgets/fullscreen_image_viewer.dart';
 
 class FoundItemDetailScreen extends StatefulWidget {
   final String itemId;
@@ -100,30 +101,40 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
             itemBuilder: (context, index) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  imageUrls[index],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: const Color(0xFF2A2A3E),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF00D4C8),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FullscreenImageViewer(imageUrl: imageUrls[index]),
+                      ),
+                    );
+                  },
+                  child: Image.network(
+                    imageUrls[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: const Color(0xFF2A2A3E),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF00D4C8),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFF2A2A3E),
-                      child: const Center(
-                        child: Icon(Icons.broken_image,
-                            color: Colors.grey, size: 50),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: const Color(0xFF2A2A3E),
+                        child: const Center(
+                          child: Icon(Icons.broken_image,
+                              color: Colors.grey, size: 50),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               );
             },
@@ -180,7 +191,10 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E1E2E),
         elevation: 0,
-        title: const Text('Found Item'),
+        title: const Text(
+          'Found Item',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -208,15 +222,26 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 40,
+                          top: MediaQuery.of(context).padding.top + 16,
                           right: 16,
                           child: GestureDetector(
                             onTap: () =>
                                 Navigator.of(context, rootNavigator: true)
                                     .pop(),
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.black54,
-                              child: Icon(Icons.close, color: Colors.white),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: const Color(0xFF08D9D6),
+                                    width: 1.5),
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Color(0xFF08D9D6),
+                                size: 24,
+                              ),
                             ),
                           ),
                         ),

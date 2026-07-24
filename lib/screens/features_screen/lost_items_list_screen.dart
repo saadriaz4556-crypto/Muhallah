@@ -56,11 +56,10 @@ class LostItemsListScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         backgroundColor: const Color(0xFF252A34),
-        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: lostFoundService.getItemsStreamForType('lost'),
+        stream: lostFoundService.getLostItemsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(

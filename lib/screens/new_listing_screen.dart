@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +23,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
   final MarketplaceService _marketplaceService = MarketplaceService();
 
   String _category = 'Electronics';
-  File? _imageFile;
-  Uint8List? _imageBytes;
+  final List<File> _imageFiles = [];
   bool _isUploading = false;
 
   @override
@@ -39,13 +37,31 @@ class _NewListingScreenState extends State<NewListingScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
+    if (_imageFiles.length >= 4) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You can add up to 4 images only')),
+      );
+      return;
+    }
+
+    final pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      bool overflow = false;
       setState(() {
-        _imageFile = File(pickedFile.path);
-        _imageBytes = bytes;
+        for (final file in pickedFiles) {
+          if (_imageFiles.length < 4) {
+            _imageFiles.add(File(file.path));
+          } else {
+            overflow = true;
+          }
+        }
       });
+      if (overflow && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You can add up to 4 images only')),
+        );
+      }
     }
   }
 
@@ -57,7 +73,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
     setState(() => _isUploading = true);
 
     try {
-      await _marketplaceService.submitListing(
+      await _marketplaceService.submitListingWithImages(
         fields: {
           'title': _titleController.text.trim(),
           'category': _category,
@@ -69,7 +85,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
               FirebaseAuth.instance.currentUser?.email ??
               'Anonymous User',
         },
-        image: _imageFile,
+        images: _imageFiles,
       );
 
       if (!mounted) return;
@@ -94,10 +110,12 @@ class _NewListingScreenState extends State<NewListingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('New Listing'),
-        backgroundColor: const Color(0xFF121212),
+        backgroundColor: const Color(0xFF252A34),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF08D9D6)),
         foregroundColor: Colors.white,
       ),
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF252A34),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -109,11 +127,18 @@ class _NewListingScreenState extends State<NewListingScreen> {
                 TextFormField(
                   controller: _titleController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Title',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
@@ -123,13 +148,20 @@ class _NewListingScreenState extends State<NewListingScreen> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   initialValue: _category,
-                  dropdownColor: const Color(0xFF1E1E1E),
+                  dropdownColor: const Color(0xFF2A303C),
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Category',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   items: const [
@@ -156,12 +188,20 @@ class _NewListingScreenState extends State<NewListingScreen> {
                   controller: _priceController,
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Price',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    prefixText: '\$',
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    prefixText: '\$ ',
+                    prefixStyle: const TextStyle(color: Colors.white),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
@@ -173,11 +213,18 @@ class _NewListingScreenState extends State<NewListingScreen> {
                   controller: _descriptionController,
                   maxLines: 4,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
@@ -188,11 +235,18 @@ class _NewListingScreenState extends State<NewListingScreen> {
                 TextFormField(
                   controller: _locationController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Location',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
@@ -204,43 +258,120 @@ class _NewListingScreenState extends State<NewListingScreen> {
                   controller: _contactController,
                   keyboardType: TextInputType.phone,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Contact Number',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white24),
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF2A303C),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF08D9D6)),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image, color: Colors.white),
-                  label: const Text('Pick Image',
-                      style: TextStyle(color: Colors.white)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white24),
-                  ),
+                const Text(
+                  'Images (max 4)',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
-                if (_imageBytes != null) ...[
-                  const SizedBox(height: 16),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.memory(
-                      _imageBytes!,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 8),
+                _imageFiles.isEmpty
+                    ? OutlinedButton.icon(
+                        onPressed: _pickImage,
+                        icon:
+                            const Icon(Icons.image, color: Color(0xFF08D9D6)),
+                        label: const Text(
+                          'Pick Image',
+                          style: TextStyle(color: Color(0xFF08D9D6)),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF08D9D6)),
+                        ),
+                      )
+                    : Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          ..._imageFiles.map((file) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.white10),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      file,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _imageFiles.remove(file);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.redAccent,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                          if (_imageFiles.length < 4)
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2A303C),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border:
+                                      Border.all(color: const Color(0xFF08D9D6)),
+                                ),
+                                child: const Icon(
+                                  Icons.add_a_photo,
+                                  color: Color(0xFF08D9D6),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _isUploading ? null : _submitListing,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF11988D),
+                      backgroundColor: const Color(0xFF08D9D6),
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: _isUploading
@@ -249,10 +380,16 @@ class _NewListingScreenState extends State<NewListingScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Colors.black,
                             ),
                           )
-                        : const Text('List Item'),
+                        : const Text(
+                            'List Item',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],

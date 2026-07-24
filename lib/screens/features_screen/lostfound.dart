@@ -344,7 +344,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
   Widget _buildLostItemsStreamList() {
     final lostFoundService = LostFoundService();
     return StreamBuilder<QuerySnapshot>(
-      stream: lostFoundService.getItemsStreamForType('lost'),
+      stream: lostFoundService.getLostItemsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -465,7 +465,7 @@ class _LostFoundHomeState extends State<LostFoundHome>
   Widget _buildFoundItemsStreamList() {
     final lostFoundService = LostFoundService();
     return StreamBuilder<QuerySnapshot>(
-      stream: lostFoundService.getItemsStreamForType('found'),
+      stream: lostFoundService.getFoundItemsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(

@@ -40,6 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // --- NEW: Role selector for login type
   String _loginRole = 'owner'; // 'owner' or 'family_member'
 
+  bool _isPasswordVisible = false;
+
   // --- slider state variables
   int _currentSlide = 0;
   Timer? _slideTimer;
@@ -719,7 +721,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: TextField(
                                   controller: _passwordController,
-                                  obscureText: true,
+                                  obscureText: !_isPasswordVisible,
                                   enabled: !_isLoading,
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
@@ -742,6 +744,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: const Icon(
                                         Icons.lock_outline_rounded,
                                         color: coral,
+                                      ),
+                                    ),
+                                    suffixIcon: Padding(
+                                      padding: const EdgeInsets.only(right: 8.0),
+                                      child: IconButton(
+                                        icon: Icon(
+                                          _isPasswordVisible
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
+                                          color: coral,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isPasswordVisible = !_isPasswordVisible;
+                                          });
+                                        },
                                       ),
                                     ),
                                     border: OutlineInputBorder(

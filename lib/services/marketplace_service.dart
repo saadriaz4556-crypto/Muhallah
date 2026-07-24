@@ -83,6 +83,40 @@ class MarketplaceService {
     await _firestore.collection('marketplace').add(listingData);
   }
 
+  Future<void> submitListingWithImages({
+    required Map<String, dynamic> fields,
+    List<File>? images,
+  }) async {
+    final user = _auth.currentUser;
+    final userId = user?.uid ?? 'anonymous';
+    final userName = user?.displayName ?? user?.email ?? 'Anonymous User';
+
+    List<String> imageUrls = [];
+    if (images != null && images.isNotEmpty) {
+      for (final img in images) {
+        try {
+          final url = await uploadImageToCloudinary(img);
+          if (url.isNotEmpty) {
+            imageUrls.add(url);
+          }
+        } catch (_) {}
+      }
+    }
+
+    final listingData = {
+      ...fields,
+      'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
+      'imageUrls': imageUrls,
+      'userId': userId,
+      'userName': fields['userName'] ?? userName,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isFeatured': false,
+      'isEndingSoon': false,
+    };
+
+    await _firestore.collection('marketplace').add(listingData);
+  }
+
   Stream<QuerySnapshot<Map<String, dynamic>>> listingStream() {
     return _firestore
         .collection('marketplace')

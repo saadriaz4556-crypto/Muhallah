@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:muhallah/widgets/fullscreen_image_viewer.dart';
 
 class LostItemDetailScreen extends StatefulWidget {
   final Map<String, dynamic> itemData;
@@ -14,13 +15,62 @@ class LostItemDetailScreen extends StatefulWidget {
 }
 
 class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
-  Future<void> _deletePost() async {
-    final itemId = (widget.itemData['id'] ??
+  String _itemId = '';
+  String _posterUid = '';
+  String _contactNumber = '';
+  bool _isLoadingDetails = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _itemId = (widget.itemData['id'] ??
             widget.itemData['docId'] ??
             widget.itemData['lostItemId'] ??
             widget.itemData['itemId'] ??
             '')
         .toString();
+    _posterUid =
+        (widget.itemData['reportedBy'] ?? widget.itemData['postedBy'] ?? '')
+            .toString();
+    _contactNumber = (widget.itemData['contactNumber'] ?? '').toString();
+
+    if (_itemId.isNotEmpty) {
+      _loadPostDetails();
+    }
+  }
+
+  Future<void> _loadPostDetails() async {
+    if (_itemId.isEmpty) return;
+
+    setState(() => _isLoadingDetails = true);
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('lost_found_reports')
+          .doc(_itemId)
+          .get();
+
+      if (!snapshot.exists) {
+        if (mounted) setState(() => _isLoadingDetails = false);
+        return;
+      }
+
+      final data = snapshot.data() ?? <String, dynamic>{};
+      if (mounted) {
+        setState(() {
+          _posterUid =
+              (data['reportedBy'] ?? data['postedBy'] ?? _posterUid).toString();
+          _contactNumber = (data['contactNumber'] ?? _contactNumber).toString();
+          _isLoadingDetails = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingDetails = false);
+    }
+  }
+
+  Future<void> _deletePost() async {
+    final itemId = _itemId;
 
     if (itemId.isEmpty) {
       if (mounted) {
@@ -43,7 +93,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'This action cannot be undone.',
+          'Delete this post? This action cannot be undone.',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -115,8 +165,10 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     final String imageUrl = widget.itemData['imageUrl'] ?? '';
     final dynamic rawTimestamp = widget.itemData['timestamp'];
     final String currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final String posterUid =
-        widget.itemData['reportedBy'] ?? widget.itemData['postedBy'] ?? '';
+    final String posterUid = _posterUid.isNotEmpty
+        ? _posterUid
+        : (widget.itemData['reportedBy'] ?? widget.itemData['postedBy'] ?? '')
+            .toString();
 
     return Scaffold(
       backgroundColor: const Color(0xFF252A34),
@@ -126,7 +178,6 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         backgroundColor: const Color(0xFF252A34),
-        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -135,32 +186,42 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           children: [
             // Image Section
             if (imageUrl.isNotEmpty)
-              Container(
-                width: double.infinity,
-                height: 250,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2A303C),
-                ),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF08D9D6),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        color: Colors.white24,
-                        size: 60,
-                      ),
-                    );
-                  },
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrl),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 250,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2A303C),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF08D9D6),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          color: Colors.white24,
+                          size: 60,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               )
             else
@@ -309,10 +370,11 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
                     height: 50,
                     child: OutlinedButton.icon(
                       onPressed: () async {
-                        final contactNumber =
-                            (widget.itemData['contactNumber'] ?? '')
-                                .toString()
-                                .trim();
+                        final contactNumber = (_contactNumber.isNotEmpty
+                                ? _contactNumber
+                                : (widget.itemData['contactNumber'] ?? ''))
+                            .toString()
+                            .trim();
                         if (contactNumber.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

@@ -40,24 +40,25 @@ class LostFoundService {
 
   /// Stream of lost items only (type == 'lost')
   Stream<QuerySnapshot> getLostItemsStream() {
-    return getItemsStreamForType('lost');
+    return _firestore
+        .collection('lost_found_reports')
+        .where('type', isEqualTo: 'lost')
+        .snapshots();
   }
 
   /// Stream of active lost items only (type == 'lost')
   Stream<QuerySnapshot> getActiveLostItemsStream() {
-    return getItemsStreamForType('lost');
+    return _firestore
+        .collection('lost_found_reports')
+        .where('type', isEqualTo: 'lost')
+        .snapshots();
   }
 
   /// Stream of found items only (type == 'found')
   Stream<QuerySnapshot> getFoundItemsStream() {
-    return getItemsStreamForType('found');
-  }
-
-  /// Stream of items filtered by the saved Firestore type value.
-  Stream<QuerySnapshot> getItemsStreamForType(String type) {
     return _firestore
         .collection('lost_found_reports')
-        .where('type', isEqualTo: type.toLowerCase())
+        .where('type', isEqualTo: 'found')
         .snapshots();
   }
 }

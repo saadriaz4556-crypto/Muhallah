@@ -8,6 +8,7 @@ import 'post_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/found_item_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/lost_item_detail_screen.dart';
 import 'package:muhallah/services/lost_found_service.dart';
+import 'package:muhallah/widgets/fullscreen_image_viewer.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -1248,37 +1249,47 @@ class _FeedScreenState extends State<FeedScreen> {
 
             // Image below body (if imageUrl is not empty)
             if (imageUrl.isNotEmpty) ...[
-              Container(
-                width: double.infinity,
-                height: 200,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: colors['surface'],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: colors['primary'],
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrl),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: colors['surface'],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: colors['primary'],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: colors['surface'],
-                        child: const Icon(
-                          Icons.error,
-                          color: Colors.grey,
-                          size: 50,
-                        ),
-                      );
-                    },
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: colors['surface'],
+                          child: const Icon(
+                            Icons.error,
+                            color: Colors.grey,
+                            size: 50,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -1410,28 +1421,38 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
             if (imageUrls.isNotEmpty) ...[
               const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrls[0],
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      height: 180,
-                      color: colors['surface'],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: colors['primary'],
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrls[0]),
+                    ),
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrls[0],
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: 180,
+                        color: colors['surface'],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: colors['primary'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               ),
             ],
