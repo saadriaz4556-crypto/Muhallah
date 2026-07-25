@@ -265,9 +265,9 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
                       height: 240,
                       loadingBuilder: (ctx, child, progress) {
                         if (progress == null) return child;
-                        return Center(
+                        return const Center(
                           child: CircularProgressIndicator(
-                            color: const Color(0xFF00D4C8),
+                            color: Color(0xFF00D4C8),
                           ),
                         );
                       },
@@ -279,12 +279,12 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
                   ),
                 ),
               ),
-            if (imageUrls.isEmpty) SizedBox.shrink(),
+            if (imageUrls.isEmpty) const SizedBox.shrink(),
             if (imageUrls.isNotEmpty) const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF00D4C8).withOpacity(0.15),
+                color: const Color(0xFF00D4C8).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
@@ -300,8 +300,9 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
               () {
                 final raw = data['title'] ?? data['itemName'] ?? '';
                 final rawString = raw.toString();
-                if (rawString.startsWith('Found: '))
+                if (rawString.startsWith('Found: ')) {
                   return rawString.substring(7);
+                }
                 return rawString.isNotEmpty ? rawString : 'Unknown Item';
               }(),
               style: const TextStyle(
@@ -387,15 +388,15 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(const Color(0xFF00D4C8)),
-                foregroundColor: MaterialStateProperty.all(Colors.white),
-                overlayColor: MaterialStateProperty.all(
-                  const Color(0xFF00D4C8).withOpacity(0.8),
+                    WidgetStateProperty.all(const Color(0xFF00D4C8)),
+                foregroundColor: WidgetStateProperty.all(Colors.white),
+                overlayColor: WidgetStateProperty.all(
+                  const Color(0xFF00D4C8).withValues(alpha: 0.8),
                 ),
-                minimumSize: MaterialStateProperty.all(
+                minimumSize: WidgetStateProperty.all(
                   const Size.fromHeight(48),
                 ),
-                shape: MaterialStateProperty.all(
+                shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -408,16 +409,16 @@ class _FoundItemDetailScreenState extends State<FoundItemDetailScreen> {
               OutlinedButton(
                 onPressed: _deletePost,
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all(Colors.red),
+                  foregroundColor: WidgetStateProperty.all(Colors.red),
                   overlayColor:
-                      MaterialStateProperty.all(Colors.red.withOpacity(0.08)),
-                  side: MaterialStateProperty.all(
+                      WidgetStateProperty.all(Colors.red.withValues(alpha: 0.08)),
+                  side: WidgetStateProperty.all(
                     const BorderSide(color: Colors.red),
                   ),
-                  minimumSize: MaterialStateProperty.all(
+                  minimumSize: WidgetStateProperty.all(
                     const Size.fromHeight(48),
                   ),
-                  shape: MaterialStateProperty.all(
+                  shape: WidgetStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

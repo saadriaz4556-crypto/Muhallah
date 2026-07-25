@@ -797,10 +797,21 @@ class _FeedScreenState extends State<FeedScreen> {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               decoration: BoxDecoration(
-                color: colors['cardBackground'],
-                border: Border(bottom: BorderSide(color: colors['border']!)),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors['background']!,
+                    colors['primary']!.withValues(alpha: 0.2),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1210,9 +1221,10 @@ class _FeedScreenState extends State<FeedScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: colors['primary']!.withOpacity(0.15),
+                color: colors['primary']!.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: colors['primary']!.withOpacity(0.3)),
+                border: Border.all(
+                    color: colors['primary']!.withValues(alpha: 0.3)),
               ),
               child: Text(
                 '🔍 Lost Item',
@@ -1254,7 +1266,8 @@ class _FeedScreenState extends State<FeedScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrl),
+                      builder: (context) =>
+                          FullscreenImageViewer(imageUrl: imageUrl),
                     ),
                   );
                 },
@@ -1388,9 +1401,10 @@ class _FeedScreenState extends State<FeedScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: colors['primary']!.withOpacity(0.15),
+                color: colors['primary']!.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: colors['primary']!.withOpacity(0.3)),
+                border: Border.all(
+                    color: colors['primary']!.withValues(alpha: 0.3)),
               ),
               child: Text(
                 '✓ Found Item',
@@ -1426,7 +1440,8 @@ class _FeedScreenState extends State<FeedScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrls[0]),
+                      builder: (context) =>
+                          FullscreenImageViewer(imageUrl: imageUrls[0]),
                     ),
                   );
                 },
@@ -1579,9 +1594,9 @@ class _FeedScreenState extends State<FeedScreen> {
                         }
                       }
                     },
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [
+                      children: [
                         Icon(Icons.delete_outline, color: Colors.red, size: 18),
                         SizedBox(width: 4),
                         Text('Delete Post',

@@ -229,8 +229,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             label: 'Name *',
                             hint: 'Enter your name',
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Name is required';
+                              }
                               return null;
                             },
                           ),
@@ -242,8 +243,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             hint: 'Enter your age',
                             keyboardType: TextInputType.number,
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Age is required';
+                              }
                               return null;
                             },
                           ),
@@ -264,8 +266,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             label: 'Profession/Occupation *',
                             hint: 'Enter your profession',
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Profession is required';
+                              }
                               return null;
                             },
                           ),
@@ -276,8 +279,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             label: 'Education *',
                             hint: 'Enter your education level',
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Education is required';
+                              }
                               return null;
                             },
                           ),
@@ -288,8 +292,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             label: 'City/Location *',
                             hint: 'Enter your city',
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'City is required';
+                              }
                               return null;
                             },
                           ),
@@ -302,8 +307,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                                 'A brief intro about yourself or your family...',
                             maxLines: 2,
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Short intro is required';
+                              }
                               return null;
                             },
                           ),
@@ -384,8 +390,9 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
                             hint: 'Family/Guardian contact number',
                             keyboardType: TextInputType.phone,
                             validator: (value) {
-                              if (value?.isEmpty ?? true)
+                              if (value?.isEmpty ?? true) {
                                 return 'Contact number is required';
+                              }
                               return null;
                             },
                           ),
@@ -591,19 +598,19 @@ class _AddRishtaProfileSheetState extends State<AddRishtaProfileSheet> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           dropdownColor: _darkCardColor,
           items: items
               .map((item) => DropdownMenuItem(
                     value: item,
                     child: Text(
                       item,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ))
               .toList(),
           onChanged: onChanged,
-          style: TextStyle(color: Colors.white, fontSize: 14),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
             fillColor: _darkBackground,

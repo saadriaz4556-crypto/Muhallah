@@ -110,18 +110,6 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
   Widget _buildMarketplaceHome() {
     return Scaffold(
       backgroundColor: colors['background'],
-      appBar: AppBar(
-        backgroundColor: colors['cardBackground'],
-        elevation: 0,
-        title: Text(
-          'Marketplace',
-          style: TextStyle(
-            color: colors['textPrimary'],
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bottomPadding = MediaQuery.of(context).padding.bottom + 90.0;
@@ -133,6 +121,33 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Column(
                 children: [
+                  // Top Header Box (same style as other screens)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          colors['background']!,
+                          colors['primary']!.withValues(alpha: 0.2),
+                        ],
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                    ),
+                    child: Text(
+                      'Marketplace',
+                      style: TextStyle(
+                        color: colors['textPrimary'],
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                   // Location & Stats - ULTRA COMPACT
                   Padding(
                     padding: const EdgeInsets.fromLTRB(

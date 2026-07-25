@@ -622,7 +622,7 @@ class _HomeScreenState extends State<HomeScreeen>
                 ),
               ),
               Text(
-                'Community Overview',
+                'Where Neighbors Become Family',
                 style: TextStyle(
                   color: light,
                   fontSize: 18,
@@ -650,68 +650,17 @@ class _HomeScreenState extends State<HomeScreeen>
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Stat 1
-                Column(
-                  children: [
-                    Text(
-                      '1,234',
-                      style: TextStyle(
-                        color: COLORS['accent'],
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Residents',
-                      style: TextStyle(color: Colors.white54, fontSize: 11),
-                    ),
-                  ],
+            child: const Center(
+              child: Text(
+                'Building stronger connections, one mohallah at a time.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
                 ),
-                // Divider
-                Container(height: 36, width: 1, color: Colors.white12),
-                // Stat 2
-                Column(
-                  children: [
-                    Text(
-                      '42',
-                      style: TextStyle(
-                        color: COLORS['success'],
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Resolved',
-                      style: TextStyle(color: Colors.white54, fontSize: 11),
-                    ),
-                  ],
-                ),
-                // Divider
-                Container(height: 36, width: 1, color: Colors.white12),
-                // Stat 3
-                Column(
-                  children: [
-                    Text(
-                      '98%',
-                      style: TextStyle(
-                        color: COLORS['warning'],
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Satisfaction',
-                      style: TextStyle(color: Colors.white54, fontSize: 11),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
 

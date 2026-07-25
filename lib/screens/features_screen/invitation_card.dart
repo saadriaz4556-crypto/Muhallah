@@ -120,10 +120,10 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
   final Color _darkColor = const Color(0xFF252a34);
   final Color _accentColor = const Color(0xFFff2e63);
   final Color _lightColor = const Color(0xFFeaeaea);
-  final Color _darkBackground = const Color(0xFF121212);
-  final Color _darkCardColor = const Color(0xFF1E1E1E);
-  final Color _darkTextColor = const Color(0xFFE0E0E0);
-  final Color _darkSecondaryText = const Color(0xFF9E9E9E);
+  final Color _darkBackground = const Color(0xFF252A34);
+  final Color _darkCardColor = const Color(0xFF2A303C);
+  final Color _darkTextColor = const Color(0xFFEAEAEA);
+  final Color _darkSecondaryText = Colors.white70;
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +263,8 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading invitations'));
+                    return const Center(
+                        child: Text('Error loading invitations'));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -302,13 +303,15 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
                       // Format for RecentInvitationCard
                       final dateTime = data['dateTime'] as Timestamp?;
                       if (dateTime != null) {
-                        data['date'] = DateFormat('MMM d, yyyy').format(dateTime.toDate());
-                        data['time'] = DateFormat('h:mm a').format(dateTime.toDate());
+                        data['date'] =
+                            DateFormat('MMM d, yyyy').format(dateTime.toDate());
+                        data['time'] =
+                            DateFormat('h:mm a').format(dateTime.toDate());
                       } else {
                         data['date'] = 'TBD';
                         data['time'] = '';
                       }
-                      
+
                       final catCode = data['category'] ?? '';
                       final catMatch = _categories.firstWhere(
                         (c) => c['categoryCode'] == catCode,
@@ -398,7 +401,7 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
       );
       return;
     }
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -732,6 +735,7 @@ class _CategoryCardState extends State<CategoryCard> {
           decoration: BoxDecoration(
             color: widget.darkCardColor,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
@@ -817,27 +821,26 @@ class _CategoryCardState extends State<CategoryCard> {
                       children: (widget.category['features'] as List<String>)
                           .take(2)
                           .map((feature) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.category['color'].withOpacity(
-                                  0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                feature,
-                                style: TextStyle(
-                                  color: widget.category['color'],
-                                  fontSize: 7,
-                                ),
-                              ),
-                            );
-                          })
-                          .toList(),
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.category['color'].withOpacity(
+                              0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            feature,
+                            style: TextStyle(
+                              color: widget.category['color'],
+                              fontSize: 7,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
@@ -902,7 +905,8 @@ class CreateOptionsSheet extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+                  border:
+                      Border.all(color: primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [

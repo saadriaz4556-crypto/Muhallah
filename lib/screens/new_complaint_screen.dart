@@ -85,16 +85,62 @@ class _NewComplaintScreenState extends State<NewComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('New Complaint'),
-        backgroundColor: const Color(0xFF252A34),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF08D9D6)),
-        foregroundColor: Colors.white,
-      ),
       backgroundColor: const Color(0xFF252A34),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Top Header Box (same style as other screens)
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF252A34),
+                    const Color(0xFF08D9D6).withValues(alpha: 0.2),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      } else {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A303C),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.arrow_back,
+                          color: Color(0xFFEAEAEA)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'New Complaint',
+                    style: TextStyle(
+                      color: Color(0xFFEAEAEA),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
@@ -257,11 +303,14 @@ class _NewComplaintScreenState extends State<NewComplaintScreen> {
                           ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ], // end inner Column children (form fields)
+            ), // end inner Column
+          ), // end Form
+        ), // end SingleChildScrollView
+            ), // end Expanded
+          ], // end outer Column children
+        ), // end outer Column
+      ), // end SafeArea
     );
   }
 }

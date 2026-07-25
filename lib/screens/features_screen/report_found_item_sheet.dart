@@ -300,7 +300,7 @@ class _ReportFoundItemSheetState extends State<ReportFoundItemSheet> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: _selectedCategory,
+                        initialValue: _selectedCategory,
                         dropdownColor: const Color(0xFF2A2A3E),
                         decoration: const InputDecoration(
                           filled: true,
@@ -410,11 +410,11 @@ class _ReportFoundItemSheetState extends State<ReportFoundItemSheet> {
                               child: OutlinedButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: ButtonStyle(
-                                  foregroundColor: MaterialStateProperty.all(
+                                  foregroundColor: WidgetStateProperty.all(
                                       const Color(0xFF00D4C8)),
-                                  overlayColor: MaterialStateProperty.all(
+                                  overlayColor: WidgetStateProperty.all(
                                       Colors.transparent),
-                                  side: MaterialStateProperty.all(
+                                  side: WidgetStateProperty.all(
                                     const BorderSide(
                                         color: Color(0xFF00D4C8)),
                                   ),
@@ -427,11 +427,11 @@ class _ReportFoundItemSheetState extends State<ReportFoundItemSheet> {
                               child: ElevatedButton(
                                 onPressed: _submitReport,
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
+                                  backgroundColor: WidgetStateProperty.all(
                                       const Color(0xFF00D4C8)),
-                                  foregroundColor: MaterialStateProperty.all(
+                                  foregroundColor: WidgetStateProperty.all(
                                       Colors.white),
-                                  overlayColor: MaterialStateProperty.all(
+                                  overlayColor: WidgetStateProperty.all(
                                       const Color(0xFF00D4C8)),
                                 ),
                                 child: const Text('SUBMIT'),

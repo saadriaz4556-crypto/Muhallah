@@ -431,7 +431,7 @@ class _ReportLostItemSheetState extends State<ReportLostItemSheet> {
 
               // Category
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 dropdownColor: const Color(0xFF2A303C),
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(

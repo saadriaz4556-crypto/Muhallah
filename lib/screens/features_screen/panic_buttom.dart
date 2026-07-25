@@ -2,25 +2,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // for haptic feedback
 
-void main() {
-  runApp(const PanicApp());
-}
-
 class PanicApp extends StatelessWidget {
   const PanicApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Emergency Panic Button',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF252A34),
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
-      home: const PanicScreen(),
-    );
+    // IMPORTANT: This must NOT wrap in its own MaterialApp when this
+    // screen is pushed into the main app's Navigator (via
+    // Navigator.push(... MaterialPageRoute(builder: (_) => const PanicApp()))
+    // from home_screen.dart). Wrapping in MaterialApp here creates a
+    // second, nested Navigator, which breaks back navigation (Navigator.of
+    // (context) inside PanicScreen would target this inner Navigator
+    // instead of the real app's Navigator, so the back button appears to
+    // do nothing).
+    return const PanicScreen();
   }
 }
 
@@ -219,230 +214,279 @@ class _PanicScreenState extends State<PanicScreen> {
     final buttonDiameter = size.width * 0.65;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: darkGray,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () {
-            // Fixed: Simply pop the current screen to go back to home
-            Navigator.of(context).pop();
-          },
-        ),
-        title: const Text('Emergency'),
-        centerTitle: true,
-        actions: [
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
-        ],
-      ),
+      backgroundColor: darkGray,
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 24),
-
-            // Status Message
-            if (_alertSent)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: teal.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: teal.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: teal, size: 24),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Help is on the way!',
-                              style: TextStyle(
-                                color: teal,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              'Emergency services have been notified',
-                              style: TextStyle(
-                                color: teal.withValues(alpha: 0.8),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: teal, size: 20),
-                        onPressed: _resetAlert,
-                      ),
-                    ],
-                  ),
+            // Top Header Box (same style as other screens)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    darkGray,
+                    teal.withValues(alpha: 0.2),
+                  ],
                 ),
-              )
-            else
-              const SizedBox.shrink(),
-
-            const SizedBox(height: 24),
-
-            // Main Panic Button
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: _alertSent ? _resetAlert : _showAlertOptions,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Pulsing Animation when alert is sent
-                      if (_alertSent)
-                        TweenAnimationBuilder(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          duration: const Duration(seconds: 2),
-                          builder: (context, value, child) {
-                            return Container(
-                              width: buttonDiameter + (value * 60),
-                              height: buttonDiameter + (value * 60),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: teal.withValues(alpha: 0.2 * (1 - value)),
-                              ),
-                            );
-                          },
-                        ),
-
-                      // Outer glow effect
-                      Container(
-                        width: buttonDiameter + 30,
-                        height: buttonDiameter + 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: _alertSent
-                                  ? teal.withValues(alpha: 0.4)
-                                  : panicRed.withValues(alpha: 0.4),
-                              blurRadius: 30,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Main button container
-                      Container(
-                        width: buttonDiameter,
-                        height: buttonDiameter,
-                        decoration: BoxDecoration(
-                          color: _alertSent ? teal : panicRed,
-                          shape: BoxShape.circle,
-                          gradient: _alertSent
-                              ? LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [teal, teal.withValues(alpha: 0.8)],
-                                )
-                              : LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [panicRed, panicRed.withValues(alpha: 0.8)],
-                                ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _alertSent
-                                  ? teal.withValues(alpha: 0.5)
-                                  : panicRed.withValues(alpha: 0.5),
-                              blurRadius: 20,
-                              spreadRadius: 2,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (_isLoading)
-                              const SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            else
-                              Icon(
-                                _alertSent
-                                    ? Icons.check
-                                    : Icons.warning_amber_rounded,
-                                size: 52,
-                                color: Colors.white,
-                              ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _alertSent ? 'Alert Sent!' : 'Panic Button',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            if (!_alertSent && !_isLoading)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  'Tap to activate',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Information Cards
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18.0),
-              child: Column(
+              child: Row(
                 children: [
-                  _InfoCard(
-                    icon: Icons.access_time_filled,
-                    title: 'Immediate Response',
-                    description:
-                        'Alert will be sent to nearby emergency contacts instantly',
-                    color: teal,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: darkGray.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.white, size: 18),
+                    ),
                   ),
-                  SizedBox(height: 12),
-                  _InfoCard(
-                    icon: Icons.location_pin,
-                    title: 'Location Sharing',
-                    description:
-                        'Your current location will be shared with responders',
-                    color: panicRed,
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Emergency',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
+            Expanded(
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+
+                  // Status Message
+                  if (_alertSent)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: teal.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: teal.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle,
+                                color: teal, size: 24),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Help is on the way!',
+                                    style: TextStyle(
+                                      color: teal,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Emergency services have been notified',
+                                    style: TextStyle(
+                                      color: teal.withValues(alpha: 0.8),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close,
+                                  color: teal, size: 20),
+                              onPressed: _resetAlert,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
+
+                  const SizedBox(height: 24),
+
+                  // Main Panic Button
+                  Expanded(
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: _alertSent ? _resetAlert : _showAlertOptions,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Pulsing Animation when alert is sent
+                            if (_alertSent)
+                              TweenAnimationBuilder(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(seconds: 2),
+                                builder: (context, value, child) {
+                                  return Container(
+                                    width: buttonDiameter + (value * 60),
+                                    height: buttonDiameter + (value * 60),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: teal.withValues(
+                                          alpha: 0.2 * (1 - value)),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                            // Outer glow effect
+                            Container(
+                              width: buttonDiameter + 30,
+                              height: buttonDiameter + 30,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _alertSent
+                                        ? teal.withValues(alpha: 0.4)
+                                        : panicRed.withValues(alpha: 0.4),
+                                    blurRadius: 30,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Main button container
+                            Container(
+                              width: buttonDiameter,
+                              height: buttonDiameter,
+                              decoration: BoxDecoration(
+                                color: _alertSent ? teal : panicRed,
+                                shape: BoxShape.circle,
+                                gradient: _alertSent
+                                    ? LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          teal,
+                                          teal.withValues(alpha: 0.8)
+                                        ],
+                                      )
+                                    : LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          panicRed,
+                                          panicRed.withValues(alpha: 0.8)
+                                        ],
+                                      ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _alertSent
+                                        ? teal.withValues(alpha: 0.5)
+                                        : panicRed.withValues(alpha: 0.5),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (_isLoading)
+                                    const SizedBox(
+                                      width: 40,
+                                      height: 40,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      _alertSent
+                                          ? Icons.check
+                                          : Icons.warning_amber_rounded,
+                                      size: 52,
+                                      color: Colors.white,
+                                    ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    _alertSent ? 'Alert Sent!' : 'Panic Button',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  if (!_alertSent && !_isLoading)
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        'Tap to activate',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Information Cards
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18.0),
+                    child: Column(
+                      children: [
+                        _InfoCard(
+                          icon: Icons.access_time_filled,
+                          title: 'Immediate Response',
+                          description:
+                              'Alert will be sent to nearby emergency contacts instantly',
+                          color: teal,
+                        ),
+                        SizedBox(height: 12),
+                        _InfoCard(
+                          icon: Icons.location_pin,
+                          title: 'Location Sharing',
+                          description:
+                              'Your current location will be shared with responders',
+                          color: panicRed,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+                ], // end inner Column children
+              ), // end inner Column
+            ), // end Expanded
+          ], // end outer Column children
+        ), // end outer Column
+      ), // end SafeArea
     );
   }
 }

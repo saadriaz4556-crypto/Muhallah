@@ -233,7 +233,7 @@ class _InvitationDetailScreenState extends State<InvitationDetailScreen> {
                     else
                       Container(
                         color: _darkCardColor,
-                        child: Icon(Icons.event, size: 80, color: _primaryColor.withOpacity(0.5)),
+                        child: Icon(Icons.event, size: 80, color: _primaryColor.withValues(alpha: 0.5)),
                       ),
                     // Gradient overlay to make text readable
                     Container(
@@ -242,9 +242,9 @@ class _InvitationDetailScreenState extends State<InvitationDetailScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withOpacity(0.4),
+                            Colors.black.withValues(alpha: 0.4),
                             Colors.transparent,
-                            _darkBackground.withOpacity(0.8),
+                            _darkBackground.withValues(alpha: 0.8),
                             _darkBackground,
                           ],
                         ),
@@ -258,7 +258,7 @@ class _InvitationDetailScreenState extends State<InvitationDetailScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -294,7 +294,7 @@ class _InvitationDetailScreenState extends State<InvitationDetailScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _primaryColor.withOpacity(0.2),
+                            color: _primaryColor.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(

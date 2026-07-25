@@ -8,8 +8,24 @@ import 'package:intl/intl.dart';
 import 'edit_profile_screen.dart';
 import 'utils/profile_constants.dart';
 import 'package:muhallah/models/business_model.dart';
-import 'package:muhallah/widgets/business_card_widget.dart' hide deepNavy, sectionBg, teal, coral, whiteish, successGreen, primaryGradient, headingStyle;
-import 'package:muhallah/screens/business_registration_screen.dart' hide deepNavy, sectionBg, teal, coral, whiteish, successGreen, primaryGradient, headingStyle;
+import 'package:muhallah/widgets/business_card_widget.dart'
+    hide
+        deepNavy,
+        sectionBg,
+        teal,
+        coral,
+        whiteish,
+        successGreen,
+        primaryGradient;
+import 'package:muhallah/screens/business_registration_screen.dart'
+    hide
+        deepNavy,
+        sectionBg,
+        teal,
+        coral,
+        whiteish,
+        successGreen,
+        primaryGradient;
 
 class ProfileDashboard extends StatefulWidget {
   const ProfileDashboard({super.key});
@@ -50,9 +66,9 @@ class _ProfileDashboardState extends State<ProfileDashboard>
     try {
       _currentUser = FirebaseAuth.instance.currentUser;
       _currentUser ??= await FirebaseAuth.instance
-            .authStateChanges()
-            .first
-            .timeout(const Duration(seconds: 2), onTimeout: () => null);
+          .authStateChanges()
+          .first
+          .timeout(const Duration(seconds: 2), onTimeout: () => null);
 
       _resolvedUid = _currentUser?.uid;
       if (_resolvedUid == null || _resolvedUid!.isEmpty) {
@@ -236,7 +252,8 @@ class _ProfileDashboardState extends State<ProfileDashboard>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.account_circle_outlined, size: 80, color: teal),
+                const Icon(Icons.account_circle_outlined,
+                    size: 80, color: teal),
                 const SizedBox(height: 16),
                 const Text(
                   "Not Logged In",
@@ -377,8 +394,8 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                                                   color: teal, width: 3),
                                               boxShadow: [
                                                 BoxShadow(
-                                                    color:
-                                                        teal.withValues(alpha: 0.3),
+                                                    color: teal.withValues(
+                                                        alpha: 0.3),
                                                     blurRadius: 15,
                                                     spreadRadius: 2),
                                               ],
@@ -447,7 +464,8 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: successGreen.withValues(alpha: 0.2),
+                                          color: successGreen.withValues(
+                                              alpha: 0.2),
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           border: Border.all(
@@ -659,7 +677,8 @@ class _ProfileDashboardState extends State<ProfileDashboard>
             color: sectionBg,
             elevation: 4,
             shadowColor: Colors.black26,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -672,7 +691,8 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                   _buildInfoRow(Icons.location_on, "Address",
                       _userData!['fullAddress'] ?? _userData!['address']),
                   const Divider(color: Colors.white10, height: 24),
-                  _buildInfoRow(Icons.perm_identity, "CNIC", _userData!['cnic']),
+                  _buildInfoRow(
+                      Icons.perm_identity, "CNIC", _userData!['cnic']),
                 ],
               ),
             ),
@@ -685,7 +705,9 @@ class _ProfileDashboardState extends State<ProfileDashboard>
                   .where('userId', isEqualTo: uid)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.docs.isEmpty) {
                   return const SizedBox.shrink();
                 }
 

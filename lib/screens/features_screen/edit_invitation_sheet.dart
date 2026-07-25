@@ -360,7 +360,7 @@ class _EditInvitationSheetState extends State<EditInvitationSheet> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _selectedCategory,
+          initialValue: _selectedCategory,
           dropdownColor: _darkCardColor,
           items: _categoryOptions.map((cat) {
             return DropdownMenuItem(
@@ -493,7 +493,7 @@ class _EditInvitationSheetState extends State<EditInvitationSheet> {
               color: _darkCardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _primaryColor.withOpacity(0.3),
+                color: _primaryColor.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -527,7 +527,7 @@ class _EditInvitationSheetState extends State<EditInvitationSheet> {
                             ),
                           ),
                           Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.black45,
                               shape: BoxShape.circle,
                             ),
@@ -687,7 +687,7 @@ class _EditInvitationSheetState extends State<EditInvitationSheet> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: _primaryColor,
+          activeThumbColor: _primaryColor,
         ),
       ],
     );
@@ -712,7 +712,7 @@ class _EditInvitationSheetState extends State<EditInvitationSheet> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           dropdownColor: _darkCardColor,
           items: items.map((item) {
             return DropdownMenuItem(

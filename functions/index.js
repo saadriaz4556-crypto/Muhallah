@@ -28,7 +28,8 @@ exports.cleanupLocalVibes = onSchedule("every 1 hours", async (event) => {
         }
 
         let deletedCount = 0;
-        const batch = db.batch();
+        let batchOperationCount = 0;
+        let batch = db.batch();
 
         for (const doc of snapshot.docs) {
             const data = doc.data();
@@ -46,16 +47,29 @@ exports.cleanupLocalVibes = onSchedule("every 1 hours", async (event) => {
             // 2. Mark as deleted in Firestore
             batch.update(doc.ref, { is_deleted: true });
             deletedCount++;
+            batchOperationCount++;
+
+            // 3. Remove mirrored announcement documents
+            const announcementsSnapshot = await db.collection('announcements')
+                .where('sourceCollection', '==', 'local_vibes_posts')
+                .where('sourcePostId', '==', doc.id)
+                .get();
+
+            for (const announcementDoc of announcementsSnapshot.docs) {
+                batch.delete(announcementDoc.ref);
+                batchOperationCount++;
+            }
 
             // NOTE: Batch limit is 500. For production, handle chunking if needed.
-            if (deletedCount >= 450) {
+            if (batchOperationCount >= 450) {
                 await batch.commit();
-                console.log(`Committed batch of 450 deletions.`);
-                deletedCount = 0;
+                console.log(`Committed batch of ${batchOperationCount} operations.`);
+                batch = db.batch();
+                batchOperationCount = 0;
             }
         }
 
-        if (deletedCount > 0) {
+        if (batchOperationCount > 0) {
             await batch.commit();
         }
 

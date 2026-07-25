@@ -50,40 +50,63 @@ class _AnnouncementTypeScreenState extends State<AnnouncementTypeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: const Color(0xFF08D9D6),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.of(context, rootNavigator: true).pop();
-            }
-          },
-        ),
-        title: const Text(
-          'Community Announcements',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF252A34),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF08D9D6)),
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: const Color(0xFF252A34),
       body: Column(
         children: [
-          // Gradient Header
+          // Top Header Box (same style as Local Services screen)
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF252A34),
+                  const Color(0xFF08D9D6).withValues(alpha: 0.2),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A303C),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child:
+                        const Icon(Icons.arrow_back, color: Color(0xFFEAEAEA)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Community Announcements',
+                  style: TextStyle(
+                    color: Color(0xFFEAEAEA),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFF2E63), Color(0xFF08D9D6)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
             child: const Text(
               'What would you like to share?',
               style: TextStyle(
@@ -300,7 +323,7 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
       });
 
       final url = await _uploadToCloudinary(image);
-      
+
       if (mounted) {
         setState(() {
           if (url != null) {
@@ -603,7 +626,8 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                               color: const Color(0xFF3A4250),
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
                                       ? loadingProgress.cumulativeBytesLoaded /
                                           loadingProgress.expectedTotalBytes!
                                       : null,
@@ -668,14 +692,21 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                               .collection('announcements')
                               .add({
                             'headline': widget.data.headline?.trim() ?? '',
-                            'description': widget.data.description?.trim() ?? '',
+                            'description':
+                                widget.data.description?.trim() ?? '',
                             'type': widget.data.type ?? 'General',
                             'postType': 'announcement',
                             'authorId':
                                 FirebaseAuth.instance.currentUser?.uid ?? '',
-                            'authorName': FirebaseAuth.instance.currentUser?.displayName?.isNotEmpty == true
-                                ? FirebaseAuth.instance.currentUser!.displayName!
-                                : (FirebaseAuth.instance.currentUser?.email?.split('@').first ?? 'Resident'),
+                            'authorName': FirebaseAuth.instance.currentUser
+                                        ?.displayName?.isNotEmpty ==
+                                    true
+                                ? FirebaseAuth
+                                    .instance.currentUser!.displayName!
+                                : (FirebaseAuth.instance.currentUser?.email
+                                        ?.split('@')
+                                        .first ??
+                                    'Resident'),
                             'createdAt': FieldValue.serverTimestamp(),
                             'imageUrl': widget.data.imageUrl ?? '',
                             'pinned': false,
@@ -686,8 +717,8 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('Announcement published successfully!'),
+                                content: Text(
+                                    'Announcement published successfully!'),
                               ),
                             );
                             Navigator.of(context)

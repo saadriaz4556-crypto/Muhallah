@@ -19,28 +19,25 @@ class LocalVibesService {
         .orderBy('expires_at', descending: true)
         .snapshots()
         .map((snapshot) {
-          final now = DateTime.now();
-          return snapshot.docs
-              .map((doc) {
-                final data = doc.data();
-                data['id'] = doc.id;
-                return data;
-              })
-              .where((post) {
-                final isDeleted = post['is_deleted'] == true;
-                final expiresAt = (post['expires_at'] as Timestamp?)?.toDate();
-                if (isDeleted) return false;
-                if (expiresAt == null) return false;
-                return expiresAt.isAfter(now);
-              })
-              .toList();
-        });
+      final now = DateTime.now();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).where((post) {
+        final isDeleted = post['is_deleted'] == true;
+        final expiresAt = (post['expires_at'] as Timestamp?)?.toDate();
+        if (isDeleted) return false;
+        if (expiresAt == null) return false;
+        return expiresAt.isAfter(now);
+      }).toList();
+    });
   }
 
   Future<Map<String, dynamic>> checkDailyLimits() async {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
-    
+
     final snapshot = await _firestore
         .collection('local_vibes_posts')
         .where('user_id', isEqualTo: currentUserId)
@@ -80,7 +77,8 @@ class LocalVibesService {
       if (mediaFile != null) {
         mediaUrl = await uploadToCloudinary(mediaFile);
         if (mediaUrl == null) {
-          throw Exception('Image upload to Cloudinary failed. Check your internet connection.');
+          throw Exception(
+              'Image upload to Cloudinary failed. Check your internet connection.');
         }
       }
 
@@ -100,11 +98,64 @@ class LocalVibesService {
         'is_deleted': false,
       });
 
+      await _createAnnouncementMirror(
+        localPostId: docRef.id,
+        postType: postType,
+        contentText: contentText,
+        mediaUrl: mediaUrl,
+      );
+
       return true;
     } catch (e) {
       debugPrint('Create Post Error: $e');
       rethrow; // Re-throw so UI catch block shows the real error
     }
+  }
+
+  Future<void> _createAnnouncementMirror({
+    required String localPostId,
+    required String postType,
+    String? contentText,
+    String? mediaUrl,
+  }) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final authorName = currentUser?.displayName?.isNotEmpty == true
+        ? currentUser!.displayName!
+        : 'Resident';
+
+    await _firestore.collection('announcements').add({
+      'postType': 'local_vibe',
+      'headline':
+          postType == 'photo' ? 'Shared a photo 📸' : 'Shared a funny vibe 😄',
+      'description': contentText ?? '',
+      'imageUrl': mediaUrl ?? '',
+      'authorName': authorName,
+      'authorId': currentUserId,
+      'createdAt': Timestamp.now(),
+      'likes': 0,
+      'comments': 0,
+      'shares': 0,
+      'pinned': false,
+      'verified': false,
+      'sourceCollection': 'local_vibes_posts',
+      'sourcePostId': localPostId,
+    });
+  }
+
+  Future<void> _deleteAnnouncementMirror(String localPostId) async {
+    final snapshot = await _firestore
+        .collection('announcements')
+        .where('sourceCollection', isEqualTo: 'local_vibes_posts')
+        .where('sourcePostId', isEqualTo: localPostId)
+        .get();
+
+    if (snapshot.docs.isEmpty) return;
+
+    final batch = _firestore.batch();
+    for (var announcementDoc in snapshot.docs) {
+      batch.delete(announcementDoc.reference);
+    }
+    await batch.commit();
   }
 
   Future<void> deletePost(String postId, {String? imageUrl}) async {
@@ -113,21 +164,23 @@ class LocalVibesService {
     await _firestore.collection('local_vibes_posts').doc(postId).update({
       'is_deleted': true,
     });
+
+    await _deleteAnnouncementMirror(postId);
   }
 
   // --- REACTIONS ---
-  
+
   Future<void> toggleReaction(String postId, String reactionType) async {
     final reactionRef = _firestore
         .collection('local_vibes_reactions')
         .doc('${postId}_$currentUserId');
-        
+
     final postRef = _firestore.collection('local_vibes_posts').doc(postId);
 
     await _firestore.runTransaction((transaction) async {
       final reactionDoc = await transaction.get(reactionRef);
       final postDoc = await transaction.get(postRef);
-      
+
       if (!postDoc.exists) return;
 
       int likes = postDoc.data()?['likes_count'] ?? 0;
@@ -135,7 +188,7 @@ class LocalVibesService {
 
       if (reactionDoc.exists) {
         final currentReaction = reactionDoc.data()?['reaction_type'];
-        
+
         // Remove old reaction
         if (currentReaction == 'like') likes--;
         if (currentReaction == 'haha') hahas--;
@@ -167,9 +220,9 @@ class LocalVibesService {
       });
     });
   }
-  
+
   // --- COMMENTS ---
-  
+
   Stream<List<Map<String, dynamic>>> getCommentsStream(String postId) {
     return _firestore
         .collection('local_vibes_comments')
@@ -183,7 +236,7 @@ class LocalVibesService {
     if (text.isEmpty || text.length > 150) return;
 
     final batch = _firestore.batch();
-    
+
     final commentRef = _firestore.collection('local_vibes_comments').doc();
     batch.set(commentRef, {
       'post_id': postId,
@@ -193,9 +246,7 @@ class LocalVibesService {
     });
 
     final postRef = _firestore.collection('local_vibes_posts').doc(postId);
-    batch.update(postRef, {
-      'comments_count': FieldValue.increment(1)
-    });
+    batch.update(postRef, {'comments_count': FieldValue.increment(1)});
 
     await batch.commit();
   }

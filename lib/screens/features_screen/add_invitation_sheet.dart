@@ -336,7 +336,7 @@ class _AddInvitationSheetState extends State<AddInvitationSheet> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _selectedCategory,
+          initialValue: _selectedCategory,
           dropdownColor: _darkCardColor,
           items: _categoryOptions.map((cat) {
             return DropdownMenuItem(
@@ -466,7 +466,7 @@ class _AddInvitationSheetState extends State<AddInvitationSheet> {
               color: _darkCardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _primaryColor.withOpacity(0.3),
+                color: _primaryColor.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -630,7 +630,7 @@ class _AddInvitationSheetState extends State<AddInvitationSheet> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: _primaryColor,
+          activeThumbColor: _primaryColor,
         ),
       ],
     );
@@ -655,7 +655,7 @@ class _AddInvitationSheetState extends State<AddInvitationSheet> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           dropdownColor: _darkCardColor,
           items: items.map((item) {
             return DropdownMenuItem(

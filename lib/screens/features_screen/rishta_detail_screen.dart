@@ -51,7 +51,7 @@ class _RishtaDetailScreenState extends State<RishtaDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
+            child: const Text(
               'Delete',
               style: TextStyle(color: Colors.red),
             ),
@@ -295,7 +295,7 @@ class _RishtaDetailScreenState extends State<RishtaDetailScreen> {
                         right: 16,
                         child: Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.green,
                             shape: BoxShape.circle,
                           ),

@@ -134,24 +134,63 @@ class _LostFoundHomeState extends State<LostFoundHome>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lost & Found'),
-        backgroundColor: const Color(0xFF252A34),
-        elevation: 0,
-      ),
+      backgroundColor: const Color(0xFF252A34),
       body: Column(
         children: [
-          // Header with gradient
+          // Top Header Box (same style as other screens)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF252A34),
+                  const Color(0xFF08D9D6).withValues(alpha: 0.2),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A303C),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child:
+                        const Icon(Icons.arrow_back, color: Color(0xFFEAEAEA)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Lost & Found',
+                  style: TextStyle(
+                    color: Color(0xFFEAEAEA),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Sub-header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0xFF252A34), Color(0xFF08D9D6)],
-              ),
-            ),
             child: const Text(
               'Report or browse lost & found items',
               style: TextStyle(

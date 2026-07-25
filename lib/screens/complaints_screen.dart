@@ -23,18 +23,18 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   // Colors matching the React Native version
   final colors = {
-    'background': const Color(0xFF121212),
-    'cardBackground': const Color(0xFF1E1E1E),
-    'surface': const Color(0xFF252525),
-    'primary': const Color(0xFF11988D),
-    'accent': const Color(0xFFFFC107),
-    'textPrimary': const Color(0xFFFFFFFF),
-    'textSecondary': const Color(0xFFB0B0B0),
-    'textTertiary': const Color(0xFF888888),
-    'border': const Color(0xFF333333),
-    'success': const Color(0xFF059669),
+    'background': const Color(0xFF252A34),
+    'cardBackground': const Color(0xFF2A303C),
+    'surface': const Color(0xFF3A4250),
+    'primary': const Color(0xFF08D9D6),
+    'accent': const Color(0xFFFF2E63),
+    'textPrimary': const Color(0xFFEAEAEA),
+    'textSecondary': Colors.white70,
+    'textTertiary': Colors.white38,
+    'border': Colors.white10,
+    'success': const Color(0xFF10B981),
     'warning': const Color(0xFFF59E0B),
-    'error': const Color(0xFFDC2626),
+    'error': const Color(0xFFFF2E63),
   };
 
   // Filter options
@@ -231,7 +231,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                     color: colors['primary'],
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.send, color: Colors.white, size: 20),
+                  child: const Icon(Icons.send, color: Colors.white, size: 20),
                 ),
               ),
             ]),
@@ -318,9 +318,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                         .collection('complaints')
                         .doc(item['id'])
                         .update({'reports': FieldValue.increment(1)});
-                    if (mounted)
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Complaint reported')));
+                    }
                   }
                 },
               ),
@@ -799,24 +800,26 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               decoration: BoxDecoration(
-                color: colors['cardBackground'],
-                border: Border(bottom: BorderSide(color: colors['border']!)),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors['background']!,
+                    colors['primary']!.withValues(alpha: 0.2),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
               child: Row(
                 children: [
                   // Left side
                   Row(
                     children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: colors['textPrimary'],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       showSearch
                           ? Expanded(
                               child: TextField(
