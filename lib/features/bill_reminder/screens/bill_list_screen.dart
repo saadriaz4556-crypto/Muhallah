@@ -153,22 +153,17 @@ class BillListScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ElevatedButton.icon(
+      floatingActionButton: SizedBox(
+        width: 56,
+        height: 56,
+        child: FloatingActionButton.small(
           onPressed: () => Get.to(() => const AddBillScreen()),
-          icon: const Icon(Icons.add),
-          label: const Text('Add New Bill'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _primaryColor,
-            foregroundColor: _darkBackground,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
+          backgroundColor: _primaryColor,
+          foregroundColor: _darkBackground,
+          child: const Icon(Icons.add, size: 24),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

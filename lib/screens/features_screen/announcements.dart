@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import '../../widgets/app_header_gradient.dart';
 
 void main() {
   runApp(const AnnouncementApp());
@@ -319,90 +320,64 @@ class _AnnouncementTypeScreenState extends State<AnnouncementTypeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF252A34),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xFF1A6B6B),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leadingWidth: 56,
+        leading: IconButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.pop(context),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A303C),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+        ),
+        title: const Text(
+          'Community Announcements',
+          style: TextStyle(color: Colors.white),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D5F5F), Color(0xFF08D9D6)],
+            ),
+          ),
+        ),
+      ),
       body: Column(
         children: [
-          // Top Header Box (same style as Local Services screen)
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-            decoration: BoxDecoration(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF252A34),
-                  const Color(0xFF08D9D6).withValues(alpha: 0.2),
-                ],
+                colors: [Color(0xFF0D5F5F), Color(0xFF1A6B6B)],
               ),
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(24),
                 bottomRight: Radius.circular(24),
               ),
             ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    } else {
-                      Navigator.of(context, rootNavigator: true).pop();
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A303C),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child:
-                        const Icon(Icons.arrow_back, color: Color(0xFFEAEAEA)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Community Announcements',
-                  style: TextStyle(
-                    color: Color(0xFFEAEAEA),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
             child: const Text(
               'What would you like to share?',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
-
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Color(0xFFB0B0B0)),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Select the type that best fits your announcement so it reaches the right people.',
-                    style: TextStyle(color: Color(0xFFB0B0B0)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
           // Category Grid
           Expanded(
             child: GridView.builder(
@@ -826,6 +801,7 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF08D9D6),
+                  foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -833,7 +809,7 @@ class _DetailsContentScreenState extends State<DetailsContentScreen> {
                 child: const Text(
                   'PREVIEW & PUBLISH',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -1005,6 +981,7 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF08D9D6),
+                  foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1014,11 +991,14 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Colors.black,
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text('CONFIRM & SEND'),
+                    : const Text(
+                        'CONFIRM & SEND',
+                        style: TextStyle(color: Colors.black),
+                      ),
               ),
             ),
           ],

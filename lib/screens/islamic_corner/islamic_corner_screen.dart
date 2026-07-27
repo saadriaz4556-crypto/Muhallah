@@ -6,6 +6,8 @@ import 'dart:async';
 import 'namaz_times_screen.dart';
 import 'qibla_screen.dart';
 import 'six_kalimat_screen.dart';
+import '../../widgets/app_header_gradient.dart';
+
 class IslamicCornerScreen extends StatefulWidget {
   const IslamicCornerScreen({super.key});
 
@@ -115,7 +117,6 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
         name = 'Isha';
         break;
       case Prayer.none:
-      default:
         name = 'Fajr';
         nextTime = _prayerTimes!.fajr.add(const Duration(days: 1));
         break;
@@ -294,14 +295,12 @@ class _IslamicCornerScreenState extends State<IslamicCornerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: deepNavy,
-      appBar: AppBar(
-        backgroundColor: deepNavy,
-        elevation: 0,
-        title: const Text(
+      appBar: const GradientHeaderAppBar(
+        title: 'Islamic Corner',
+        titleWidget: Text(
           'Islamic Corner',
           style: TextStyle(color: premiumWhite, fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: teal),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

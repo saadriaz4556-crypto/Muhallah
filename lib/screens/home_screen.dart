@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Added Firestore import
 import 'package:muhallah/screens/polls/polls_screen.dart';
 import 'package:muhallah/screens/business_registration_screen.dart';
 import 'package:muhallah/screens/business_directory_screen.dart';
+import 'package:muhallah/screens/features_screen/announcement_entry_screen.dart';
 import 'package:muhallah/screens/features_screen/announcements.dart';
 import 'package:muhallah/features/bill_reminder/screens/bill_list_screen.dart';
 import 'package:muhallah/screens/rental/rental_listings_screen.dart';
@@ -232,7 +233,8 @@ class _HomeScreenState extends State<HomeScreeen>
       case 'Announcements':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AnnouncementApp()),
+          MaterialPageRoute(
+              builder: (context) => const AnnouncementEntryScreen()),
         );
         break;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:muhallah/models/business_model.dart';
+import 'package:muhallah/widgets/app_header_gradient.dart';
 import 'package:muhallah/widgets/business_card_widget.dart';
 
 const Color deepNavy = Color(0xFF252A34);
@@ -14,7 +15,8 @@ class BusinessDirectoryScreen extends StatefulWidget {
   const BusinessDirectoryScreen({super.key});
 
   @override
-  State<BusinessDirectoryScreen> createState() => _BusinessDirectoryScreenState();
+  State<BusinessDirectoryScreen> createState() =>
+      _BusinessDirectoryScreenState();
 }
 
 class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
@@ -44,19 +46,15 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: deepNavy,
-      appBar: AppBar(
-        title: const Text('Business Directory'),
-        backgroundColor: deepNavy,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+      appBar: const GradientHeaderAppBar(
+        title: 'Business Directory',
+        titleWidget: Text(
+          'Business Directory',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -64,7 +62,8 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
           children: [
             // Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Container(
                 decoration: BoxDecoration(
                   color: inputBg,
@@ -79,11 +78,14 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Search by business name or category...',
-                    hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white30, size: 20),
+                    hintStyle:
+                        const TextStyle(color: Colors.white30, fontSize: 13),
+                    prefixIcon: const Icon(Icons.search,
+                        color: Colors.white30, size: 20),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear, color: Colors.white30, size: 18),
+                            icon: const Icon(Icons.clear,
+                                color: Colors.white30, size: 18),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -128,8 +130,10 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                       ),
                       selectedColor: teal,
                       backgroundColor: sectionBg,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
                       side: BorderSide(
                         color: isSelected ? teal : Colors.white12,
                         width: 1,
@@ -158,7 +162,8 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator(color: teal));
+                    return const Center(
+                        child: CircularProgressIndicator(color: teal));
                   }
 
                   final docs = snapshot.data?.docs ?? [];
@@ -167,11 +172,13 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.storefront_outlined, size: 64, color: Colors.white24),
+                          Icon(Icons.storefront_outlined,
+                              size: 64, color: Colors.white24),
                           SizedBox(height: 12),
                           Text(
                             'No businesses registered yet.',
-                            style: TextStyle(color: Colors.white54, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white54, fontSize: 14),
                           ),
                         ],
                       ),
@@ -189,17 +196,25 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
 
                   final filteredItems = allItems.where((item) {
                     // Category Filter
-                    if (_activeCategoryKey != 'All' && item.model.category != _activeCategoryKey) {
+                    if (_activeCategoryKey != 'All' &&
+                        item.model.category != _activeCategoryKey) {
                       return false;
                     }
                     // Search Query Filter
                     if (_searchQuery.isNotEmpty) {
                       final q = _searchQuery.toLowerCase();
-                      final matchesName = item.model.businessName.toLowerCase().contains(q);
-                      final matchesCategory = item.model.category.toLowerCase().contains(q);
-                      final matchesSubCategory = item.model.subCategory.toLowerCase().contains(q);
-                      final matchesOwner = item.model.ownerName.toLowerCase().contains(q);
-                      if (!matchesName && !matchesCategory && !matchesSubCategory && !matchesOwner) {
+                      final matchesName =
+                          item.model.businessName.toLowerCase().contains(q);
+                      final matchesCategory =
+                          item.model.category.toLowerCase().contains(q);
+                      final matchesSubCategory =
+                          item.model.subCategory.toLowerCase().contains(q);
+                      final matchesOwner =
+                          item.model.ownerName.toLowerCase().contains(q);
+                      if (!matchesName &&
+                          !matchesCategory &&
+                          !matchesSubCategory &&
+                          !matchesOwner) {
                         return false;
                       }
                     }
@@ -211,11 +226,13 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.search_off_rounded, size: 64, color: Colors.white24),
+                          Icon(Icons.search_off_rounded,
+                              size: 64, color: Colors.white24),
                           SizedBox(height: 12),
                           Text(
                             'No matching businesses found.',
-                            style: TextStyle(color: Colors.white54, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white54, fontSize: 14),
                           ),
                         ],
                       ),
@@ -223,7 +240,8 @@ class _BusinessDirectoryScreenState extends State<BusinessDirectoryScreen> {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
                       final item = filteredItems[index];

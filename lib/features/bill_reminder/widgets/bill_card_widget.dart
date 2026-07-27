@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import '../models/bill_model.dart';
-import '../screens/image_preview_screen.dart';
 import '../screens/add_bill_screen.dart';
 import '../controllers/bill_controller.dart';
+import '../../../widgets/fullscreen_image_viewer.dart';
 
 class BillCardWidget extends StatelessWidget {
   final BillModel bill;
@@ -15,12 +15,7 @@ class BillCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap ?? (bill.billImageUrl != null ? () {
-        Get.to(() => ImagePreviewScreen(
-          imagePath: bill.billImageUrl!,
-          title: bill.billType == 'Custom' ? (bill.customBillName ?? 'Bill') : bill.billType,
-        ));
-      } : null),
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -41,7 +36,9 @@ class BillCardWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        bill.billType == 'Custom' ? (bill.customBillName ?? 'Custom Bill') : bill.billType,
+                        bill.billType == 'Custom'
+                            ? (bill.customBillName ?? 'Custom Bill')
+                            : bill.billType,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -51,22 +48,37 @@ class BillCardWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Due: ${DateFormat('d MMM, yyyy').format(bill.dueDate)}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
                 if (bill.billImageUrl != null) ...[
-                  Hero(
-                    tag: bill.billImageUrl!,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.network(
-                        bill.billImageUrl!.replaceFirst('/upload/', '/upload/w_100,h_100,c_fill/'),
-                        height: 45,
-                        width: 45,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, color: Colors.grey, size: 24),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FullscreenImageViewer(imageUrl: bill.billImageUrl!),
+                        ),
+                      );
+                    },
+                    child: Hero(
+                      tag: bill.billImageUrl!,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.network(
+                          bill.billImageUrl!.replaceFirst(
+                              '/upload/', '/upload/w_100,h_100,c_fill/'),
+                          height: 45,
+                          width: 45,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image,
+                                  color: Colors.grey, size: 24),
+                        ),
                       ),
                     ),
                   ),
@@ -84,7 +96,8 @@ class BillCardWidget extends StatelessWidget {
                       await controller.deleteBill(bill.id);
                     }
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
                     const PopupMenuItem<String>(
                       value: 'edit',
                       child: Row(
@@ -126,7 +139,8 @@ class BillCardWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF3A4154),
                     borderRadius: BorderRadius.circular(6),
@@ -143,7 +157,8 @@ class BillCardWidget extends StatelessWidget {
                 padding: EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.auto_awesome, size: 14, color: Color(0xFFFFB800)),
+                    Icon(Icons.auto_awesome,
+                        size: 14, color: Color(0xFFFFB800)),
                     SizedBox(width: 4),
                     Text(
                       'Date auto-detected via AI',

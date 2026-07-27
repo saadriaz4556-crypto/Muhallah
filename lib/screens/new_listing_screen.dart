@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:muhallah/services/marketplace_service.dart';
+import 'package:muhallah/widgets/phone_input_field.dart';
 
 class NewListingScreen extends StatefulWidget {
   const NewListingScreen({super.key});
@@ -63,7 +64,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
       'price': _priceController.text.trim(),
       'description': _descriptionController.text.trim(),
       'location': _locationController.text.trim(),
-      'contact': _contactController.text.trim(),
+      'contact': PhoneInputField.formatToE164(_contactController.text),
       'userName': userName,
     };
 
@@ -224,7 +225,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
                         decoration: InputDecoration(
                           labelText: 'Price',
                           labelStyle: const TextStyle(color: Colors.white54),
-                          prefixText: '\$ ',
+                          prefixText: 'Rs ',
                           prefixStyle: const TextStyle(color: Colors.white),
                           filled: true,
                           fillColor: const Color(0xFF2A303C),
@@ -293,25 +294,9 @@ class _NewListingScreenState extends State<NewListingScreen> {
                                 : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      PhoneInputField(
                         controller: _contactController,
-                        keyboardType: TextInputType.phone,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Contact Number',
-                          labelStyle: const TextStyle(color: Colors.white54),
-                          filled: true,
-                          fillColor: const Color(0xFF2A303C),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white10),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                const BorderSide(color: Color(0xFF08D9D6)),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        label: 'Contact Number',
                       ),
                       const SizedBox(height: 24),
                       const Text(

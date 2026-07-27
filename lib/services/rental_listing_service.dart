@@ -28,4 +28,9 @@ class RentalListingService {
       'status': 'rented',
     });
   }
+
+  // Delete a listing
+  Future<void> deleteListing(String listingId) async {
+    await _firestore.collection(_collection).doc(listingId).delete();
+  }
 }
