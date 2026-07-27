@@ -37,7 +37,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.billToEdit?.customBillName ?? '');
+    _nameController =
+        TextEditingController(text: widget.billToEdit?.customBillName ?? '');
     _amountController = TextEditingController(
       text: widget.billToEdit?.amount != null
           ? widget.billToEdit!.amount.toStringAsFixed(0)
@@ -52,7 +53,9 @@ class _AddBillScreenState extends State<AddBillScreen> {
       dueDate = bill.dueDate;
       reminderDaysBefore = bill.reminderDaysBefore;
       billImageUrl = bill.billImageUrl;
-      if (reminderDaysBefore != 0 && reminderDaysBefore != 1 && reminderDaysBefore != 3) {
+      if (reminderDaysBefore != 0 &&
+          reminderDaysBefore != 1 &&
+          reminderDaysBefore != 3) {
         isManualReminder = true;
       }
     }
@@ -72,7 +75,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1F36),
         elevation: 0,
-        title: Text(widget.billToEdit != null ? 'Edit Bill' : 'Add Bill', style: const TextStyle(color: Colors.white)),
+        title: Text(widget.billToEdit != null ? 'Edit Bill' : 'Add Bill',
+            style: const TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
@@ -86,7 +90,10 @@ class _AddBillScreenState extends State<AddBillScreen> {
             // Section 1: Bill Information
             const Text(
               'Bill Information',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -95,7 +102,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
             if (billTypeError != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(billTypeError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                child: Text(billTypeError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12)),
               ),
             const SizedBox(height: 20),
 
@@ -128,7 +136,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
             if (amountError != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(amountError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                child: Text(amountError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12)),
               ),
             const SizedBox(height: 20),
 
@@ -140,7 +149,9 @@ class _AddBillScreenState extends State<AddBillScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF252C42),
                   border: Border.all(
-                    color: dueDateError != null ? Colors.red : Colors.grey.withValues(alpha: 0.3),
+                    color: dueDateError != null
+                        ? Colors.red
+                        : Colors.grey.withValues(alpha: 0.3),
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -150,13 +161,15 @@ class _AddBillScreenState extends State<AddBillScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Due Date', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        const Text('Due Date',
+                            style: TextStyle(color: Colors.grey, fontSize: 12)),
                         const SizedBox(height: 4),
                         Text(
                           dueDate != null
                               ? DateFormat('d MMMM, yyyy').format(dueDate!)
                               : 'Select date',
-                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.white),
                         ),
                       ],
                     ),
@@ -168,14 +181,18 @@ class _AddBillScreenState extends State<AddBillScreen> {
             if (dueDateError != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(dueDateError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                child: Text(dueDateError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12)),
               ),
             const SizedBox(height: 32),
 
             // Section 2: Bill Image Upload
             const Text(
               'Upload Bill Image (Optional)',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -194,7 +211,10 @@ class _AddBillScreenState extends State<AddBillScreen> {
             // Section 3: Reminder
             const Text(
               'When should we remind you?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 16),
             _buildReminderSelector(),
@@ -204,7 +224,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
             ElevatedButton(
               onPressed: isSaving ? null : _saveBill,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isSaving ? Colors.grey : const Color(0xFF00BCD4),
+                backgroundColor:
+                    isSaving ? Colors.grey : const Color(0xFF00BCD4),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -220,7 +241,9 @@ class _AddBillScreenState extends State<AddBillScreen> {
                       ),
                     )
                   : Text(
-                      widget.billToEdit != null ? 'Save Changes' : 'Save & Set Reminder',
+                      widget.billToEdit != null
+                          ? 'Save Changes'
+                          : 'Save & Set Reminder',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -236,7 +259,15 @@ class _AddBillScreenState extends State<AddBillScreen> {
   }
 
   Widget _buildBillTypeSelector() {
-    final types = ['Electricity', 'Gas', 'Water', 'Internet', 'Phone', 'Rent', 'Custom'];
+    final types = [
+      'Electricity',
+      'Gas',
+      'Water',
+      'Internet',
+      'Phone',
+      'Rent',
+      'Custom'
+    ];
     return SizedBox(
       height: 45,
       child: ListView(
@@ -252,10 +283,14 @@ class _AddBillScreenState extends State<AddBillScreen> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF00BCD4) : const Color(0xFF252C42),
+                color: isSelected
+                    ? const Color(0xFF00BCD4)
+                    : const Color(0xFF252C42),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withValues(alpha: 0.3),
+                  color: isSelected
+                      ? const Color(0xFF00BCD4)
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               child: Center(
@@ -263,7 +298,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   type,
                   style: TextStyle(
                     color: isSelected ? Colors.black : Colors.grey,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
@@ -312,9 +348,13 @@ class _AddBillScreenState extends State<AddBillScreen> {
   Widget _buildUploadImageButton() {
     return ElevatedButton.icon(
       onPressed: isUploading ? null : _pickAndUploadImage,
-      icon: isUploading 
-        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF00BCD4)))
-        : const Icon(Icons.photo_camera),
+      icon: isUploading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: Color(0xFF00BCD4)))
+          : const Icon(Icons.photo_camera),
       label: Text(isUploading ? 'Uploading...' : '📷 Upload Bill Image'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -335,7 +375,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: const Color(0xFF252C42),
-            border: Border.all(color: const Color(0xFF00BCD4).withValues(alpha: 0.3)),
+            border: Border.all(
+                color: const Color(0xFF00BCD4).withValues(alpha: 0.3)),
           ),
           child: Stack(
             children: [
@@ -347,11 +388,14 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   width: double.infinity,
                   loadingBuilder: (context, child, progress) {
                     if (progress == null) return child;
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFF00BCD4)));
+                    return const Center(
+                        child: CircularProgressIndicator(
+                            color: Color(0xFF00BCD4)));
                   },
                   errorBuilder: (context, error, stackTrace) {
                     return const Center(
-                      child: Text('Image loaded', style: TextStyle(color: Colors.grey)),
+                      child: Text('Image loaded',
+                          style: TextStyle(color: Colors.grey)),
                     );
                   },
                 ),
@@ -367,7 +411,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
                       shape: BoxShape.circle,
                     ),
                     padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.close, color: Colors.white, size: 20),
+                    child:
+                        const Icon(Icons.close, color: Colors.white, size: 20),
                   ),
                 ),
               ),
@@ -403,14 +448,17 @@ class _AddBillScreenState extends State<AddBillScreen> {
         Row(
           children: options.map((option) {
             final isSelected = (option['value'] == -1 && isManualReminder) ||
-                (option['value'] != -1 && !isManualReminder && reminderDaysBefore == option['value']);
+                (option['value'] != -1 &&
+                    !isManualReminder &&
+                    reminderDaysBefore == option['value']);
             return Expanded(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     if (option['value'] == -1) {
                       isManualReminder = true;
-                      reminderDaysBefore = widget.billToEdit?.reminderDaysBefore ?? 7;
+                      reminderDaysBefore =
+                          widget.billToEdit?.reminderDaysBefore ?? 7;
                     } else {
                       isManualReminder = false;
                       reminderDaysBefore = option['value'] as int;
@@ -421,10 +469,14 @@ class _AddBillScreenState extends State<AddBillScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF00BCD4) : const Color(0xFF252C42),
+                    color: isSelected
+                        ? const Color(0xFF00BCD4)
+                        : const Color(0xFF252C42),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF00BCD4) : Colors.grey.withValues(alpha: 0.3),
+                      color: isSelected
+                          ? const Color(0xFF00BCD4)
+                          : Colors.grey.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Center(
@@ -433,7 +485,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: isSelected ? Colors.black : Colors.grey,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                         fontSize: 12,
                       ),
                     ),
@@ -448,7 +501,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
           _buildTextField(
             label: 'Enter Days Before Due Date',
             placeholder: '7',
-            controller: TextEditingController(text: reminderDaysBefore.toString()),
+            controller:
+                TextEditingController(text: reminderDaysBefore.toString()),
             keyboardType: TextInputType.number,
             onChanged: (val) {
               try {
@@ -506,7 +560,7 @@ class _AddBillScreenState extends State<AddBillScreen> {
           billImageUrl = url;
           isUploading = false;
         });
-        
+
         Get.snackbar(
           '✅ Image Uploaded!',
           'Image saved to cloud: ${file.name}',
@@ -559,7 +613,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
 
     // Create bill
     final bill = BillModel(
-      id: widget.billToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.billToEdit?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       billType: selectedBillType,
       customBillName: customBillName,
       amount: amount!,
@@ -574,8 +629,8 @@ class _AddBillScreenState extends State<AddBillScreen> {
     // Get controller and save
     final controller = Get.find<BillController>();
     controller.addBill(bill).then((success) {
-      if (success) {
-        Get.back();
+      if (success && mounted) {
+        Navigator.of(context).pop();
       } else {
         setState(() => isSaving = false);
       }

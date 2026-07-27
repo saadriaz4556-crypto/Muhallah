@@ -3,6 +3,7 @@ import '../../services/polls_service.dart';
 import '../../models/poll_model.dart';
 import '../../models/vote_model.dart';
 import '../../widgets/poll_card.dart';
+import '../../widgets/app_header_gradient.dart';
 import 'create_poll_screen.dart';
 
 class PollsScreen extends StatefulWidget {
@@ -47,25 +48,27 @@ class _PollsScreenState extends State<PollsScreen>
 
     return Scaffold(
       backgroundColor: background,
-      appBar: AppBar(
-        backgroundColor: background,
-        elevation: 0,
-        title: const Text(
+      appBar: GradientHeaderAppBar(
+        title: 'Polls & Voting',
+        titleWidget: const Text(
           'Polls & Voting',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: accent,
-          labelColor: accent,
-          unselectedLabelColor: Colors.white54,
-          tabs: const [
-            Tab(text: 'Active Polls'),
-            Tab(text: 'Completed'),
-            Tab(text: 'My Votes'),
-            Tab(text: 'Create Poll'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            indicatorColor: accent,
+            labelColor: accent,
+            unselectedLabelColor: Colors.white54,
+            tabs: const [
+              Tab(text: 'Active Polls'),
+              Tab(text: 'Completed'),
+              Tab(text: 'My Votes'),
+              Tab(text: 'Create Poll'),
+            ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -190,7 +193,8 @@ class _PollsScreenState extends State<PollsScreen>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF08D9D6).withValues(alpha: 0.1),
+                                color: const Color(0xFF08D9D6)
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -268,8 +272,8 @@ class _PollsScreenState extends State<PollsScreen>
           const SizedBox(height: 16),
           Text(
             message,
-            style:
-                TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
           ),
         ],
       ),

@@ -1024,10 +1024,15 @@ class _FeedScreenState extends State<FeedScreen> {
                           );
                         }
                         final posts = snapshot.data!;
+                        final filteredPosts = activeFilter == 'all'
+                            ? posts
+                            : posts
+                                .where((p) => p['type'] == activeFilter)
+                                .toList();
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
-                            children: posts.map<Widget>((post) {
+                            children: filteredPosts.map<Widget>((post) {
                               if (post['isFoundItem'] == true) {
                                 return _buildFoundItemCard(post);
                               }
@@ -1135,7 +1140,9 @@ class _FeedScreenState extends State<FeedScreen> {
           } else {
             combined.add({
               'id': doc.id,
-              'type': data['postType'] ?? 'announcement',
+              'type': data['postType'] == 'announcement'
+                  ? 'announcements'
+                  : (data['postType'] ?? 'announcements'),
               'author': data['authorName'] ?? '',
               'time': _timeAgo(data['createdAt']),
               'verified': data['verified'] ?? false,

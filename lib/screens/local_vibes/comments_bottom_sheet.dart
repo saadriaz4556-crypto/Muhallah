@@ -30,15 +30,26 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
 
   void _submitComment() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSubmitting) return;
 
     setState(() => _isSubmitting = true);
-    await _service.addComment(widget.postId, text);
-    if (mounted) {
-      setState(() {
-        _isSubmitting = false;
-        _controller.clear();
-      });
+
+    try {
+      await _service.addComment(widget.postId, text);
+      if (mounted) {
+        setState(() {
+          _controller.clear();
+          _isSubmitting = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Could not send comment. Please try again.')),
+        );
+      }
     }
   }
 
@@ -77,8 +88,18 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             child: StreamBuilder<List<Map<String, dynamic>>>(
               stream: _service.getCommentsStream(widget.postId),
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                      'Unable to load comments right now.',
+                      style: TextStyle(color: Colors.white54),
+                    ),
+                  );
+                }
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: accentTeal));
+                  return const Center(
+                      child: CircularProgressIndicator(color: accentTeal));
                 }
 
                 final comments = snapshot.data ?? [];
@@ -94,10 +115,12 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                 return ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: comments.length,
-                  separatorBuilder: (_, __) => const Divider(color: Colors.white10),
+                  separatorBuilder: (_, __) =>
+                      const Divider(color: Colors.white10),
                   itemBuilder: (context, index) {
                     final comment = comments[index];
-                    final date = (comment['created_at'] as dynamic)?.toDate() ?? DateTime.now();
+                    final date = (comment['created_at'] as dynamic)?.toDate() ??
+                        DateTime.now();
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -107,7 +130,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                           const CircleAvatar(
                             radius: 16,
                             backgroundColor: Colors.white12,
-                            child: Icon(Icons.person, color: Colors.white54, size: 20),
+                            child: Icon(Icons.person,
+                                color: Colors.white54, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -115,7 +139,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Text(
                                       'Resident',
@@ -137,7 +162,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                 const SizedBox(height: 4),
                                 Text(
                                   comment['comment_text'] ?? '',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                                  style: const TextStyle(
+                                      color: Colors.white70, fontSize: 14),
                                 ),
                               ],
                             ),
@@ -173,7 +199,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       ),
                       filled: true,
                       fillColor: Colors.white10,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                     ),
                   ),
                 ),
@@ -184,7 +211,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                         child: SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: accentTeal),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: accentTeal),
                         ),
                       )
                     : IconButton(

@@ -18,7 +18,7 @@ class NewPostScreen extends StatefulWidget {
 
 class _NewPostScreenState extends State<NewPostScreen> {
   final _service = LocalVibesService();
-  
+
   Map<String, dynamic> _limits = {'jokesLeft': 5};
   bool _isLoadingLimits = true;
   bool _isUploading = false;
@@ -61,18 +61,26 @@ class _NewPostScreenState extends State<NewPostScreen> {
   Future<void> _pickImage() async {
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-      if (picked != null) {
-        final file = File(picked.path);
-        final size = await file.length();
-        if (size > 5 * 1024 * 1024) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Photo size must be under 5MB')),
-            );
-          }
-          return;
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (picked == null) {
+        return;
+      }
+
+      final file = File(picked.path);
+      final size = await file.length();
+      if (size > 5 * 1024 * 1024) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Photo size must be under 5MB')),
+          );
         }
+        return;
+      }
+
+      if (mounted) {
         setState(() {
           _selectedFile = file;
         });
@@ -89,7 +97,8 @@ class _NewPostScreenState extends State<NewPostScreen> {
     final text = _jokeController.text.trim();
     if (text.isEmpty && _selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please write something or select a photo!')),
+        const SnackBar(
+            content: Text('Please write something or select a photo!')),
       );
       return;
     }
@@ -151,7 +160,8 @@ class _NewPostScreenState extends State<NewPostScreen> {
       appBar: AppBar(
         backgroundColor: bgDeepNavy,
         elevation: 0,
-        title: const Text('Add a Funny Vibe 🔥', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Add a Funny Vibe 🔥',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: jokesLeft <= 0
@@ -168,8 +178,9 @@ class _NewPostScreenState extends State<NewPostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Remaining funny posts today: $jokesLeft',
-                    style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                    'Remaining posts today: $jokesLeft',
+                    style: const TextStyle(
+                        color: Colors.greenAccent, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -208,8 +219,10 @@ class _NewPostScreenState extends State<NewPostScreen> {
                             onTap: () => setState(() => _selectedFile = null),
                             child: CircleAvatar(
                               radius: 14,
-                              backgroundColor: Colors.black.withValues(alpha: 0.6),
-                              child: const Icon(Icons.close, size: 16, color: Colors.white),
+                              backgroundColor:
+                                  Colors.black.withValues(alpha: 0.6),
+                              child: const Icon(Icons.close,
+                                  size: 16, color: Colors.white),
                             ),
                           ),
                         ),
@@ -221,18 +234,24 @@ class _NewPostScreenState extends State<NewPostScreen> {
                     onTap: _pickImage,
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 4.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _selectedFile == null ? Icons.add_photo_alternate_outlined : Icons.cached,
+                            _selectedFile == null
+                                ? Icons.add_photo_alternate_outlined
+                                : Icons.cached,
                             color: accentTeal,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _selectedFile == null ? 'Add Photo (Optional)' : 'Change Photo',
-                            style: const TextStyle(color: accentTeal, fontWeight: FontWeight.bold),
+                            _selectedFile == null
+                                ? 'Add Photo (Optional)'
+                                : 'Change Photo',
+                            style: const TextStyle(
+                                color: accentTeal, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -260,12 +279,17 @@ class _NewPostScreenState extends State<NewPostScreen> {
                       onPressed: _isUploading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentTeal,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         disabledBackgroundColor: Colors.grey,
                       ),
                       child: _isUploading
                           ? const CircularProgressIndicator(color: bgDeepNavy)
-                          : const Text('Post Vibe', style: TextStyle(color: bgDeepNavy, fontSize: 16, fontWeight: FontWeight.bold)),
+                          : const Text('Post Vibe',
+                              style: TextStyle(
+                                  color: bgDeepNavy,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],

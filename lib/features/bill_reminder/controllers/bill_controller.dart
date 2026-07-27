@@ -42,11 +42,19 @@ class BillController extends GetxController {
       // Save to Hive
       await billsBox.put(bill.id, bill);
 
-      // Schedule notification
-      await NotificationService.scheduleNotification(bill);
+      try {
+        // Schedule notification (best effort; do not block bill save)
+        await NotificationService.scheduleNotification(bill);
+      } catch (e) {
+        debugPrint('Notification scheduling failed: $e');
+      }
 
-      // Reload
-      await loadBills();
+      try {
+        // Reload
+        await loadBills();
+      } catch (e) {
+        debugPrint('Reload failed after bill save: $e');
+      }
 
       Get.snackbar(
         '✅ Bill Saved!',
@@ -56,7 +64,8 @@ class BillController extends GetxController {
       );
       return true;
     } catch (e) {
-      Get.snackbar('❌ Error', 'Failed to save bill', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('❌ Error', 'Failed to save bill',
+          backgroundColor: Colors.red, colorText: Colors.white);
       return false;
     }
   }
@@ -64,7 +73,7 @@ class BillController extends GetxController {
   Future<bool> deleteBill(String billId) async {
     try {
       final bill = billsBox.get(billId);
-      
+
       // Cancel notification
       await NotificationService.cancelNotification(billId);
 
@@ -74,10 +83,12 @@ class BillController extends GetxController {
       // Reload
       await loadBills();
 
-      Get.snackbar('✅ Bill Deleted', '', backgroundColor: Colors.black54, colorText: Colors.white);
+      Get.snackbar('✅ Bill Deleted', '',
+          backgroundColor: Colors.black54, colorText: Colors.white);
       return true;
     } catch (e) {
-      Get.snackbar('❌ Error', 'Failed to delete bill', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('❌ Error', 'Failed to delete bill',
+          backgroundColor: Colors.red, colorText: Colors.white);
       return false;
     }
   }

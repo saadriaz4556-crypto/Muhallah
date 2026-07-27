@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/rental_listing_model.dart';
 import '../../services/rental_listing_service.dart';
+import '../../widgets/app_header_gradient.dart';
 import 'add_rental_listing_screen.dart';
 import 'rental_detail_screen.dart';
 
@@ -29,31 +30,34 @@ class _RentalListingsScreenState extends State<RentalListingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgDeepNavy,
-      appBar: AppBar(
-        backgroundColor: bgDeepNavy,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: accentTeal),
-        title: const Text(
+      appBar: const GradientHeaderAppBar(
+        title: 'House for Rent',
+        titleWidget: Text(
           'House for Rent',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: accentTeal, size: 28),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddRentalListingScreen(),
-                ),
-              );
-            },
+      ),
+      floatingActionButton: SizedBox(
+        width: 62,
+        height: 62,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddRentalListingScreen(),
+              ),
+            );
+          },
+          backgroundColor: accentTeal,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
-        ],
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
       ),
       body: Column(
         children: [
@@ -114,11 +118,12 @@ class _RentalListingsScreenState extends State<RentalListingsScreen> {
                 }
 
                 final allListings = snapshot.data ?? [];
-                
+
                 // Filter listings based on type
                 final filteredListings = allListings.where((listing) {
                   if (_selectedFilter == 'All') return true;
-                  String mappedType = listing.type.replaceAll('_', ' ').toLowerCase();
+                  String mappedType =
+                      listing.type.replaceAll('_', ' ').toLowerCase();
                   return mappedType == _selectedFilter.toLowerCase();
                 }).toList();
 
@@ -146,11 +151,13 @@ class _RentalListingsScreenState extends State<RentalListingsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.home_work_outlined, color: accentTeal.withValues(alpha: 0.5), size: 80),
+          Icon(Icons.home_work_outlined,
+              color: accentTeal.withValues(alpha: 0.5), size: 80),
           const SizedBox(height: 16),
           const Text(
             'No listings found',
-            style: TextStyle(color: lightText, fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: lightText, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -214,7 +221,8 @@ class RentalListingCard extends StatelessWidget {
                             height: 200,
                             color: Colors.white10,
                             child: const Center(
-                              child: CircularProgressIndicator(color: accentTeal),
+                              child:
+                                  CircularProgressIndicator(color: accentTeal),
                             ),
                           );
                         },
@@ -222,7 +230,8 @@ class RentalListingCard extends StatelessWidget {
                           return Container(
                             height: 200,
                             color: Colors.white10,
-                            child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                            child: const Icon(Icons.broken_image,
+                                color: Colors.grey, size: 50),
                           );
                         },
                       )
@@ -230,14 +239,16 @@ class RentalListingCard extends StatelessWidget {
                         height: 200,
                         width: double.infinity,
                         color: Colors.white10,
-                        child: const Icon(Icons.image, color: Colors.grey, size: 50),
+                        child: const Icon(Icons.image,
+                            color: Colors.grey, size: 50),
                       ),
                 // Type Badge
                 Positioned(
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: typeColor,
                       borderRadius: BorderRadius.circular(20),
@@ -257,9 +268,12 @@ class RentalListingCard extends StatelessWidget {
                   top: 12,
                   right: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: listing.status == 'available' ? statusGreen : statusRed,
+                      color: listing.status == 'available'
+                          ? statusGreen
+                          : statusRed,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -274,7 +288,7 @@ class RentalListingCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -290,16 +304,18 @@ class RentalListingCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Location
                   Row(
                     children: [
-                      const Icon(Icons.location_on, color: Colors.grey, size: 16),
+                      const Icon(Icons.location_on,
+                          color: Colors.grey, size: 16),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           listing.location,
-                          style: const TextStyle(color: lightText, fontSize: 14),
+                          style:
+                              const TextStyle(color: lightText, fontSize: 14),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -307,19 +323,22 @@ class RentalListingCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Info Row (Rooms, Baths, Furnished)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildIconInfo(Icons.king_bed_outlined, '${listing.rooms} Rooms'),
-                      _buildIconInfo(Icons.bathtub_outlined, '${listing.bathrooms} Baths'),
-                      _buildIconInfo(Icons.chair_outlined, listing.furnishingStatus.toUpperCase()),
+                      _buildIconInfo(
+                          Icons.king_bed_outlined, '${listing.rooms} Rooms'),
+                      _buildIconInfo(
+                          Icons.bathtub_outlined, '${listing.bathrooms} Baths'),
+                      _buildIconInfo(Icons.chair_outlined,
+                          listing.furnishingStatus.toUpperCase()),
                     ],
                   ),
-                  
+
                   const Divider(color: Colors.white10, height: 24),
-                  
+
                   // Available From
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,8 +348,12 @@ class RentalListingCard extends StatelessWidget {
                         style: TextStyle(color: Colors.grey[400], fontSize: 12),
                       ),
                       Text(
-                        DateFormat('dd MMM, yyyy').format(listing.availableFrom),
-                        style: const TextStyle(color: lightText, fontSize: 12, fontWeight: FontWeight.bold),
+                        DateFormat('dd MMM, yyyy')
+                            .format(listing.availableFrom),
+                        style: const TextStyle(
+                            color: lightText,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

@@ -8,6 +8,7 @@ import '../../features/jobs/models/job_model.dart';
 import '../../features/jobs/models/job_application_model.dart';
 import '../../features/jobs/services/job_application_service.dart';
 import 'job_applications_screen.dart';
+import '../../widgets/app_header_gradient.dart';
 
 // --- THEME COLORS ---
 const Color bgDeepNavy = Color(0xFF252A34);
@@ -77,18 +78,29 @@ class _JobsHomeScreenState extends State<JobsHomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Jobs 💼'),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: accentTeal,
-          labelColor: accentTeal,
-          unselectedLabelColor: lightText,
-          tabs: const [
-            Tab(text: "Browse Jobs"),
-            Tab(text: "My Applications"),
-            Tab(text: "Posted by Me"),
-          ],
+      appBar: GradientHeaderAppBar(
+        title: 'Jobs 💼',
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: accentTeal,
+            labelColor: accentTeal,
+            unselectedLabelColor: lightText,
+            tabs: const [
+              Tab(text: "Browse Jobs"),
+              Tab(text: "My Applications"),
+              Tab(text: "Posted by Me"),
+            ],
+          ),
+        ),
+        titleWidget: const Text(
+          'Jobs 💼',
+          style: TextStyle(
+            color: lightText,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: TabBarView(
@@ -99,18 +111,16 @@ class _JobsHomeScreenState extends State<JobsHomeScreen>
           PostedJobsScreen(),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const PostJobScreen()),
           );
         },
-        icon: const Icon(Icons.add, color: bgDeepNavy),
-        label: const Text(
-          "Post a Job",
-          style: TextStyle(color: bgDeepNavy, fontWeight: FontWeight.bold),
-        ),
+        backgroundColor: accentTeal,
+        foregroundColor: bgDeepNavy,
+        child: const Icon(Icons.add, size: 28),
       ),
     );
   }
@@ -374,7 +384,8 @@ class JobDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const Center(child: CircularProgressIndicator(color: accentTeal)),
+      builder: (ctx) =>
+          const Center(child: CircularProgressIndicator(color: accentTeal)),
     );
 
     try {
@@ -383,21 +394,21 @@ class JobDetailScreen extends StatelessWidget {
           .collection('job_applications')
           .where('jobId', isEqualTo: jobId)
           .get();
-      
+
       final batch = FirebaseFirestore.instance.batch();
       for (var doc in appsQuery.docs) {
         batch.delete(doc.reference);
       }
-      
+
       // 2. Delete the job itself
       batch.delete(FirebaseFirestore.instance.collection('jobs').doc(jobId));
-      
+
       await batch.commit();
 
       if (context.mounted) {
         Navigator.pop(context); // Pop loader
         Navigator.pop(context); // Pop Detail Screen
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Job deleted successfully"),
@@ -424,7 +435,8 @@ class JobDetailScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: bgDeepNavy,
         title: const Text("Delete Job Post"),
-        content: Text("Are you sure you want to delete '$jobTitle'? This will also delete all applications received for this job."),
+        content: Text(
+            "Are you sure you want to delete '$jobTitle'? This will also delete all applications received for this job."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -461,7 +473,8 @@ class JobDetailScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.delete, color: dangerCoral),
                   tooltip: 'Delete Job',
-                  onPressed: () => _showDeleteDialog(context, job.id, job.jobTitle),
+                  onPressed: () =>
+                      _showDeleteDialog(context, job.id, job.jobTitle),
                 ),
               ]
             : null,
@@ -674,7 +687,6 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
     setState(() => _isLoading = true);
 
     try {
-
       // Check if already applied
       final alreadyApplied =
           await _jobAppService.hasAlreadyApplied(widget.job.id, user.uid);
@@ -908,7 +920,8 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: accentTeal));
+          return const Center(
+              child: CircularProgressIndicator(color: accentTeal));
         }
         if (snapshot.hasError) {
           return Center(
@@ -956,11 +969,13 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
                   children: [
                     const SizedBox(height: 4),
                     Text(app.company,
-                        style: const TextStyle(color: accentTeal, fontSize: 13)),
+                        style:
+                            const TextStyle(color: accentTeal, fontSize: 13)),
                     const SizedBox(height: 4),
                     Text(
                         "Applied on: ${DateFormat('dd MMM, yyyy').format(app.appliedAt)}",
-                        style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        style: const TextStyle(
+                            color: Colors.white54, fontSize: 12)),
                   ],
                 ),
                 trailing: _buildStatusBadge(app.status),
@@ -1011,7 +1026,8 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const Center(child: CircularProgressIndicator(color: accentTeal)),
+      builder: (ctx) =>
+          const Center(child: CircularProgressIndicator(color: accentTeal)),
     );
 
     try {
@@ -1020,20 +1036,20 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
           .collection('job_applications')
           .where('jobId', isEqualTo: jobId)
           .get();
-      
+
       final batch = FirebaseFirestore.instance.batch();
       for (var doc in appsQuery.docs) {
         batch.delete(doc.reference);
       }
-      
+
       // 2. Delete the job itself
       batch.delete(FirebaseFirestore.instance.collection('jobs').doc(jobId));
-      
+
       await batch.commit();
 
       if (context.mounted) {
         Navigator.pop(context); // Pop loader
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Job deleted successfully"),
@@ -1060,7 +1076,8 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: bgDeepNavy,
         title: const Text("Delete Job Post"),
-        content: Text("Are you sure you want to delete '$jobTitle'? This will also delete all applications received for this job."),
+        content: Text(
+            "Are you sure you want to delete '$jobTitle'? This will also delete all applications received for this job."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1104,7 +1121,8 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: accentTeal));
+          return const Center(
+              child: CircularProgressIndicator(color: accentTeal));
         }
         if (snapshot.hasError) {
           return Center(
@@ -1126,7 +1144,8 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
         }
 
         final jobs = snapshot.data!.docs
-            .map((d) => JobModel.fromMap(d.data() as Map<String, dynamic>, d.id))
+            .map(
+                (d) => JobModel.fromMap(d.data() as Map<String, dynamic>, d.id))
             .toList();
         // Sort in-memory by createdAt descending
         jobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -1153,17 +1172,21 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
                 ),
                 title: Text(job.jobTitle,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16, color: lightText)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: lightText)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
                     Text(job.company,
-                        style: const TextStyle(color: accentTeal, fontSize: 13)),
+                        style:
+                            const TextStyle(color: accentTeal, fontSize: 13)),
                     const SizedBox(height: 2),
                     Text(
                         "Last date: ${DateFormat('dd MMM, yyyy').format(job.lastDate)}",
-                        style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        style: const TextStyle(
+                            color: Colors.white54, fontSize: 12)),
                   ],
                 ),
                 trailing: Row(
@@ -1171,7 +1194,8 @@ class _PostedJobsScreenState extends State<PostedJobsScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.delete, color: dangerCoral),
-                      onPressed: () => _showDeleteDialog(context, job.id, job.jobTitle),
+                      onPressed: () =>
+                          _showDeleteDialog(context, job.id, job.jobTitle),
                     ),
                     const Icon(Icons.arrow_forward_ios,
                         color: accentTeal, size: 16),

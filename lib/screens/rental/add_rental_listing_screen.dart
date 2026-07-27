@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -501,42 +502,46 @@ class _AddRentalListingScreenState extends State<AddRentalListingScreen> {
               scrollDirection: Axis.horizontal,
               itemCount: _selectedImages.length,
               itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      width: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: accentTeal),
+                return GestureDetector(
+                  onTap: () => _showImagePreview(_selectedImages[index].path),
+                  child: Stack(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        width: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: accentTeal),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            File(_selectedImages[index].path),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                  child: Icon(Icons.image, color: Colors.grey));
+                            },
+                          ),
+                        ),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          _selectedImages[index].path,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Center(
-                                child: Icon(Icons.image, color: Colors.grey));
+                      Positioned(
+                        top: 0,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => _selectedImages.removeAt(index));
                           },
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Colors.red, shape: BoxShape.circle),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 20),
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 10,
-                      child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedImages.removeAt(index)),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle),
-                          child: const Icon(Icons.close,
-                              color: Colors.white, size: 20),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
@@ -555,6 +560,51 @@ class _AddRentalListingScreenState extends State<AddRentalListingScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showImagePreview(String imagePath) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                        child: Icon(Icons.broken_image,
+                            color: Colors.grey, size: 60));
+                  },
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: accentTeal, width: 1.5),
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 24),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

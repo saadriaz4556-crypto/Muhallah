@@ -227,9 +227,23 @@ class LocalVibesService {
     return _firestore
         .collection('local_vibes_comments')
         .where('post_id', isEqualTo: postId)
-        .orderBy('created_at', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+        .map((snapshot) {
+      final comments = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
+      comments.sort((a, b) {
+        final aDate = (a['created_at'] as Timestamp?)?.toDate();
+        final bDate = (b['created_at'] as Timestamp?)?.toDate();
+        if (aDate == null || bDate == null) return 0;
+        return bDate.compareTo(aDate);
+      });
+
+      return comments;
+    });
   }
 
   Future<void> addComment(String postId, String text) async {
