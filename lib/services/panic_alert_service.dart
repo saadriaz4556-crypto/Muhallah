@@ -143,6 +143,11 @@ class PanicAlertService {
     });
   }
 
+  /// Deletes the alert document from the `panic_alerts` collection.
+  Future<void> deleteAlert(String alertId) async {
+    await _firestore.collection('panic_alerts').doc(alertId).delete();
+  }
+
   // ─────────────────────────────────────────────
   // Read: Real-time streams
   // ─────────────────────────────────────────────

@@ -28,6 +28,7 @@ import 'package:get/get.dart';
 import 'package:muhallah/features/bill_reminder/models/bill_model.dart';
 import 'package:muhallah/features/bill_reminder/services/notification_service.dart';
 import 'package:muhallah/features/bill_reminder/screens/bill_list_screen.dart';
+import 'package:muhallah/services/fcm_token_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Initialize FCM Token handler
+    FcmTokenService.instance.initialize();
     
     // Initialize Hive
     await Hive.initFlutter();

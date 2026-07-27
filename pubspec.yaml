@@ -22,6 +22,7 @@ dependencies:
   firebase_core: ^3.6.0     # For Firebase initialization
   firebase_auth: ^5.3.1     # For user registration and login
   cloud_firestore: ^5.4.4   # For storing user details (Name, CNIC, etc.)
+  firebase_messaging: ^15.1.0 # For push notifications
   firebase_storage: ^12.3.0  # Updated version (if you need image storage later)
   flutter_map: ^8.2.2
   latlong2: ^0.9.1

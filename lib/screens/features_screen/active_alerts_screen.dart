@@ -145,6 +145,75 @@ class _ActiveAlertsScreenState extends State<ActiveAlertsScreen> {
     }
   }
 
+  Future<void> _deleteAlert(PanicAlertModel alert) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _darkGray,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete Alert',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this panic alert?\nThis action cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _panicRed,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _service.deleteAlert(alert.id);
+      HapticFeedback.mediumImpact();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: _panicRed,
+            content: Text(
+              'Alert deleted successfully.',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+            content: Text(
+              'Failed to delete alert. Please try again.',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -304,8 +373,10 @@ class _ActiveAlertsScreenState extends State<ActiveAlertsScreen> {
           itemBuilder: (context, index) => _AlertCard(
             alert: alerts[index],
             isOwnAlert: alerts[index].userId == _currentUserId,
+            isAdmin: _isAdmin,
             onCall: () => _callNumber(alerts[index].phoneNumber),
             onResolve: () => _resolveAlert(alerts[index]),
+            onDelete: () => _deleteAlert(alerts[index]),
           ),
         );
       },
@@ -344,14 +415,18 @@ class _ActiveAlertsScreenState extends State<ActiveAlertsScreen> {
 class _AlertCard extends StatefulWidget {
   final PanicAlertModel alert;
   final bool isOwnAlert;
+  final bool isAdmin;
   final VoidCallback onCall;
   final VoidCallback onResolve;
+  final VoidCallback onDelete;
 
   const _AlertCard({
     required this.alert,
     required this.isOwnAlert,
+    required this.isAdmin,
     required this.onCall,
     required this.onResolve,
+    required this.onDelete,
   });
 
   @override
@@ -488,6 +563,25 @@ class _AlertCardState extends State<_AlertCard>
                         fontSize: 12,
                       ),
                     ),
+                    if (widget.isOwnAlert || widget.isAdmin) ...[
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: widget.onDelete,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: _panicRed.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: _panicRed,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
 
