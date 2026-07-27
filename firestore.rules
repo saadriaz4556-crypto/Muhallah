@@ -26,6 +26,25 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.applicantId == request.auth.uid;
     }
 
+    // Panic Alerts Collection Rules
+    match /panic_alerts/{alertId} {
+      // Any authenticated user can create a panic alert
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'active'
+                    && request.resource.data.resolvedAt == null;
+
+      // Authenticated users can read alerts (Firestore query filters by mohallahId)
+      allow read: if request.auth != null;
+
+      // Only the original creator can update (e.g., mark as resolved)
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+
+      // No one can delete panic alerts (audit trail)
+      allow delete: if false;
+    }
+
     // Default: Deny other collections
     match /{document=**} {
       allow read, write: if false;

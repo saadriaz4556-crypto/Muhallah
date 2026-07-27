@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // for haptic feedback
+import 'package:flutter/services.dart';
+import 'package:muhallah/services/panic_alert_service.dart';
+import 'package:muhallah/screens/features_screen/active_alerts_screen.dart';
 
 class PanicApp extends StatelessWidget {
   const PanicApp({super.key});
@@ -27,12 +29,18 @@ class PanicScreen extends StatefulWidget {
 }
 
 class _PanicScreenState extends State<PanicScreen> {
-  // Colors provided by user
+  // Colors (match existing theme)
   static const Color teal = Color(0xFF08D9D6);
   static const Color darkGray = Color(0xFF252A34);
   static const Color panicRed = Color(0xFFFF2E63);
+
+  final PanicAlertService _service = PanicAlertService();
+
   bool _isLoading = false;
   bool _alertSent = false;
+  String? _lastAlertId;
+
+  // ── Alert flow ─────────────────────────────────────────────────────────────
 
   Future<void> _showAlertOptions() async {
     HapticFeedback.lightImpact();
@@ -143,62 +151,80 @@ class _PanicScreenState extends State<PanicScreen> {
   Future<void> _sendAlert(_AlertChoice choice) async {
     if (!mounted) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final alertType =
+          choice == _AlertChoice.community ? 'community' : 'admin_only';
 
-    if (!mounted) return;
+      final alertId = await _service.sendPanicAlert(alertType: alertType);
 
-    setState(() {
-      _isLoading = false;
-      _alertSent = true;
-    });
+      if (!mounted) return;
 
-    HapticFeedback.heavyImpact();
+      setState(() {
+        _isLoading = false;
+        _alertSent = true;
+        _lastAlertId = alertId;
+      });
 
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: teal,
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Alert Sent Successfully!',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            Text(
-              choice == _AlertChoice.community
-                  ? 'Community & security have been notified'
-                  : 'Group admins have been alerted',
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
+      HapticFeedback.heavyImpact();
+
+      // Show success snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: teal,
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Alert Sent Successfully!',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Text(
+                choice == _AlertChoice.community
+                    ? 'Community & security have been notified'
+                    : 'Group admins have been alerted',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
         ),
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
-      ),
-    );
+      );
 
-    // Reset after some time
-    Timer(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() {
-          _alertSent = false;
-        });
-      }
-    });
+      // Auto-reset after 5 seconds
+      Timer(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() => _alertSent = false);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+
+      // Show error to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red[800],
+          content: Text(
+            'Failed to send alert: ${e.toString().replaceFirst('Exception: ', '')}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   void _resetAlert() {
@@ -207,6 +233,8 @@ class _PanicScreenState extends State<PanicScreen> {
       _isLoading = false;
     });
   }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +246,7 @@ class _PanicScreenState extends State<PanicScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Header Box (same style as other screens)
+            // ── Top Header ─────────────────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
@@ -261,10 +289,47 @@ class _PanicScreenState extends State<PanicScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const Spacer(),
+                  // View Active Alerts button
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ActiveAlertsScreen(),
+                      ),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: panicRed.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: panicRed.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.feed_outlined,
+                              color: panicRed, size: 14),
+                          SizedBox(width: 5),
+                          Text(
+                            'Active Alerts',
+                            style: TextStyle(
+                              color: panicRed,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
 
+            // ── Body ───────────────────────────────────────────────────────
             Expanded(
               child: Column(
                 children: [
@@ -279,8 +344,8 @@ class _PanicScreenState extends State<PanicScreen> {
                         decoration: BoxDecoration(
                           color: teal.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: teal.withValues(alpha: 0.3)),
+                          border: Border.all(
+                              color: teal.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
@@ -300,10 +365,10 @@ class _PanicScreenState extends State<PanicScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'Emergency services have been notified',
+                                    'Alert saved to Firestore — your community has been notified',
                                     style: TextStyle(
                                       color: teal.withValues(alpha: 0.8),
-                                      fontSize: 14,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ],
@@ -323,7 +388,7 @@ class _PanicScreenState extends State<PanicScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Main Panic Button
+                  // ── Main Panic Button ─────────────────────────────────────
                   Expanded(
                     child: Center(
                       child: GestureDetector(
@@ -331,7 +396,7 @@ class _PanicScreenState extends State<PanicScreen> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Pulsing Animation when alert is sent
+                            // Pulsing ring when alert is sent
                             if (_alertSent)
                               TweenAnimationBuilder(
                                 tween: Tween(begin: 0.0, end: 1.0),
@@ -349,7 +414,7 @@ class _PanicScreenState extends State<PanicScreen> {
                                 },
                               ),
 
-                            // Outer glow effect
+                            // Outer glow
                             Container(
                               width: buttonDiameter + 30,
                               height: buttonDiameter + 30,
@@ -367,12 +432,11 @@ class _PanicScreenState extends State<PanicScreen> {
                               ),
                             ),
 
-                            // Main button container
+                            // Main button
                             Container(
                               width: buttonDiameter,
                               height: buttonDiameter,
                               decoration: BoxDecoration(
-                                color: _alertSent ? teal : panicRed,
                                 shape: BoxShape.circle,
                                 gradient: _alertSent
                                     ? LinearGradient(
@@ -380,7 +444,7 @@ class _PanicScreenState extends State<PanicScreen> {
                                         end: Alignment.bottomRight,
                                         colors: [
                                           teal,
-                                          teal.withValues(alpha: 0.8)
+                                          teal.withValues(alpha: 0.8),
                                         ],
                                       )
                                     : LinearGradient(
@@ -388,7 +452,7 @@ class _PanicScreenState extends State<PanicScreen> {
                                         end: Alignment.bottomRight,
                                         colors: [
                                           panicRed,
-                                          panicRed.withValues(alpha: 0.8)
+                                          panicRed.withValues(alpha: 0.8),
                                         ],
                                       ),
                                 boxShadow: [
@@ -427,7 +491,9 @@ class _PanicScreenState extends State<PanicScreen> {
                                     ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    _alertSent ? 'Alert Sent!' : 'Panic Button',
+                                    _alertSent
+                                        ? 'Alert Sent!'
+                                        : 'Panic Button',
                                     style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
@@ -456,7 +522,7 @@ class _PanicScreenState extends State<PanicScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Information Cards
+                  // ── Info Cards ────────────────────────────────────────────
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18.0),
                     child: Column(
@@ -471,9 +537,9 @@ class _PanicScreenState extends State<PanicScreen> {
                         SizedBox(height: 12),
                         _InfoCard(
                           icon: Icons.location_pin,
-                          title: 'Location Sharing',
+                          title: 'Live Location Sharing',
                           description:
-                              'Your current location will be shared with responders',
+                              'Your GPS location is captured and shared with responders',
                           color: panicRed,
                         ),
                       ],
@@ -481,15 +547,19 @@ class _PanicScreenState extends State<PanicScreen> {
                   ),
 
                   const SizedBox(height: 30),
-                ], // end inner Column children
-              ), // end inner Column
-            ), // end Expanded
-          ], // end outer Column children
-        ), // end outer Column
-      ), // end SafeArea
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Shared sub-widgets
+// ══════════════════════════════════════════════════════════════════════════════
 
 enum _AlertChoice { community, admin }
 
@@ -612,7 +682,8 @@ class _InfoCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(fontSize: 13, color: Colors.white70),
+                    style:
+                        const TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                 ],
               ),

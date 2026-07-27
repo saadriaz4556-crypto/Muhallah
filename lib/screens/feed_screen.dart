@@ -7,7 +7,6 @@ import 'my_posts_screen.dart';
 import 'post_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/found_item_detail_screen.dart';
 import 'package:muhallah/screens/features_screen/lost_item_detail_screen.dart';
-import 'package:muhallah/services/lost_found_service.dart';
 import 'package:muhallah/widgets/fullscreen_image_viewer.dart';
 
 class FeedScreen extends StatefulWidget {

@@ -106,7 +106,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
                   end: Alignment.bottomRight,
                   colors: [
                     const Color(0xFF252A34),
-                    const Color(0xFF08D9D6).withOpacity(0.2),
+                    const Color(0xFF08D9D6).withValues(alpha: 0.2),
                   ],
                 ),
                 borderRadius: const BorderRadius.only(
@@ -176,7 +176,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: _category,
+                        initialValue: _category,
                         dropdownColor: const Color(0xFF2A303C),
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(

@@ -44,10 +44,10 @@ class BillListScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.receipt,
+                              const Icon(Icons.receipt,
                                   color: _primaryColor, size: 32),
                               const SizedBox(height: 12),
-                              Text(
+                              const Text(
                                 'Total Bills',
                                 style: TextStyle(
                                     color: _darkSecondaryText, fontSize: 14),
@@ -58,7 +58,7 @@ class BillListScreen extends StatelessWidget {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       '${controller.totalBills}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: _primaryColor,
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
@@ -82,10 +82,10 @@ class BillListScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.account_balance_wallet,
+                              const Icon(Icons.account_balance_wallet,
                                   color: _primaryColor, size: 32),
                               const SizedBox(height: 12),
-                              Text(
+                              const Text(
                                 'Total Amount',
                                 style: TextStyle(
                                     color: _darkSecondaryText, fontSize: 14),
@@ -96,7 +96,7 @@ class BillListScreen extends StatelessWidget {
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       'PKR ${controller.totalAmount.toStringAsFixed(0)}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: _primaryColor,
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class BillListScreen extends StatelessWidget {
                             alignment: Alignment.centerLeft,
                             padding: const EdgeInsets.only(left: 20),
                             color: _primaryColor,
-                            child: Icon(Icons.delete, color: _darkBackground),
+                            child: const Icon(Icons.delete, color: _darkBackground),
                           ),
                           onDismissed: (direction) async {
                             await controller.deleteBill(bill.id);
@@ -196,11 +196,11 @@ class BillListScreen extends StatelessWidget {
                 color: _darkCardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.arrow_back, color: _darkTextColor),
+              child: const Icon(Icons.arrow_back, color: _darkTextColor),
             ),
           ),
           const SizedBox(width: 12),
-          Text(
+          const Text(
             'Bill Reminders',
             style: TextStyle(
               color: _darkTextColor,
@@ -214,24 +214,24 @@ class BillListScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.credit_card, size: 80, color: _primaryColor),
-          const SizedBox(height: 24),
+          Icon(Icons.credit_card, size: 80, color: _primaryColor),
+          SizedBox(height: 24),
           Text(
             'No bills added yet',
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: _darkTextColor),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             'Add your utility bills to get due-date reminders\nand never miss a payment.',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: _darkSecondaryText, fontSize: 14),
+            style: TextStyle(color: _darkSecondaryText, fontSize: 14),
           ),
         ],
       ),

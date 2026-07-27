@@ -23,8 +23,276 @@ class AnnouncementApp extends StatelessWidget {
         fontFamily: 'Inter',
         useMaterial3: true,
       ),
-      home: const AnnouncementTypeScreen(),
+      home: const AnnouncementsFeedScreen(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class AnnouncementsFeedScreen extends StatefulWidget {
+  const AnnouncementsFeedScreen({super.key});
+
+  @override
+  State<AnnouncementsFeedScreen> createState() =>
+      _AnnouncementsFeedScreenState();
+}
+
+class _AnnouncementsFeedScreenState extends State<AnnouncementsFeedScreen> {
+  String _formatTimeAgo(dynamic timestamp) {
+    if (timestamp == null) return '';
+    DateTime dt;
+    if (timestamp is Timestamp) {
+      dt = timestamp.toDate();
+    } else if (timestamp is DateTime) {
+      dt = timestamp;
+    } else {
+      return '';
+    }
+
+    final diff = DateTime.now().difference(dt);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    final days = diff.inDays;
+    return days == 1 ? '1d ago' : '${days}d ago';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF252A34),
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            margin: const EdgeInsets.only(left: 12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A303C),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.arrow_back, color: Color(0xFFEAEAEA)),
+          ),
+        ),
+        title: const Text('Community Announcements'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AnnouncementTypeScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              '+ New',
+              style: TextStyle(
+                color: Color(0xFF08D9D6),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF252A34),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('announcements')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF08D9D6),
+              ),
+            );
+          }
+
+          final docs = snapshot.data?.docs.where((doc) {
+                final data = doc.data();
+                final postType = data['postType']?.toString().toLowerCase();
+                final type = data['type']?.toString();
+                const announcementTypes = {
+                  'General',
+                  'Pool',
+                  'Security',
+                  'Events'
+                };
+
+                if (postType == 'announcement') return true;
+                if (type != null && announcementTypes.contains(type)) {
+                  return true;
+                }
+                return false;
+              }).toList() ??
+              [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  'No announcements yet. Be the first to share one!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFFB0B0B0),
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: docs.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final data = docs[index].data();
+              final type = data['type'] as String? ?? 'General';
+              final headline = data['headline'] as String? ?? '';
+              final description = data['description'] as String? ?? '';
+              final imageUrl = data['imageUrl'] as String? ?? '';
+              final authorName = data['authorName'] as String? ?? 'Resident';
+              final createdAt = data['createdAt'];
+              final likes = data['likes'] as int? ?? 0;
+              final comments = data['comments'] as int? ?? 0;
+              final shares = data['shares'] as int? ?? 0;
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A303C),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(8, 217, 214, 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          type,
+                          style: const TextStyle(
+                            color: Color(0xFF08D9D6),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        headline,
+                        style: const TextStyle(
+                          color: Color(0xFFEAEAEA),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        style: const TextStyle(
+                          color: Color(0xFFB0B0B0),
+                        ),
+                      ),
+                      if (imageUrl.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                height: 180,
+                                color: const Color(0xFF3A4250),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF08D9D6),
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 180,
+                                color: const Color(0xFF3A4250),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    color: Color(0xFFB0B0B0),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'By $authorName • ${_formatTimeAgo(createdAt)}',
+                              style: const TextStyle(
+                                color: Color(0xFF8A8F97),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.thumb_up_alt_outlined,
+                            size: 16,
+                            color: Color(0xFF8A8F97),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            likes.toString(),
+                            style: const TextStyle(color: Color(0xFF8A8F97)),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.comment_outlined,
+                            size: 16,
+                            color: Color(0xFF8A8F97),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            comments.toString(),
+                            style: const TextStyle(color: Color(0xFF8A8F97)),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.share_outlined,
+                            size: 16,
+                            color: Color(0xFF8A8F97),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            shares.toString(),
+                            style: const TextStyle(color: Color(0xFF8A8F97)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -686,6 +954,9 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                 onPressed: _isLoading
                     ? null
                     : () async {
+                        final currentContext = context;
+                        final messenger = ScaffoldMessenger.of(currentContext);
+                        final navigator = Navigator.of(currentContext);
                         setState(() => _isLoading = true);
                         try {
                           await FirebaseFirestore.instance
@@ -714,19 +985,17 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                             'comments': 0,
                             'shares': 0,
                           });
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Announcement published successfully!'),
-                              ),
-                            );
-                            Navigator.of(context)
-                                .popUntil((route) => route.isFirst);
-                          }
+                          if (!mounted) return;
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Announcement published successfully!'),
+                            ),
+                          );
+                          navigator.popUntil((route) => route.isFirst);
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(content: Text('Error: $e')),
                             );
                           }
