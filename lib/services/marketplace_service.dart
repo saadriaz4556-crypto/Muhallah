@@ -117,6 +117,14 @@ class MarketplaceService {
     await _firestore.collection('marketplace').add(listingData);
   }
 
+  Future<void> deleteListing(String listingId) async {
+    if (listingId.trim().isEmpty) {
+      return;
+    }
+
+    await _firestore.collection('marketplace').doc(listingId).delete();
+  }
+
   Stream<QuerySnapshot<Map<String, dynamic>>> listingStream() {
     return _firestore
         .collection('marketplace')

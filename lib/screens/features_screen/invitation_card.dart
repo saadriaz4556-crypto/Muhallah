@@ -376,18 +376,21 @@ class _InvitationCardScreenState extends State<InvitationCardScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [_accentColor, _accentColor.withValues(alpha: 0.8)],
+            colors: [
+              const Color(0xFF08D9D6),
+              const Color(0xFF08D9D6).withValues(alpha: 0.8),
+            ],
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: _accentColor.withValues(alpha: 0.3),
+              color: const Color(0xFF08D9D6).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: const Icon(Icons.add, color: Colors.white, size: 22),
+        child: Icon(Icons.add, color: _darkBackground, size: 22),
       ),
     );
   }

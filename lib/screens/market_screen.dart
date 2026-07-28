@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:muhallah/screens/new_listing_screen.dart';
 import 'package:muhallah/services/marketplace_service.dart';
+import 'package:muhallah/widgets/full_screen_image_viewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MarketplaceModule extends StatefulWidget {
@@ -66,6 +67,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
   ];
 
   final List<Map<String, dynamic>> listings = [];
+  final Set<String> _deletedListingIds = <String>{};
 
   final Map<String, dynamic> productDetail = {
     'id': '5',
@@ -89,6 +91,37 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _listingStream() {
     return _marketplaceService.listingStream();
+  }
+
+  String _normalizeCategoryValue(String? value) {
+    final trimmedValue = (value ?? '').trim();
+    if (trimmedValue.isEmpty) {
+      return '';
+    }
+
+    switch (trimmedValue.toLowerCase()) {
+      case 'electronics':
+      case 'electronic':
+        return 'Electronics';
+      case 'furniture':
+        return 'Furniture';
+      case 'vehicles':
+      case 'vehicle':
+        return 'Vehicles';
+      case 'books':
+      case 'book':
+        return 'Books';
+      case 'clothing':
+      case 'cloth':
+        return 'Clothing';
+      case 'sports':
+      case 'sport':
+        return 'Sports';
+      case 'other':
+        return 'Other';
+      default:
+        return trimmedValue;
+    }
   }
 
   String _formatPrice(dynamic price) {
@@ -377,35 +410,46 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                           .toList();
 
                       final query = searchQuery.trim().toLowerCase();
-                      final filteredItems = marketplaceItems.where((item) {
-                        final matchesCategory = selectedCategory == 'all' ||
-                            (item['category'] ?? '').toString().toLowerCase() ==
-                                selectedCategory.toLowerCase();
-                        if (!matchesCategory) {
-                          return false;
-                        }
-                        if (query.isEmpty) {
-                          return true;
-                        }
+                      final baseVisibleItems = marketplaceItems.where((item) {
                         final title =
                             (item['title'] ?? '').toString().toLowerCase();
                         final category =
-                            (item['category'] ?? '').toString().toLowerCase();
-                        return title.contains(query) ||
+                            _normalizeCategoryValue(item['category'])
+                                .toLowerCase();
+                        final matchesSearch = query.isEmpty ||
+                            title.contains(query) ||
                             category.contains(query);
+                        return matchesSearch &&
+                            !_deletedListingIds
+                                .contains(item['id']?.toString() ?? '');
                       }).toList();
 
-                      final counts = <String, int>{};
-                      for (final item in marketplaceItems) {
-                        final category =
-                            (item['category'] ?? 'Other').toString();
-                        counts[category] = (counts[category] ?? 0) + 1;
-                      }
+                      final filteredItems = baseVisibleItems.where((item) {
+                        final normalizedSelectedCategory =
+                            selectedCategory == 'all'
+                                ? null
+                                : _normalizeCategoryValue(selectedCategory);
+                        return normalizedSelectedCategory == null ||
+                            _normalizeCategoryValue(item['category']) ==
+                                normalizedSelectedCategory;
+                      }).toList();
 
+                      final categoryCounts = <String, int>{
+                        'all': baseVisibleItems.length
+                      };
                       for (final category in categories) {
-                        if (category['id'] != 'all') {
-                          category['count'] = counts[category['id']] ?? 0;
+                        if (category['id'] == 'all') {
+                          continue;
                         }
+
+                        final normalizedCategory =
+                            _normalizeCategoryValue(category['id']);
+                        categoryCounts[normalizedCategory] = baseVisibleItems
+                            .where((item) =>
+                                _normalizeCategoryValue(item['category']) ==
+                                normalizedCategory)
+                            .length;
+                        category['count'] = categoryCounts[normalizedCategory];
                       }
 
                       return Column(
@@ -549,8 +593,53 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
     );
   }
 
+  Future<void> _deleteListingWithConfirmation(
+    BuildContext context,
+    Map<String, dynamic> item,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: const Text('Delete this listing?'),
+        content: const Text('Delete this listing? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) {
+      return;
+    }
+
+    try {
+      await _marketplaceService.deleteListing(item['id'].toString());
+      if (!context.mounted) return;
+      setState(() {
+        _deletedListingIds.add(item['id'].toString());
+      });
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Listing deleted')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete listing: $e')),
+      );
+    }
+  }
+
   Widget _buildListingCard(Map<String, dynamic> item) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    final isOwner = item['userId'] == currentUserId;
     final likedBy = List<dynamic>.from(item['likedBy'] ?? []);
     final isLiked = likedBy.contains(currentUserId);
 
@@ -566,20 +655,50 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
           // Image Container - ULTRA COMPACT
           Stack(
             children: [
-              Container(
-                height: 110, // Reduced from 120
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
-                  ),
-                  image: DecorationImage(
-                    image: item['imageUrl'] != null &&
-                            item['imageUrl'].toString().isNotEmpty
-                        ? NetworkImage(item['imageUrl'].toString())
-                        : const AssetImage('assets/images/ModernChair.jpg')
-                            as ImageProvider,
-                    fit: BoxFit.cover,
+              GestureDetector(
+                onTap: () {
+                  final rawUrls = item['imageUrls'];
+                  final imageUrls = <String>[];
+                  if (rawUrls is List) {
+                    for (final value in rawUrls) {
+                      if (value != null && value.toString().isNotEmpty) {
+                        imageUrls.add(value.toString());
+                      }
+                    }
+                  }
+                  if (imageUrls.isEmpty &&
+                      item['imageUrl'] != null &&
+                      item['imageUrl'].toString().isNotEmpty) {
+                    imageUrls.add(item['imageUrl'].toString());
+                  }
+                  if (imageUrls.isEmpty) {
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImageViewer(
+                        imageUrls: imageUrls,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 110, // Reduced from 120
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                    image: DecorationImage(
+                      image: item['imageUrl'] != null &&
+                              item['imageUrl'].toString().isNotEmpty
+                          ? NetworkImage(item['imageUrl'].toString())
+                          : const AssetImage('assets/images/ModernChair.jpg')
+                              as ImageProvider,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -766,16 +885,57 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () => _showContactSheet(context, item),
-                  child: Text(
-                    'Contact',
-                    style: TextStyle(
-                      color: colors['primary'],
-                      fontSize: 10, // Reduced from 11
-                      fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    if (isOwner)
+                      GestureDetector(
+                        onTap: () =>
+                            _deleteListingWithConfirmation(context, item),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              size: 12,
+                              color: colors['error'],
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: colors['error'],
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (isOwner) const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () async {
+                        final contactNumber =
+                            (item['contactNumber'] ?? '').toString().trim();
+                        if (contactNumber.isNotEmpty) {
+                          final phoneUri =
+                              Uri(scheme: 'tel', path: contactNumber);
+                          if (await launchUrl(phoneUri)) {
+                            return;
+                          }
+                        }
+                        if (!context.mounted) return;
+                        if (!mounted) return;
+                        _showContactSheet(context, item);
+                      },
+                      child: Text(
+                        'Contact',
+                        style: TextStyle(
+                          color: colors['primary'],
+                          fontSize: 10, // Reduced from 11
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -833,6 +993,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                     ),
                   );
                   if (confirm == true) {
+                    if (!context.mounted) return;
                     await FirebaseFirestore.instance
                         .collection('marketplace')
                         .doc(item['id'])
@@ -865,11 +1026,10 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                     ),
                   );
                   if (confirm == true) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Listing reported')),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Listing reported')),
+                    );
                   }
                 },
               ),
@@ -1018,6 +1178,7 @@ class _MarketplaceModuleState extends State<MarketplaceModule> {
                       'description': description,
                       'location': location,
                     });
+                    if (!ctx.mounted) return;
                     Navigator.pop(ctx);
                   },
                   child: const Text('Save'),

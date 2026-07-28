@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:muhallah/services/marketplace_service.dart';
@@ -25,6 +26,7 @@ class _NewListingScreenState extends State<NewListingScreen> {
 
   String _category = 'Electronics';
   final List<File> _imageFiles = [];
+  final List<Uint8List> _imageBytes = [];
   bool _isUploading = false;
 
   @override
@@ -40,11 +42,47 @@ class _NewListingScreenState extends State<NewListingScreen> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null && mounted) {
+      final bytes = kIsWeb ? await pickedFile.readAsBytes() : null;
+      if (!mounted) return;
       setState(() {
         if (_imageFiles.length < 4) {
           _imageFiles.add(File(pickedFile.path));
+          if (bytes != null) {
+            _imageBytes.add(bytes);
+          }
         }
       });
+    }
+  }
+
+  String _normalizeCategoryValue(String? value) {
+    final trimmedValue = (value ?? '').trim();
+    if (trimmedValue.isEmpty) {
+      return 'Other';
+    }
+
+    switch (trimmedValue.toLowerCase()) {
+      case 'electronics':
+      case 'electronic':
+        return 'Electronics';
+      case 'furniture':
+        return 'Furniture';
+      case 'vehicles':
+      case 'vehicle':
+        return 'Vehicles';
+      case 'books':
+      case 'book':
+        return 'Books';
+      case 'clothing':
+      case 'cloth':
+        return 'Clothing';
+      case 'sports':
+      case 'sport':
+        return 'Sports';
+      case 'other':
+        return 'Other';
+      default:
+        return trimmedValue;
     }
   }
 
@@ -56,11 +94,20 @@ class _NewListingScreenState extends State<NewListingScreen> {
     setState(() => _isUploading = true);
 
     final user = FirebaseAuth.instance.currentUser;
-    final userName = user?.displayName ?? user?.email ?? 'Anonymous User';
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to list an item')),
+      );
+      setState(() => _isUploading = false);
+      return;
+    }
+
+    final userName = user.displayName ?? user.email ?? 'Anonymous User';
 
     final fields = {
       'title': _titleController.text.trim(),
-      'category': _category,
+      'category': _normalizeCategoryValue(_category),
       'price': _priceController.text.trim(),
       'description': _descriptionController.text.trim(),
       'location': _locationController.text.trim(),
@@ -323,7 +370,9 @@ class _NewListingScreenState extends State<NewListingScreen> {
                               runSpacing: 8,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                ..._imageFiles.map((file) {
+                                ..._imageFiles.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final file = entry.value;
                                   return Stack(
                                     children: [
                                       Container(
@@ -338,10 +387,15 @@ class _NewListingScreenState extends State<NewListingScreen> {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(10),
-                                          child: Image.file(
-                                            file,
-                                            fit: BoxFit.cover,
-                                          ),
+                                          child: kIsWeb
+                                              ? Image.memory(
+                                                  _imageBytes[index],
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Image.file(
+                                                  file,
+                                                  fit: BoxFit.cover,
+                                                ),
                                         ),
                                       ),
                                       Positioned(
@@ -350,7 +404,11 @@ class _NewListingScreenState extends State<NewListingScreen> {
                                         child: GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              _imageFiles.remove(file);
+                                              _imageFiles.removeAt(index);
+                                              if (kIsWeb &&
+                                                  index < _imageBytes.length) {
+                                                _imageBytes.removeAt(index);
+                                              }
                                             });
                                           },
                                           child: Container(
