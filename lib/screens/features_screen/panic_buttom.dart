@@ -307,9 +307,9 @@ class _PanicScreenState extends State<PanicScreen> {
                           color: panicRed.withValues(alpha: 0.4),
                         ),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(Icons.feed_outlined,
                               color: panicRed, size: 14),
                           SizedBox(width: 5),

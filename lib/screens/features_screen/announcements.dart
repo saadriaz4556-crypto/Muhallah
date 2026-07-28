@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import '../../widgets/app_header_gradient.dart';
 
 void main() {
   runApp(const AnnouncementApp());
@@ -954,10 +953,11 @@ class _PreviewPublishScreenState extends State<PreviewPublishScreen> {
                                         ?.split('@')
                                         .first ??
                                     'Resident'),
-                            'createdAt': FieldValue.serverTimestamp(),
+                            'createdAt': Timestamp.now(),
                             'imageUrl': widget.data.imageUrl ?? '',
                             'pinned': false,
                             'likes': 0,
+                            'likedBy': [],
                             'comments': 0,
                             'shares': 0,
                           });

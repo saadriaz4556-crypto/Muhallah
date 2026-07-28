@@ -5,7 +5,6 @@ import 'package:muhallah/screens/polls/polls_screen.dart';
 import 'package:muhallah/screens/business_registration_screen.dart';
 import 'package:muhallah/screens/business_directory_screen.dart';
 import 'package:muhallah/screens/features_screen/announcement_entry_screen.dart';
-import 'package:muhallah/screens/features_screen/announcements.dart';
 import 'package:muhallah/features/bill_reminder/screens/bill_list_screen.dart';
 import 'package:muhallah/screens/rental/rental_listings_screen.dart';
 import 'package:muhallah/screens/features_screen/invitation_card.dart';

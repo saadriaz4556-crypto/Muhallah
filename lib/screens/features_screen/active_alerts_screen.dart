@@ -123,10 +123,10 @@ class _ActiveAlertsScreenState extends State<ActiveAlertsScreen> {
       HapticFeedback.mediumImpact();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             behavior: SnackBarBehavior.floating,
             backgroundColor: _teal,
-            content: const Text(
+            content: Text(
               'Alert marked as resolved.',
               style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
             ),
@@ -726,7 +726,7 @@ class _AlertCardState extends State<_AlertCard>
                   label: Text(_mapExpanded ? 'Hide Map' : 'Show Map'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
-                    side: BorderSide(color: Colors.white24),
+                    side: const BorderSide(color: Colors.white24),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     shape: RoundedRectangleBorder(

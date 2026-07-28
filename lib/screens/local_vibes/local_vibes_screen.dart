@@ -162,17 +162,17 @@ class _LocalVibesScreenState extends State<LocalVibesScreen> {
             ),
           ),
           titleSpacing: 0,
-          title: SizedBox(
+          title: const SizedBox(
             height: 100,
             child: Row(
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Local Vibes 🔥',
                           style: TextStyle(
